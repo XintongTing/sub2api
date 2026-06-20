@@ -52,6 +52,13 @@ func TestValidateProviderRequest(t *testing.T) {
 			wantErr:        false,
 		},
 		{
+			name:           "valid payoneer provider draft",
+			providerKey:    payment.TypePayoneer,
+			providerName:   "Payoneer Provider",
+			supportedTypes: payment.TypePayoneer,
+			wantErr:        false,
+		},
+		{
 			name:           "valid alipay provider",
 			providerKey:    "alipay",
 			providerName:   "Alipay Direct",
@@ -157,6 +164,13 @@ func TestIsSensitiveProviderConfigField(t *testing.T) {
 		{payment.TypeAirwallex, "apiBase", false},
 		{payment.TypeAirwallex, "accountId", false},
 		{payment.TypeAirwallex, "currency", false},
+
+		// Payoneer
+		{payment.TypePayoneer, "clientSecret", true},
+		{payment.TypePayoneer, "webhookSecret", true},
+		{payment.TypePayoneer, "clientId", false},
+		{payment.TypePayoneer, "environment", false},
+		{payment.TypePayoneer, "currency", false},
 
 		// Unknown provider: never sensitive
 		{"unknown", "secretKey", false},

@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
 	"github.com/Wei-Shaw/sub2api/internal/handler/dto"
@@ -48,13 +49,15 @@ func NewAuthHandler(cfg *config.Config, authService *service.AuthService, userSe
 
 // RegisterRequest represents the registration request payload
 type RegisterRequest struct {
-	Email          string `json:"email" binding:"required,email"`
-	Password       string `json:"password" binding:"required,min=6"`
-	VerifyCode     string `json:"verify_code"`
-	TurnstileToken string `json:"turnstile_token"`
-	PromoCode      string `json:"promo_code"`      // 注册优惠码
-	InvitationCode string `json:"invitation_code"` // 邀请码
-	AffCode        string `json:"aff_code"`        // 邀请返利码
+	Email             string `json:"email" binding:"required,email"`
+	Password          string `json:"password" binding:"required,min=6"`
+	VerifyCode        string `json:"verify_code"`
+	TurnstileToken    string `json:"turnstile_token"`
+	PromoCode         string `json:"promo_code"`      // 注册优惠码
+	InvitationCode    string `json:"invitation_code"` // 邀请码
+	AffCode           string `json:"aff_code"`        // 邀请返利码
+	AgreementAccepted bool   `json:"agreement_accepted"`
+	AgreementVersion  string `json:"agreement_version"`
 }
 
 // SendVerifyCodeRequest 发送验证码请求
@@ -164,6 +167,10 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		response.BadRequest(c, "Invalid request: "+err.Error())
 		return
 	}
+	if !req.AgreementAccepted {
+		response.BadRequest(c, "Please read and accept the customer registration notice and service agreement before registering.")
+		return
+	}
 
 	// Turnstile 验证（邮箱验证码注册场景避免重复校验一次性 token）
 	if err := h.authService.VerifyTurnstileForRegister(c.Request.Context(), req.TurnstileToken, ip.GetClientIP(c), req.VerifyCode); err != nil {
@@ -185,7 +192,64 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	h.recordRegistrationAgreement(c.Request.Context(), user.ID, req.AgreementVersion)
+
 	h.respondWithTokenPair(c, user)
+}
+
+func (h *AuthHandler) recordRegistrationAgreement(ctx context.Context, userID int64, version string) {
+	if h == nil || h.userAttributeService == nil || userID == 0 {
+		return
+	}
+	version = strings.TrimSpace(version)
+	if version == "" {
+		version = "customer-registration-notice-2026-06-08"
+	}
+
+	definitions := []struct {
+		key   string
+		name  string
+		value string
+	}{
+		{key: "agreement_accepted", name: "Agreement accepted", value: "true"},
+		{key: "agreement_accepted_at", name: "Agreement accepted at", value: time.Now().UTC().Format(time.RFC3339)},
+		{key: "agreement_version", name: "Agreement version", value: version},
+	}
+
+	updates := make([]service.UpdateUserAttributeInput, 0, len(definitions))
+	for _, item := range definitions {
+		def, err := h.ensureAgreementAttributeDefinition(ctx, item.key, item.name)
+		if err != nil {
+			slog.Warn("failed to ensure agreement attribute definition", "key", item.key, "error", err)
+			return
+		}
+		updates = append(updates, service.UpdateUserAttributeInput{
+			AttributeID: def.ID,
+			Value:       item.value,
+		})
+	}
+	if err := h.userAttributeService.UpdateUserAttributes(ctx, userID, updates); err != nil {
+		slog.Warn("failed to record registration agreement acceptance", "user_id", userID, "error", err)
+	}
+}
+
+func (h *AuthHandler) ensureAgreementAttributeDefinition(ctx context.Context, key, name string) (*service.UserAttributeDefinition, error) {
+	def, err := h.userAttributeService.GetDefinitionByKey(ctx, key)
+	if err == nil {
+		return def, nil
+	}
+	_, createErr := h.userAttributeService.CreateDefinition(ctx, service.CreateAttributeDefinitionInput{
+		Key:         key,
+		Name:        name,
+		Description: "Recorded automatically when the customer registration notice and service agreement is accepted.",
+		Type:        service.AttributeTypeText,
+		Required:    false,
+		Enabled:     true,
+	})
+	if createErr != nil {
+		slog.Warn("failed to create agreement attribute definition", "key", key, "error", createErr)
+	}
+	return h.userAttributeService.GetDefinitionByKey(ctx, key)
 }
 
 // SendVerifyCode 发送邮箱验证码

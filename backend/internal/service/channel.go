@@ -388,6 +388,34 @@ type SupportedModel struct {
 	Pricing  *ChannelModelPricing // 定价详情（nil 表示未配置定价）
 }
 
+// SupportedModelNames returns concrete model IDs exposed by this channel.
+// It keeps the configured original case for display/copy/call semantics while
+// de-duplicating case-insensitively.
+func (c *Channel) SupportedModelNames(platform string) []string {
+	if c == nil {
+		return nil
+	}
+	seen := make(map[string]struct{})
+	names := make([]string, 0)
+	for _, model := range c.SupportedModels() {
+		if platform != "" && model.Platform != platform {
+			continue
+		}
+		name := strings.TrimSpace(model.Name)
+		if name == "" {
+			continue
+		}
+		key := strings.ToLower(name)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
+}
+
 // wildcardSuffix 是模型模式中的通配符后缀标记（仅支持尾部匹配）。
 const wildcardSuffix = "*"
 

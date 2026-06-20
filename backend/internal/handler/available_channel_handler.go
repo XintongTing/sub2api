@@ -2,6 +2,7 @@ package handler
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/response"
 	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
@@ -92,6 +93,22 @@ type userSupportedModel struct {
 	Pricing  *userSupportedModelPricing `json:"pricing"`
 }
 
+type publicModelPricing struct {
+	Name            string   `json:"name"`
+	Provider        string   `json:"provider"`
+	BillingMode     string   `json:"billing_mode"`
+	Currency        string   `json:"currency"`
+	InputPrice      *float64 `json:"input_price"`
+	OutputPrice     *float64 `json:"output_price"`
+	CacheReadPrice  *float64 `json:"cache_read_price"`
+	CacheWritePrice *float64 `json:"cache_write_price"`
+	PerRequestPrice *float64 `json:"per_request_price"`
+	Unit            string   `json:"unit"`
+	EndpointTypes   []string `json:"endpoint_types"`
+	Tags            []string `json:"tags"`
+	Description     string   `json:"description"`
+}
+
 // userChannelPlatformSection 单渠道内某个平台的子视图：用户可见的分组 + 该平台
 // 支持的模型。按 platform 聚合后让前端可以把渠道名作为 row-group 一次渲染，
 // 后面的平台行按 sections 顺序铺开。
@@ -164,6 +181,74 @@ func (h *AvailableChannelHandler) List(c *gin.Context) {
 	}
 
 	response.Success(c, out)
+}
+
+// ListPublicModels exposes a sanitized, read-only model catalog for the public
+// model marketplace. It never returns channel IDs, upstream credentials, base
+// URLs, group authorization rules, or any other internal routing data.
+func (h *AvailableChannelHandler) ListPublicModels(c *gin.Context) {
+	channels, err := h.channelService.ListAvailable(c.Request.Context())
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	allowedModels := publicBusinessModelSet()
+	byName := make(map[string]publicModelPricing)
+	for _, ch := range channels {
+		if ch.Status != service.StatusActive {
+			continue
+		}
+		for _, model := range ch.SupportedModels {
+			name := strings.TrimSpace(model.Name)
+			if name == "" {
+				continue
+			}
+			key := strings.ToLower(name)
+			if _, ok := allowedModels[key]; !ok {
+				continue
+			}
+			item, exists := byName[key]
+			if !exists {
+				item = publicModelPricing{
+					Name:          name,
+					Provider:      publicModelProvider(name, model.Platform, ch.Name),
+					BillingMode:   string(service.BillingModeToken),
+					Currency:      "THB",
+					Unit:          "1M Tokens",
+					EndpointTypes: publicModelEndpointTypes(name),
+					Tags:          publicModelTags(name),
+					Description:   publicModelDescription(name),
+				}
+			}
+			mergePublicPricing(&item, model.Pricing)
+			byName[key] = item
+		}
+	}
+
+	out := make([]publicModelPricing, 0, len(byName))
+	for _, item := range byName {
+		out = append(out, item)
+	}
+	sort.SliceStable(out, func(i, j int) bool {
+		if out[i].Provider == out[j].Provider {
+			return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name)
+		}
+		return out[i].Provider < out[j].Provider
+	})
+
+	response.Success(c, out)
+}
+
+func publicBusinessModelSet() map[string]struct{} {
+	set := make(map[string]struct{})
+	for _, spec := range service.DefaultHuosanyunCatalog() {
+		set[strings.ToLower(strings.TrimSpace(spec.Model))] = struct{}{}
+		for _, alias := range spec.Aliases {
+			set[strings.ToLower(strings.TrimSpace(alias))] = struct{}{}
+		}
+	}
+	return set
 }
 
 // buildPlatformSections 把一个渠道按 visibleGroups 的平台集合拆成有序的 section 列表：
@@ -280,4 +365,165 @@ func toUserPricing(p *service.ChannelModelPricing) *userSupportedModelPricing {
 		PerRequestPrice:  p.PerRequestPrice,
 		Intervals:        intervals,
 	}
+}
+
+func mergePublicPricing(dst *publicModelPricing, p *service.ChannelModelPricing) {
+	if p == nil {
+		return
+	}
+	mode := string(p.BillingMode)
+	if mode == "" {
+		mode = string(service.BillingModeToken)
+	}
+	if dst.BillingMode == "" || dst.BillingMode == string(service.BillingModeToken) {
+		dst.BillingMode = mode
+	}
+	if mode == string(service.BillingModePerRequest) || mode == string(service.BillingModeImage) || p.PerRequestPrice != nil {
+		dst.Unit = "request"
+	} else {
+		dst.Unit = "1M Tokens"
+	}
+	if dst.InputPrice == nil && p.InputPrice != nil {
+		dst.InputPrice = p.InputPrice
+	}
+	if dst.OutputPrice == nil && p.OutputPrice != nil {
+		dst.OutputPrice = p.OutputPrice
+	}
+	if dst.CacheReadPrice == nil && p.CacheReadPrice != nil {
+		dst.CacheReadPrice = p.CacheReadPrice
+	}
+	if dst.CacheWritePrice == nil && p.CacheWritePrice != nil {
+		dst.CacheWritePrice = p.CacheWritePrice
+	}
+	if dst.PerRequestPrice == nil && p.PerRequestPrice != nil {
+		dst.PerRequestPrice = p.PerRequestPrice
+	}
+	for _, interval := range p.Intervals {
+		if dst.InputPrice == nil && interval.InputPrice != nil {
+			dst.InputPrice = interval.InputPrice
+		}
+		if dst.OutputPrice == nil && interval.OutputPrice != nil {
+			dst.OutputPrice = interval.OutputPrice
+		}
+		if dst.CacheReadPrice == nil && interval.CacheReadPrice != nil {
+			dst.CacheReadPrice = interval.CacheReadPrice
+		}
+		if dst.CacheWritePrice == nil && interval.CacheWritePrice != nil {
+			dst.CacheWritePrice = interval.CacheWritePrice
+		}
+		if dst.PerRequestPrice == nil && interval.PerRequestPrice != nil {
+			dst.PerRequestPrice = interval.PerRequestPrice
+		}
+	}
+}
+
+func publicModelProvider(modelName, platform, channelName string) string {
+	name := strings.ToLower(modelName)
+	switch {
+	case strings.Contains(name, "deepseek"):
+		return "DeepSeek"
+	case strings.Contains(name, "qwen"):
+		return "Qwen"
+	case strings.Contains(name, "glm"):
+		return "Zhipu/GLM"
+	case strings.Contains(name, "kimi") || strings.Contains(name, "moonshot"):
+		return "Kimi/Moonshot"
+	case strings.Contains(name, "minimax"):
+		return "MiniMax"
+	case strings.Contains(name, "kling"):
+		return "Kling"
+	case strings.Contains(name, "doubao"):
+		return "Doubao/Seedance"
+	case strings.Contains(name, "gpt") || strings.Contains(name, "openai"):
+		return "OpenAI"
+	}
+	if platform != "" {
+		return titleASCII(platform)
+	}
+	if channelName != "" {
+		return channelName
+	}
+	return "Other"
+}
+
+func publicModelTags(modelName string) []string {
+	name := strings.ToLower(modelName)
+	tags := []string{"OpenAI-compatible", "Token billing"}
+	switch {
+	case strings.Contains(name, "deepseek"):
+		tags = append(tags, "Reasoning", "Coding")
+	case strings.Contains(name, "qwen"):
+		tags = append(tags, "Fast response", "General chat")
+	case strings.Contains(name, "glm"):
+		tags = append(tags, "Text generation", "Tool use")
+	case strings.Contains(name, "kimi"):
+		tags = append(tags, "Long context", "Office analysis")
+	case strings.Contains(name, "kling"):
+		tags = append(tags, "Video generation", "Per request")
+	case strings.Contains(name, "doubao"):
+		tags = append(tags, "Multimodal", "Content generation")
+	case strings.Contains(name, "minimax"):
+		tags = append(tags, "Text generation", "Long-form writing")
+	default:
+		tags = append(tags, "General model")
+	}
+	return uniqueStrings(tags)
+}
+
+func publicModelEndpointTypes(modelName string) []string {
+	name := strings.ToLower(modelName)
+	switch {
+	case strings.Contains(name, "kling"):
+		return []string{"video"}
+	case strings.Contains(name, "seedance"):
+		return []string{"video"}
+	default:
+		return []string{"openai:/v1/chat/completions"}
+	}
+}
+
+func publicModelDescription(modelName string) string {
+	name := strings.ToLower(modelName)
+	switch {
+	case strings.Contains(name, "deepseek"):
+		return "DeepSeek model for general chat, complex reasoning, code generation, and enterprise text processing."
+	case strings.Contains(name, "qwen"):
+		return "Qwen model for daily chat, content creation, knowledge Q&A, and low-latency business calls."
+	case strings.Contains(name, "glm"):
+		return "GLM model for text generation, tool use, office automation, and structured tasks."
+	case strings.Contains(name, "kimi"):
+		return "Kimi model for long-context understanding, retrieval-augmented workflows, office analysis, and agent tasks."
+	case strings.Contains(name, "minimax"):
+		return "MiniMax model for general chat, long-form writing, creative content generation, and business integration."
+	case strings.Contains(name, "kling"):
+		return "Kling video generation model for text-to-video, image-to-video, and creative production."
+	case strings.Contains(name, "doubao"):
+		return "Doubao model for content generation, multimodal understanding, and high-concurrency business scenarios."
+	default:
+		return "Model available through this gateway. Actual calls depend on API key permissions, account balance, and backend pricing."
+	}
+}
+
+func titleASCII(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "Other"
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+func uniqueStrings(src []string) []string {
+	seen := make(map[string]struct{}, len(src))
+	out := make([]string, 0, len(src))
+	for _, value := range src {
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		out = append(out, value)
+	}
+	return out
 }

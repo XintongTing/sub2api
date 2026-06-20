@@ -96,6 +96,7 @@ import { sanitizeUrl } from '@/utils/url'
 import type { LoginAgreementDocument, PublicSettings } from '@/types'
 import zhAdminCompliance from '../../../../docs/legal/admin-compliance.zh.md?raw'
 import enAdminCompliance from '../../../../docs/legal/admin-compliance.en.md?raw'
+import customerRegistrationNoticeZh from '../../../../docs/legal/customer-registration-notice.zh.md?raw'
 
 type LegalDocumentIcon = 'document' | 'shield' | 'globe' | 'cog'
 
@@ -112,14 +113,21 @@ marked.setOptions({
 
 const documentId = computed(() => String(route.params.documentId || ''))
 const isAdminComplianceDocument = computed(() => documentId.value === 'admin-compliance')
+const isCustomerRegistrationNotice = computed(() =>
+  ['terms', 'customer-registration-notice', 'service-agreement'].includes(documentId.value)
+)
 const documents = computed(() => settings.value?.login_agreement_documents ?? [])
-const siteName = computed(() => settings.value?.site_name || 'Sub2API')
+const siteName = computed(() => settings.value?.site_name || 'OneAPI')
 const siteLogo = computed(() => sanitizeUrl(settings.value?.site_logo || '', {
   allowRelative: true,
   allowDataUrl: true,
 }))
 const updatedAt = computed(() =>
-  isAdminComplianceDocument.value ? '' : settings.value?.login_agreement_updated_at || ''
+  isAdminComplianceDocument.value
+    ? ''
+    : isCustomerRegistrationNotice.value
+      ? '2026-06-08'
+      : settings.value?.login_agreement_updated_at || ''
 )
 const documentTypeLabel = computed(() =>
   isAdminComplianceDocument.value ? t('legal.adminCompliance') : t('legal.loginAgreement')
@@ -130,7 +138,14 @@ const currentDocument = computed<LoginAgreementDocument | null>(() => {
     return {
       id: 'admin-compliance',
       title: t('adminCompliance.title'),
-      content_md: getLocale() === 'zh' ? zhAdminCompliance : enAdminCompliance
+      content_md: getLocale().startsWith('zh') ? zhAdminCompliance : enAdminCompliance
+    }
+  }
+  if (isCustomerRegistrationNotice.value) {
+    return {
+      id: 'terms',
+      title: '客户注册告知函（暨服务协议）',
+      content_md: customerRegistrationNoticeZh
     }
   }
   const id = documentId.value
@@ -153,7 +168,7 @@ const renderedHtml = computed(() => {
 
 const documentIcon = computed<LegalDocumentIcon>(() => {
   const title = currentDocument.value?.title || ''
-  if (title.includes('政策') || title.includes('隐私')) {
+  if (title.includes('政策') || title.includes('隐私') || title.includes('合规')) {
     return 'shield'
   }
   if (title.includes('国家') || title.includes('地区')) {

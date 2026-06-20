@@ -87,6 +87,38 @@
           </p>
         </div>
 
+        <!-- Confirm Password Input -->
+        <div>
+          <label for="confirmPassword" class="input-label">
+            {{ t('auth.confirmPassword') }}
+          </label>
+          <div class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+              <Icon name="lock" size="md" class="text-gray-400 dark:text-dark-500" />
+            </div>
+            <input
+              id="confirmPassword"
+              v-model="formData.confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
+              required
+              autocomplete="new-password"
+              :disabled="registrationActionDisabled"
+              class="input pl-11 pr-11"
+              :class="{ 'input-error': errors.confirmPassword }"
+              :placeholder="t('auth.confirmPasswordPlaceholder')"
+            />
+            <button
+              type="button"
+              :disabled="registrationActionDisabled"
+              @click="showConfirmPassword = !showConfirmPassword"
+              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
+            >
+              <Icon v-if="showConfirmPassword" name="eyeOff" size="md" />
+              <Icon v-else name="eye" size="md" />
+            </button>
+          </div>
+        </div>
+
         <!-- Invitation Code Input (Required when enabled) -->
         <div v-if="invitationCodeEnabled">
           <label for="invitation_code" class="input-label">
@@ -204,6 +236,33 @@
           @reject="rejectLoginAgreement"
           @open="showAgreementModal = true"
         />
+
+        <div>
+          <label
+            class="flex items-start gap-3 rounded-lg border border-primary-100 bg-primary-50/60 p-3 text-sm leading-6 text-gray-700 dark:border-primary-500/20 dark:bg-primary-500/10 dark:text-dark-200"
+            :class="{ 'border-red-300 bg-red-50 text-red-700 dark:border-red-500/50 dark:bg-red-500/10 dark:text-red-200': errors.agreement }"
+          >
+            <input
+              v-model="formData.agreementAccepted"
+              type="checkbox"
+              class="mt-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              :disabled="registrationActionDisabled"
+            />
+            <span>
+              {{ t('auth.registrationAgreementPrefix') }}
+              <router-link
+                to="/legal/terms"
+                target="_blank"
+                class="font-semibold text-primary-700 underline underline-offset-4 hover:text-primary-800 dark:text-primary-300"
+              >
+                {{ t('auth.registrationAgreementTitle') }}
+              </router-link>
+            </span>
+          </label>
+          <p v-if="errors.agreement" class="input-error-message mt-1">
+            {{ errors.agreement }}
+          </p>
+        </div>
 
         <!-- Submit Button -->
         <button
@@ -345,6 +404,7 @@ const isLoading = ref<boolean>(false)
 const settingsLoaded = ref<boolean>(false)
 const errorMessage = ref<string>('')
 const showPassword = ref<boolean>(false)
+const showConfirmPassword = ref<boolean>(false)
 
 // Public settings
 const registrationEnabled = ref<boolean>(true)
@@ -353,7 +413,7 @@ const promoCodeEnabled = ref<boolean>(true)
 const invitationCodeEnabled = ref<boolean>(false)
 const turnstileEnabled = ref<boolean>(false)
 const turnstileSiteKey = ref<string>('')
-const siteName = ref<string>('Sub2API')
+const siteName = ref<string>('OneAPI')
 const linuxdoOAuthEnabled = ref<boolean>(false)
 const wechatOAuthEnabled = ref<boolean>(false)
 const oidcOAuthEnabled = ref<boolean>(false)
@@ -395,21 +455,27 @@ let invitationValidateTimeout: ReturnType<typeof setTimeout> | null = null
 const formData = reactive({
   email: '',
   password: '',
+  confirmPassword: '',
   promo_code: '',
   invitation_code: '',
-  aff_code: ''
+  aff_code: '',
+  agreementAccepted: false
 })
 
 const errors = reactive({
   email: '',
   password: '',
+  confirmPassword: '',
   turnstile: '',
-  invitation_code: ''
+  invitation_code: '',
+  agreement: ''
 })
 
 const validationToastMessage = computed(() =>
   errors.email ||
   errors.password ||
+  errors.confirmPassword ||
+  errors.agreement ||
   (invitationValidation.invalid ? invitationValidation.message : '') ||
   errors.invitation_code ||
   (promoValidation.invalid ? promoValidation.message : '') ||
@@ -418,12 +484,7 @@ const validationToastMessage = computed(() =>
 )
 
 const showOAuthLogin = computed(
-  () =>
-    linuxdoOAuthEnabled.value ||
-    wechatOAuthEnabled.value ||
-    oidcOAuthEnabled.value ||
-    githubOAuthEnabled.value ||
-    googleOAuthEnabled.value
+  () => false
 )
 
 const agreementGateActive = computed(
@@ -461,7 +522,7 @@ onMounted(async () => {
     invitationCodeEnabled.value = settings.invitation_code_enabled
     turnstileEnabled.value = settings.turnstile_enabled
     turnstileSiteKey.value = settings.turnstile_site_key || ''
-    siteName.value = settings.site_name || 'Sub2API'
+    siteName.value = settings.site_name || 'OneAPI'
     linuxdoOAuthEnabled.value = settings.linuxdo_oauth_enabled
     wechatOAuthEnabled.value = isWeChatWebOAuthEnabled(settings)
     oidcOAuthEnabled.value = settings.oidc_oauth_enabled
@@ -751,17 +812,24 @@ function validateForm(): boolean {
   // Reset errors
   errors.email = ''
   errors.password = ''
+  errors.confirmPassword = ''
   errors.turnstile = ''
   errors.invitation_code = ''
+  errors.agreement = ''
 
   let isValid = true
 
   if (agreementGateActive.value) {
-    appStore.showWarning('请先阅读并同意最新条款后再注册。')
+    appStore.showWarning(t('auth.acceptLatestAgreementFirst'))
     if (loginAgreementMode.value !== 'checkbox') {
       showAgreementModal.value = true
     }
     return false
+  }
+
+  if (!formData.agreementAccepted) {
+    errors.agreement = t('auth.registrationAgreementRequired')
+    isValid = false
   }
 
   // Email validation
@@ -784,6 +852,14 @@ function validateForm(): boolean {
     isValid = false
   } else if (formData.password.length < 6) {
     errors.password = t('auth.passwordMinLength')
+    isValid = false
+  }
+
+  if (!formData.confirmPassword) {
+    errors.confirmPassword = t('auth.confirmPasswordRequired')
+    isValid = false
+  } else if (formData.password && formData.password !== formData.confirmPassword) {
+    errors.confirmPassword = t('auth.passwordsDoNotMatch')
     isValid = false
   }
 
@@ -872,6 +948,8 @@ async function handleRegister(): Promise<void> {
           turnstile_token: turnstileToken.value,
           promo_code: formData.promo_code || undefined,
           invitation_code: formData.invitation_code || undefined,
+          agreement_accepted: true,
+          agreement_version: 'customer-registration-notice-2026-06-08',
           ...(affCode ? { aff_code: affCode } : {})
         })
       )
@@ -888,6 +966,8 @@ async function handleRegister(): Promise<void> {
       turnstile_token: turnstileEnabled.value ? turnstileToken.value : undefined,
       promo_code: formData.promo_code || undefined,
       invitation_code: formData.invitation_code || undefined,
+      agreement_accepted: true,
+      agreement_version: 'customer-registration-notice-2026-06-08',
       ...(affCode ? { aff_code: affCode } : {})
     })
     clearAffiliateReferralCode()

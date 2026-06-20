@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sort"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -424,6 +425,53 @@ func (s *ChannelService) GetChannelForGroup(ctx context.Context, groupID int64) 
 	}
 
 	return ch.Clone(), nil
+}
+
+// ListSupportedModelNames returns concrete, user-callable model IDs from the
+// active channel catalog. This is the local model library used by /v1/models
+// and the public marketplace, so newly synced upstream model IDs can show up
+// without relying on account-level model_mapping aliases.
+func (s *ChannelService) ListSupportedModelNames(ctx context.Context, groupID *int64, platform string) ([]string, error) {
+	if s == nil {
+		return nil, nil
+	}
+	cache, err := s.loadCache(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	seen := make(map[string]string)
+	addChannel := func(ch *Channel, effectivePlatform string) {
+		if ch == nil || !ch.IsActive() {
+			return
+		}
+		for _, name := range ch.SupportedModelNames(effectivePlatform) {
+			key := strings.ToLower(name)
+			if _, exists := seen[key]; !exists {
+				seen[key] = name
+			}
+		}
+	}
+
+	if groupID != nil {
+		ch := cache.channelByGroupID[*groupID]
+		effectivePlatform := strings.TrimSpace(platform)
+		if effectivePlatform == "" {
+			effectivePlatform = cache.groupPlatform[*groupID]
+		}
+		addChannel(ch, effectivePlatform)
+	} else {
+		for _, ch := range cache.byID {
+			addChannel(ch, strings.TrimSpace(platform))
+		}
+	}
+
+	out := make([]string, 0, len(seen))
+	for _, name := range seen {
+		out = append(out, name)
+	}
+	sort.Strings(out)
+	return out, nil
 }
 
 // GetGroupPlatform 获取分组的平台标识（从缓存）

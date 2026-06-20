@@ -10011,8 +10011,22 @@ func (s *GatewayService) GetAvailableModels(ctx context.Context, groupID *int64,
 		}
 	}
 
+	if s.channelService != nil {
+		channelModels, channelErr := s.channelService.ListSupportedModelNames(ctx, groupID, platform)
+		if channelErr != nil {
+			slog.Warn("failed to load channel model catalog for /v1/models", "error", channelErr)
+		}
+		for _, model := range channelModels {
+			model = strings.TrimSpace(model)
+			if model == "" {
+				continue
+			}
+			modelSet[model] = struct{}{}
+		}
+	}
+
 	// If no account has model_mapping, return nil (use default)
-	if !hasAnyMapping {
+	if !hasAnyMapping && len(modelSet) == 0 {
 		if s.modelsListCache != nil {
 			s.modelsListCache.Set(cacheKey, []string(nil), s.modelsListCacheTTL)
 			modelsListCacheStoreTotal.Add(1)

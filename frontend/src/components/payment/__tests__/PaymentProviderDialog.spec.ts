@@ -14,6 +14,7 @@ const messages: Record<string, string> = {
   'admin.settings.payment.stripeWebhookHint': 'Configure Stripe webhook.',
   'admin.settings.payment.stripeWebhookApiVersionHint': 'Use Stripe API version {version}.',
   'admin.settings.payment.airwallexWebhookHint': 'Select payment_intent.succeeded and use the latest stable API version.',
+  'admin.settings.payment.payoneerWebhookHint': 'Configure Payoneer Checkout webhook.',
 }
 
 vi.mock('vue-i18n', () => ({
@@ -57,11 +58,13 @@ function mountDialog(options: { editing?: ProviderInstance | null } = {}) {
         { value: 'wxpay', label: 'WeChat Pay' },
         { value: 'stripe', label: 'Stripe' },
         { value: 'airwallex', label: 'Airwallex' },
+        { value: 'payoneer', label: 'Payoneer' },
       ],
       enabledKeyOptions: [
         { value: 'alipay', label: 'Alipay' },
         { value: 'wxpay', label: 'WeChat Pay' },
         { value: 'airwallex', label: 'Airwallex' },
+        { value: 'payoneer', label: 'Payoneer' },
       ],
       allPaymentTypes: [
         { value: 'alipay', label: 'Alipay' },
@@ -130,13 +133,23 @@ describe('PaymentProviderDialog payment guide', () => {
     expect(wrapper.text()).toContain('/api/v1/payment/webhook/stripe')
   })
 
+  it('shows Payoneer webhook guidance with the fixed webhook URL', async () => {
+    const wrapper = mountDialog()
+
+    ;(wrapper.vm as unknown as { reset: (key: string) => void }).reset('payoneer')
+    await nextTick()
+
+    expect(wrapper.text()).toContain(messages['admin.settings.payment.payoneerWebhookHint'])
+    expect(wrapper.text()).toContain('/api/v1/payment/webhook/payoneer')
+  })
+
   it('emits an empty Airwallex accountId when the admin clears it', async () => {
     const provider = providerFactory({
       config: {
         clientId: 'cid_123',
         apiBase: 'https://api.airwallex.com/api/v1',
-        countryCode: 'CN',
-        currency: 'CNY',
+        countryCode: 'TH',
+        currency: 'THB',
         accountId: 'acct_123',
       },
     })

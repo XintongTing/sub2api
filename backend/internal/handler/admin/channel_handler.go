@@ -56,6 +56,11 @@ type updateChannelRequest struct {
 	AccountStatsPricingRules   *[]accountStatsPricingRuleRequest `json:"account_stats_pricing_rules"`
 }
 
+type syncHuosanyunCatalogRequest struct {
+	Overwrite      bool  `json:"overwrite"`
+	RestrictModels *bool `json:"restrict_models"`
+}
+
 type channelModelPricingRequest struct {
 	Platform         string                   `json:"platform" binding:"omitempty,max=50"`
 	Models           []string                 `json:"models" binding:"required,min=1,max=100"`
@@ -456,6 +461,56 @@ func (h *ChannelHandler) Update(c *gin.Context) {
 	}
 
 	response.Success(c, channelToResponse(channel))
+}
+
+// SyncHuosanyunCatalog imports TokenAPIFuel's verified Huosanyun sellable model
+// catalog into a channel. It stores real upstream model IDs, legacy aliases, and
+// THB sell prices in model_pricing/model_mapping without exposing upstream keys.
+// POST /api/v1/admin/channels/:id/sync-huosanyun
+func (h *ChannelHandler) SyncHuosanyunCatalog(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.ErrorFrom(c, infraerrors.BadRequest("INVALID_CHANNEL_ID", "Invalid channel ID"))
+		return
+	}
+
+	req := syncHuosanyunCatalogRequest{}
+	if c.Request.ContentLength > 0 {
+		if err := c.ShouldBindJSON(&req); err != nil {
+			response.ErrorFrom(c, infraerrors.BadRequest("VALIDATION_ERROR", err.Error()))
+			return
+		}
+	}
+
+	channel, err := h.channelService.GetByID(c.Request.Context(), id)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	pricing := service.MergeHuosanyunCatalog(channel.ModelPricing, req.Overwrite)
+	mapping := service.MergeHuosanyunAliases(channel.ModelMapping, req.Overwrite)
+	restrictModels := true
+	if req.RestrictModels != nil {
+		restrictModels = *req.RestrictModels
+	}
+
+	updated, err := h.channelService.Update(c.Request.Context(), id, &service.UpdateChannelInput{
+		ModelPricing:       &pricing,
+		ModelMapping:       mapping,
+		BillingModelSource: service.BillingModelSourceChannelMapped,
+		RestrictModels:     &restrictModels,
+	})
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{
+		"channel":     channelToResponse(updated),
+		"model_count": len(service.DefaultHuosanyunCatalog()),
+		"overwrite":   req.Overwrite,
+	})
 }
 
 // Delete handles deleting a channel

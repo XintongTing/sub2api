@@ -5762,7 +5762,7 @@
                       v-model="form.payment_product_name_prefix"
                       type="text"
                       class="input"
-                      placeholder="Sub2API"
+                      placeholder="OneAPI"
                     />
                   </div>
                   <div>
@@ -5773,7 +5773,7 @@
                       v-model="form.payment_product_name_suffix"
                       type="text"
                       class="input"
-                      placeholder="CNY"
+                      placeholder="THB"
                     />
                   </div>
                   <div>
@@ -5784,9 +5784,9 @@
                       class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 dark:border-dark-600 dark:bg-dark-800 dark:text-gray-300"
                     >
                       {{
-                        (form.payment_product_name_prefix || "Sub2API") +
+                        (form.payment_product_name_prefix || "OneAPI") +
                         " 100 " +
-                        (form.payment_product_name_suffix || "CNY")
+                        (form.payment_product_name_suffix || "THB")
                       }}
                     </div>
                   </div>
@@ -6506,7 +6506,7 @@
                 <div class="relative">
                   <span
                     class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    >$</span
+                    >฿</span
                   >
                   <input
                     v-model.number="form.balance_low_notify_threshold"
@@ -7034,11 +7034,11 @@ const form = reactive<SettingsForm>({
   default_subscriptions: [],
   force_email_on_third_party_signup: false,
   default_user_rpm_limit: 0,
-  site_name: "Sub2API",
+  site_name: "OneAPI",
   site_logo: "",
   site_subtitle: "Subscription to API Conversion Platform",
-  api_base_url: "",
-  contact_info: "",
+  api_base_url: "https://tokenapifuel.com",
+  contact_info: "service@tokenapifuel.com",
   doc_url: "",
   home_content: "",
   backend_mode_enabled: false,
@@ -8932,6 +8932,7 @@ const allPaymentTypes = computed(() => [
   { value: "wxpay", label: t("payment.methods.wxpay") },
   { value: "stripe", label: t("payment.methods.stripe") },
   { value: "airwallex", label: t("payment.methods.airwallex") },
+  { value: "payoneer", label: t("payment.methods.payoneer") },
 ]);
 
 function isPaymentTypeEnabled(type: string): boolean {
@@ -8989,6 +8990,7 @@ const providerKeyOptions = computed(() => [
   { value: "wxpay", label: t("admin.settings.payment.providerWxpay") },
   { value: "stripe", label: t("admin.settings.payment.providerStripe") },
   { value: "airwallex", label: t("admin.settings.payment.providerAirwallex") },
+  { value: "payoneer", label: t("admin.settings.payment.providerPayoneer") },
 ]);
 
 const enabledProviderKeyOptions = computed(() => {

@@ -29,6 +29,7 @@ export interface PlatformDashboardStats {
 }
 
 export interface UserDashboardStats {
+  balance?: number
   total_api_keys: number
   active_api_keys: number
   total_requests: number

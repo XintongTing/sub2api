@@ -372,6 +372,7 @@ const defaultBaseUrl = typeof window !== 'undefined' ? window.location.origin : 
 const providerWebhookHintMap: Record<string, string> = {
   stripe: 'admin.settings.payment.stripeWebhookHint',
   airwallex: 'admin.settings.payment.airwallexWebhookHint',
+  payoneer: 'admin.settings.payment.payoneerWebhookHint',
 }
 
 const providerWebhookUrl = computed(() => {
@@ -489,6 +490,9 @@ const limitableTypes = computed(() => {
   // Stripe: single "stripe" entry (one set of shared limits)
   if (form.provider_key === 'stripe') {
     return [{ value: 'stripe', label: 'Stripe' }]
+  }
+  if (form.provider_key === 'payoneer') {
+    return [{ value: 'payoneer', label: 'Payoneer' }]
   }
   const selected = form.supported_types.filter(t => t !== 'easypay')
   return selected.map(v => {

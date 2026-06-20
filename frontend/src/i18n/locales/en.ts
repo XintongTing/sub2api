@@ -1,4 +1,16 @@
 export default {
+  publicNav: {
+    home: 'Home',
+    console: 'Console',
+    models: 'Models',
+    docs: 'Docs',
+    login: 'Login',
+    admin: 'Admin',
+    lightMode: 'Switch to light mode',
+    darkMode: 'Switch to dark mode',
+    toggleNavigation: 'Toggle navigation',
+  },
+
   // Home Page
   home: {
     viewOnGithub: 'View on GitHub',
@@ -10,11 +22,17 @@ export default {
     login: 'Login',
     getStarted: 'Get Started',
     goToDashboard: 'Go to Dashboard',
+    defaultSiteSubtitle: 'AI model API gateway',
     // User-focused value proposition
     heroSubtitle: 'One Key, All AI Models',
-    heroDescription: 'No need to manage multiple subscriptions. Access Claude, GPT, Gemini and more with a single API key',
+    heroDescription: 'Use one API key for enabled models and deduct costs from wallet balance by actual token usage',
+    terminal: {
+      title: 'terminal',
+      routingComment: '# Routing to upstream...',
+      responseContent: 'Hello!'
+    },
     tags: {
-      subscriptionToApi: 'Subscription to API',
+      subscriptionToApi: 'API Gateway',
       stickySession: 'Session Persistence',
       realtimeBilling: 'Pay As You Go'
     },
@@ -187,8 +205,8 @@ export default {
 
   // Setup Wizard
   setup: {
-    title: 'Sub2API Setup',
-    description: 'Configure your Sub2API instance',
+    title: 'OneAPI Setup',
+    description: 'Configure your OneAPI instance',
     database: {
       title: 'Database Configuration',
       description: 'Connect to your PostgreSQL database',
@@ -375,6 +393,13 @@ export default {
   // Navigation
   nav: {
     dashboard: 'Dashboard',
+    dataBoard: 'Data Board',
+    chat: 'Chat',
+    playground: 'Playground',
+    console: 'Console',
+    personalCenter: 'Personal Center',
+    walletManagement: 'Wallet',
+    personalSettings: 'Personal Settings',
     announcements: 'Announcements',
     apiKeys: 'API Keys',
     usage: 'Usage',
@@ -388,7 +413,7 @@ export default {
     users: 'Users',
     groups: 'Groups',
     channels: 'Channels',
-    availableChannels: 'Available Channels',
+    availableChannels: 'Available Models',
     subscriptions: 'Subscriptions',
     accounts: 'Accounts',
     proxies: 'Proxies',
@@ -404,7 +429,7 @@ export default {
     logout: 'Logout',
     github: 'GitHub',
     mySubscriptions: 'My Subscriptions',
-    buySubscription: 'Recharge / Subscription',
+    buySubscription: 'Wallet Top-up',
     docs: 'Docs',
     myOrders: 'My Orders',
     orderManagement: 'Orders',
@@ -414,7 +439,7 @@ export default {
     channelManagement: 'Channels',
     channelPricing: 'Channel Pricing',
     channelMonitor: 'Channel Monitor',
-    channelStatus: 'Channel Status',
+    channelStatus: 'Service Status',
     riskControl: 'Risk Control',
   },
 
@@ -426,6 +451,10 @@ export default {
     signingIn: 'Signing in...',
     createAccount: 'Create Account',
     signUpToStart: 'Sign up to start using {siteName}',
+    registrationAgreementPrefix: 'I have read and agree to',
+    registrationAgreementTitle: 'the Customer Registration Notice and Service Agreement',
+    registrationAgreementRequired: 'Please read and accept the Customer Registration Notice and Service Agreement before registering.',
+    acceptLatestAgreementFirst: 'Please read and accept the latest terms before registering.',
     signUp: 'Sign up',
     processing: 'Processing...',
     continue: 'Continue',
@@ -640,7 +669,15 @@ export default {
 
   // Dashboard
   dashboard: {
-    title: 'Dashboard',
+    title: 'Data Board',
+    consoleOverview: 'Console Overview',
+    overviewDescription: 'View account balance, API keys, usage trends, and recent usage. If statistics are temporarily unavailable, the page keeps available data and shows a retry hint.',
+    refreshData: 'Refresh Data',
+    refreshing: 'Refreshing...',
+    requestFailed: 'Request failed',
+    requestTimeout: '{label} timed out. Please try again later.',
+    statsLabel: 'Data board statistics',
+    statsUnavailable: 'Data board statistics are temporarily unavailable: {message}',
     welcomeMessage: "Welcome back! Here's an overview of your account.",
     balance: 'Balance',
     apiKeys: 'API Keys',
@@ -825,8 +862,8 @@ export default {
     },
     // Quota and expiration
     quotaLimit: 'Quota Limit',
-    quotaAmount: 'Quota Amount (USD)',
-    quotaAmountPlaceholder: 'Enter quota limit in USD',
+    quotaAmount: 'Quota Amount (THB)',
+    quotaAmountPlaceholder: 'Enter quota limit in THB',
     quotaAmountHint: 'Set the maximum amount this key can spend. 0 = unlimited.',
     quotaUsed: 'Quota Used',
     reset: 'Reset',
@@ -838,9 +875,9 @@ export default {
     rateLimitColumn: 'Rate Limit',
     rateLimitSection: 'Rate Limit',
     resetUsage: 'Reset',
-    rateLimit5h: '5-Hour Limit (USD)',
-    rateLimit1d: 'Daily Limit (USD)',
-    rateLimit7d: '7-Day Limit (USD)',
+    rateLimit5h: '5-Hour Limit (THB)',
+    rateLimit1d: 'Daily Limit (THB)',
+    rateLimit7d: '7-Day Limit (THB)',
     rateLimitHint: 'Set the maximum spending for this key within each time window. 0 = unlimited.',
     rateLimitUsage: 'Rate Limit Usage',
     resetRateLimitUsage: 'Reset Rate Limit Usage',
@@ -1025,15 +1062,15 @@ export default {
     relativeDaysAgo: '{n}d ago'
   },
 
-  // Channel Status (user-facing read-only view)
+  // Service Status (user-facing read-only view)
   channelStatus: {
-    title: 'Channel Status',
-    description: 'Inspect channel availability, latency and recent status',
-    searchPlaceholder: 'Search channels...',
+    title: 'Service Status',
+    description: 'Inspect model availability, latency and recent status',
+    searchPlaceholder: 'Search models...',
     allProviders: 'All Providers',
-    loadError: 'Failed to load channel status',
-    detailLoadError: 'Failed to load channel detail',
-    detailTitle: 'Channel Detail',
+    loadError: 'Failed to load service status',
+    detailLoadError: 'Failed to load model status detail',
+    detailTitle: 'Model Status Detail',
     closeDetail: 'Close',
     windowTab: {
       '7d': '7 days',
@@ -1063,17 +1100,17 @@ export default {
       avgLatency7d: '7d Avg Latency (ms)'
     },
     empty: {
-      title: 'No channels available',
-      description: 'No monitored channels have been configured yet.'
+      title: 'No model status available',
+      description: 'No monitored models have been configured yet.'
     }
   },
 
-  // Available Channels (user-facing)
+  // Available Models (user-facing)
   availableChannels: {
-    title: 'Available Channels',
-    description: 'Channels you can access, along with their supported models and pricing',
-    searchPlaceholder: 'Search channels or models...',
-    empty: 'No available channels',
+    title: 'Available Models',
+    description: 'Models you can access, along with their endpoints and pricing',
+    searchPlaceholder: 'Search models...',
+    empty: 'No available models',
     noModels: 'No models configured',
     noPricing: 'Pricing not configured',
     exclusive: 'Exclusive',
@@ -1081,7 +1118,7 @@ export default {
     exclusiveTooltip: 'Exclusive groups granted to you by an admin',
     publicTooltip: 'Groups open to all users',
     columns: {
-      name: 'Channel',
+      name: 'Model Service',
       description: 'Description',
       platform: 'Platform',
       groups: 'Your Accessible Groups',
@@ -2064,12 +2101,12 @@ export default {
       platformQuota: {
         menuItem: 'Platform Quotas',
         title: 'Platform Quotas',
-        subtitle: 'Configure daily / weekly / monthly USD usage limits for each upstream platform for user {email}',
+        subtitle: 'Configure daily / weekly / monthly THB usage limits for each upstream platform for user {email}',
         columns: {
           platform: 'Platform',
-          daily: 'Daily (USD)',
-          weekly: 'Weekly (USD)',
-          monthly: 'Monthly (USD, 30-day rolling)',
+          daily: 'Daily (THB)',
+          weekly: 'Weekly (THB)',
+          monthly: 'Monthly (THB, 30-day rolling)',
           usage: 'Current Usage',
         },
         placeholder: 'unlimited',
@@ -2227,9 +2264,9 @@ export default {
         typeNotEditable: 'Billing type cannot be changed after group creation.',
         standard: 'Standard (Balance)',
         subscription: 'Subscription (Quota)',
-        dailyLimit: 'Daily Limit (USD)',
-        weeklyLimit: 'Weekly Limit (USD)',
-        monthlyLimit: 'Monthly Limit (USD)',
+        dailyLimit: 'Daily Limit (THB)',
+        weeklyLimit: 'Weekly Limit (THB)',
+        monthlyLimit: 'Monthly Limit (THB)',
         defaultValidityDays: 'Default Validity (Days)',
         validityHint: 'Number of days the subscription is valid when assigned to a user',
         noLimit: 'No limit'
@@ -2338,13 +2375,13 @@ export default {
       }
     },
 
-    // Available Channels (aggregated read-only view)
+    // Available Models (user-facing aggregate view)
     availableChannels: {
-      title: 'Available Channels',
-      description: 'Aggregated view: each channel with its linked groups and supported models (wildcards expanded)',
-      searchPlaceholder: 'Search channels or models...',
+      title: 'Available Models',
+      description: 'Aggregated user-facing view of available models, pricing, and service status.',
+      searchPlaceholder: 'Search models...',
       columns: {
-        name: 'Channel',
+        name: 'Model',
         status: 'Status',
         billingSource: 'Billing Model Source',
         groups: 'Linked Groups',
@@ -3256,7 +3293,7 @@ export default {
       resetQuota: 'Reset Quota',
       quotaLimit: 'Quota Limit',
       quotaLimitPlaceholder: '0 means unlimited',
-      quotaLimitHint: 'Set daily/weekly/total spending limits (USD). Anthropic API key accounts can also configure client affinity. Changing limits won\'t reset usage.',
+      quotaLimitHint: 'Set daily/weekly/total spending limits (THB). Anthropic API key accounts can also configure client affinity. Changing limits won\'t reset usage.',
       quotaLimitToggle: 'Enable Quota Limit',
       quotaLimitToggleHint: 'When enabled, account will be paused when usage reaches the set limit',
       quotaDailyLimit: 'Daily Limit',
@@ -4391,7 +4428,7 @@ export default {
       generatedSuccessfully: 'Generated Successfully',
       codesCreated: '{count} redeem code(s) created',
       codeType: 'Code Type',
-      amount: 'Amount ($)',
+      amount: 'Amount (THB)',
       value: 'Value',
       count: 'Count',
       generating: 'Generating...',
@@ -4535,7 +4572,7 @@ export default {
       code: 'Promo Code',
       autoGenerate: 'auto-generate if empty',
       codePlaceholder: 'Enter promo code or leave empty',
-      bonusAmount: 'Bonus Amount ($)',
+      bonusAmount: 'Bonus Amount (THB)',
       maxUses: 'Max Uses',
       zeroUnlimited: '0 = unlimited',
       expiresAt: 'Expires At',
@@ -5426,10 +5463,10 @@ export default {
           defaultIntervalHint: 'Pre-fills the interval when creating a new monitor; each monitor can override it. Range 15 – 3600.',
         },
         availableChannels: {
-          title: 'Available Channels',
-          description: 'Show logged-in users an aggregate view of the channels, models and pricing they can access. Disabled by default.',
+          title: 'Available Models',
+          description: 'Show logged-in users an aggregate view of models and pricing they can access. Disabled by default.',
           configureLink: 'Configure model pricing in Channel Management > Channel Pricing',
-          enabled: 'Enable Available Channels',
+          enabled: 'Enable Available Models',
           enabledHint: 'When off, the sidebar entry is hidden and the endpoint returns an empty list.',
         },
         riskControl: {
@@ -5544,7 +5581,7 @@ export default {
       },
       linuxdo: {
         title: 'LinuxDo Connect Login',
-        description: 'Configure LinuxDo Connect OAuth for Sub2API end-user login',
+        description: 'Configure LinuxDo Connect OAuth for OneAPI end-user login',
         enable: 'Enable LinuxDo Login',
         enableHint: 'Show LinuxDo login on the login/register pages',
         clientId: 'Client ID',
@@ -5564,7 +5601,7 @@ export default {
       },
       dingtalk: {
         title: 'DingTalk Login',
-        description: 'Configure DingTalk OAuth for Sub2API end-user login',
+        description: 'Configure DingTalk OAuth for OneAPI end-user login',
         enable: 'Enable DingTalk Login (Internal Corporate App)',
         enableHint: 'Show DingTalk login on the login/register pages',
         clientId: 'Client ID (AppKey)',
@@ -5680,9 +5717,9 @@ export default {
       },
       platformQuota: {
         platform:    'Platform',
-        daily:       'Daily (USD)',
-        weekly:      'Weekly (USD)',
-        monthly:     'Monthly (USD, 30d rolling)',
+        daily:       'Daily (THB)',
+        weekly:      'Weekly (THB)',
+        monthly:     'Monthly (THB, 30d rolling)',
         placeholder: 'Unlimited',
       },
       claudeCode: {
@@ -5767,10 +5804,10 @@ export default {
         backendModeDescription:
           'Disables user registration, public site, and self-service features. Only admin can log in and manage the platform.',
         siteName: 'Site Name',
-        siteNamePlaceholder: 'Sub2API',
+        siteNamePlaceholder: 'OneAPI',
         siteNameHint: 'Displayed in emails and page titles',
         siteSubtitle: 'Site Subtitle',
-        siteSubtitlePlaceholder: 'Subscription to API Conversion Platform',
+        siteSubtitlePlaceholder: 'AI model API gateway',
         siteSubtitleHint: 'Displayed on login and register pages',
         apiBaseUrl: 'API Base URL',
         apiBaseUrlPlaceholder: 'https://api.example.com',
@@ -5818,11 +5855,11 @@ export default {
         hideCcsImportButtonHint: 'When enabled, the "Import to CCS" button will be hidden on the API Keys page'
       },
       purchase: {
-        title: 'Recharge / Subscription Page',
-        description: 'Show a "Recharge / Subscription" entry in the sidebar and open the configured URL in an iframe',
-        enabled: 'Show Recharge / Subscription Entry',
+        title: 'Wallet Top-up Page',
+        description: 'Show a wallet top-up entry in the sidebar and open the configured URL in an iframe',
+        enabled: 'Show Wallet Top-up Entry',
         enabledHint: 'Only shown in standard mode (not simple mode)',
-        url: 'Recharge / Subscription URL',
+        url: 'Wallet Top-up URL',
         urlPlaceholder: 'https://example.com/purchase',
         urlHint: 'Must be an absolute http(s) URL',
         iframeWarning:
@@ -5870,8 +5907,8 @@ export default {
         maxAmount: 'Maximum Amount',
         dailyLimit: 'Daily Limit',
         balanceRechargeMultiplier: 'Balance Recharge Multiplier',
-        balanceRechargeMultiplierHint: 'How many USD balance the user receives for each 1 CNY paid',
-        balanceRechargePreview: 'Preview: 1 CNY = {usd} USD',
+        balanceRechargeMultiplierHint: 'How many THB balance the user receives for each 1 THB paid',
+        balanceRechargePreview: 'Preview: 1 THB = {usd} THB',
         rechargeFeeRate: 'Recharge Fee Rate',
         rechargeFeeRateHint: 'Percentage of service fee charged on top of recharge amount, 0 means no fee',
         rechargeFeePreview: 'Preview: Recharge 100, fee {fee}',
@@ -5907,6 +5944,7 @@ export default {
         providerWxpay: 'WeChat Pay (Direct)',
         providerStripe: 'Stripe',
         providerAirwallex: 'Airwallex',
+        providerPayoneer: 'Payoneer',
         typeDisabled: 'type disabled',
         enableTypesFirst: 'Enable at least one payment type above first',
         easypayRedirect: 'Redirect',
@@ -5934,14 +5972,20 @@ export default {
         wxpayAdvancedOptions: 'WeChat Pay Advanced Options',
         field_secretKey: 'Secret Key',
         field_clientId: 'Client ID',
+        field_clientSecret: 'Client Secret',
         field_apiKey: 'API Key',
         field_publishableKey: 'Publishable Key',
         field_webhookSecret: 'Webhook Secret',
         field_countryCode: 'Country/region code',
         field_currency: 'Payment currency',
         field_accountId: 'Airwallex Account ID',
+        field_environment: 'Environment',
+        field_createPath: 'Create order path',
+        field_queryPath: 'Query order path',
         field_airwallexApiBaseHint: 'Must match the API key environment: use https://api-demo.airwallex.com/api/v1 for sandbox/demo keys, and https://api.airwallex.com/api/v1 for production keys. Mixed environments return credentials_invalid / Access Denied.',
-        field_paymentCurrencyHint: 'Default is CNY. Stripe and Airwallex can choose HKD, USD, or another listed currency supported by the account; WeChat Pay, Alipay, and EasyPay remain CNY.',
+        field_payoneerApiBaseHint: 'Sandbox defaults to https://api.sandbox.payoneer.com and live defaults to https://api.payoneer.com. Override only when Payoneer gives your merchant account a different endpoint.',
+        field_payoneerPathHint: 'Advanced Payoneer Checkout adapter path. Keep {trade_no} in the query path so order reconciliation can replace it with the upstream transaction ID.',
+        field_paymentCurrencyHint: 'Default is THB for the Thailand rollout. Choose another listed currency only when the provider account explicitly supports it.',
         field_accountIdHint: 'Leave this empty unless you use multiple accounts, an organization-level key, or connected-account payments. A single-account scoped API key uses the selected account by default.',
         field_cid: 'Channel ID',
         field_cidAlipay: 'Alipay Channel ID',
@@ -5949,6 +5993,7 @@ export default {
         stripeWebhookHint: 'Configure the following URL as a Webhook endpoint in Stripe Dashboard:',
         stripeWebhookApiVersionHint: 'Set this Webhook endpoint API version to match the integrated Stripe SDK. Recommended: {version}. A mismatch can cause webhook parsing errors.',
         airwallexWebhookHint: 'Configure the following URL as a Webhook endpoint in Airwallex. Select at least Payment Intent -> Succeeded (payment_intent.succeeded), preferably also Payment Intent -> Cancelled (payment_intent.cancelled). Use the account default or latest stable API version.',
+        payoneerWebhookHint: 'Configure the following URL as the Payoneer Checkout webhook endpoint after the backend Payoneer provider is enabled.',
         airwallexGuideSummary: 'When creating an Airwallex scoped API key, select Read and Write for Payment Acceptance under account-level permissions.',
         airwallexGuideNote: 'Do not grant unrelated permissions such as Spend, Payouts, Transfers, Funds Splits, or POS Terminals unless you explicitly need them. For webhooks, select at least payment_intent.succeeded, preferably also payment_intent.cancelled, and use the account default or latest stable API version.',
         limitsTitle: 'Limits',
@@ -6057,7 +6102,7 @@ export default {
         fromEmail: 'From Email',
         fromEmailPlaceholder: "noreply{'@'}example.com",
         fromName: 'From Name',
-        fromNamePlaceholder: 'Sub2API',
+        fromNamePlaceholder: 'OneAPI',
         useTls: 'Use TLS',
         useTlsHint: 'Enable TLS encryption for SMTP connection'
       },
@@ -6616,16 +6661,16 @@ export default {
     retry: 'Retry'
   },
 
-  // Recharge / Subscription Page
+  // Wallet top-up page
   purchase: {
-    title: 'Recharge / Subscription',
-    description: 'Recharge balance or purchase subscription via the embedded page',
+    title: 'Wallet Top-up',
+    description: 'Top up account balance through the embedded page',
     openInNewTab: 'Open in new tab',
     notEnabledTitle: 'Feature not enabled',
-    notEnabledDesc: 'The administrator has not enabled the recharge/subscription entry. Please contact admin.',
-    notConfiguredTitle: 'Recharge / Subscription URL not configured',
+    notEnabledDesc: 'The administrator has not enabled the wallet top-up entry. Please contact admin.',
+    notConfiguredTitle: 'Wallet top-up URL not configured',
     notConfiguredDesc:
-      'The administrator enabled the entry but has not configured a recharge/subscription URL. Please contact admin.'
+      'The administrator enabled the entry but has not configured a wallet top-up URL. Please contact admin.'
   },
 
   // Custom Page (iframe embed)
@@ -6706,14 +6751,14 @@ export default {
     // Admin tour steps
     admin: {
       welcome: {
-        title: '👋 Welcome to Sub2API',
-        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Sub2API is a powerful AI service gateway platform that helps you easily manage and distribute AI services.</p><p style="margin-bottom: 12px;"><b>🎯 Core Features:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>Group Management</b> - Create service tiers (VIP, Free Trial, etc.)</li><li>🔗 <b>Account Pool</b> - Connect multiple upstream AI service accounts</li><li>🔑 <b>Key Distribution</b> - Generate independent API Keys for users</li><li>💰 <b>Billing Control</b> - Flexible rate and quota management</li></ul><p style="color: #10b981; font-weight: 600;">Let\'s complete the initial setup in 3 minutes →</p></div>',
+        title: '👋 Welcome to OneAPI',
+        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">OneAPI is a powerful AI service gateway platform that helps you easily manage and distribute AI services.</p><p style="margin-bottom: 12px;"><b>🎯 Core Features:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>Group Management</b> - Create service tiers (VIP, Free Trial, etc.)</li><li>🔗 <b>Account Pool</b> - Connect multiple upstream AI service accounts</li><li>🔑 <b>Key Distribution</b> - Generate independent API Keys for users</li><li>💰 <b>Billing Control</b> - Flexible rate and quota management</li></ul><p style="color: #10b981; font-weight: 600;">Let\'s complete the initial setup in 3 minutes →</p></div>',
         nextBtn: 'Start Setup 🚀',
         prevBtn: 'Skip'
       },
       groupManage: {
         title: '📦 Step 1: Group Management',
-        description: '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>What is a Group?</b></p><p style="margin-bottom: 12px;">Groups are the core concept of Sub2API, like a "service package":</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 Each group can contain multiple upstream accounts</li><li>💰 Each group has independent billing multiplier</li><li>👥 Can be set as public or exclusive</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 Example:</b> You can create "VIP Premium" (high rate) and "Free Trial" (low rate) groups</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 Click "Group Management" on the left sidebar</p></div>'
+        description: '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>What is a Group?</b></p><p style="margin-bottom: 12px;">Groups are the core concept of OneAPI, like a "service package":</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 Each group can contain multiple upstream accounts</li><li>💰 Each group has independent billing multiplier</li><li>👥 Can be set as public or exclusive</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 Example:</b> You can create "VIP Premium" (high rate) and "Free Trial" (low rate) groups</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 Click "Group Management" on the left sidebar</p></div>'
       },
       createGroup: {
         title: '➕ Create New Group',
@@ -6731,7 +6776,7 @@ export default {
       },
       groupMultiplier: {
         title: '💰 3. Rate Multiplier',
-        description: '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;">Set the billing multiplier to control user charges.</p><div style="padding: 8px 12px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 13px; margin-bottom: 12px;"><b>⚙️ Billing Rules:</b><ul style="margin: 8px 0 0 16px;"><li><b>1.0</b> - Original price (cost price)</li><li><b>1.5</b> - User consumes $1, charged $1.5</li><li><b>2.0</b> - User consumes $1, charged $2</li><li><b>0.8</b> - Subsidy mode (loss-making)</li></ul></div><p style="font-size: 13px; color: #6b7280;">Recommend setting test group to 1.0</p></div>',
+        description: '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;">Set the billing multiplier to control user charges.</p><div style="padding: 8px 12px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 13px; margin-bottom: 12px;"><b>⚙️ Billing Rules:</b><ul style="margin: 8px 0 0 16px;"><li><b>1.0</b> - Original price (cost price)</li><li><b>1.5</b> - User consumes ?1, charged ?1.5</li><li><b>2.0</b> - User consumes ?1, charged ?2</li><li><b>0.8</b> - Subsidy mode (loss-making)</li></ul></div><p style="font-size: 13px; color: #6b7280;">Recommend setting test group to 1.0</p></div>',
         nextBtn: 'Next'
       },
       groupExclusive: {
@@ -6806,8 +6851,8 @@ export default {
     // User tour steps
     user: {
       welcome: {
-        title: '👋 Welcome to Sub2API',
-        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Hello! Welcome to the Sub2API AI service platform.</p><p style="margin-bottom: 12px;"><b>🎯 Quick Start:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 Create API Key</li><li>📋 Copy key to your application</li><li>🚀 Start using AI services</li></ul><p style="color: #10b981; font-weight: 600;">Just 1 minute, let\'s get started →</p></div>',
+        title: '👋 Welcome to OneAPI',
+        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Hello! Welcome to the OneAPI AI service platform.</p><p style="margin-bottom: 12px;"><b>🎯 Quick Start:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 Create API Key</li><li>📋 Copy key to your application</li><li>🚀 Start using AI services</li></ul><p style="color: #10b981; font-weight: 600;">Just 1 minute, let\'s get started →</p></div>',
         nextBtn: 'Start 🚀',
         prevBtn: 'Skip'
       },
@@ -6838,7 +6883,7 @@ export default {
 
   // Payment System
   payment: {
-    title: 'Recharge / Subscription',
+    title: 'Wallet Top-up',
     amountLabel: 'Amount',
     paymentAmount: 'Payment Amount',
     creditedBalance: 'Credited Balance',
@@ -6855,6 +6900,7 @@ export default {
       wxpay: 'WeChat Pay',
       stripe: 'Stripe',
       airwallex: 'Airwallex',
+      payoneer: 'Payoneer',
       card: 'Card',
       link: 'Link',
       alipay_direct: 'Alipay (Direct)',
@@ -6934,7 +6980,7 @@ export default {
     amountTooLow: 'Minimum amount is {min}',
     amountTooHigh: 'Maximum amount is {max}',
     amountNoMethod: 'No payment method available for this amount',
-    rechargeRatePreview: 'Current rate: 1 CNY = {usd} USD',
+    rechargeRatePreview: 'Current rate: 1 THB = {usd} THB',
     refundReason: 'Refund Reason',
     refundReasonPlaceholder: 'Please describe your refund reason',
     stripeLoadFailed: 'Failed to load payment component. Please refresh and try again.',
@@ -7066,7 +7112,7 @@ export default {
       deductBalanceHint: 'Subtract recharged amount from user balance',
       userBalance: 'User Balance',
       orderAmount: 'Order Amount',
-      insufficientBalance: 'Insufficient balance — will deduct to $0',
+      insufficientBalance: 'Insufficient balance — will deduct to ?0',
       noDeduction: 'Will NOT deduct user balance',
       forceRefund: 'Force refund (ignore balance check)',
       orderCancelled: 'Order Cancelled',

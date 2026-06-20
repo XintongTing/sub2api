@@ -287,14 +287,7 @@ const authActionDisabled = computed(
 )
 
 const showOAuthLogin = computed(
-  () =>
-    !backendModeEnabled.value &&
-    (linuxdoOAuthEnabled.value ||
-      dingtalkOAuthEnabled.value ||
-      wechatOAuthEnabled.value ||
-      oidcOAuthEnabled.value ||
-      githubOAuthEnabled.value ||
-      googleOAuthEnabled.value)
+  () => false
 )
 
 watch(validationToastMessage, (value, previousValue) => {
