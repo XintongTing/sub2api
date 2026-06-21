@@ -33,7 +33,7 @@
         </section>
 
         <section id="base-url" class="doc-section">
-          <h2>Base URL</h2>
+          <h2>{{ sectionLabels.baseUrl }}</h2>
           <p>{{ docs.baseUrl.current }}</p>
           <pre><code>{{ gatewayBaseUrl }}</code></pre>
           <p>{{ docs.baseUrl.sdk }}</p>
@@ -49,7 +49,7 @@ Content-Type: application/json</code></pre>
         </section>
 
         <section id="chat" class="doc-section">
-          <h2>Chat Completions</h2>
+          <h2>{{ sectionLabels.chat }}</h2>
           <p>{{ docs.chatDescription }}</p>
           <pre><code>POST /v1/chat/completions</code></pre>
 
@@ -67,7 +67,7 @@ Content-Type: application/json</code></pre>
         </section>
 
         <section id="codex" class="doc-section">
-          <h2>Codex CLI / OpenCode</h2>
+          <h2>{{ sectionLabels.codex }}</h2>
           <p>{{ docs.codexDescription }}</p>
           <p>{{ docs.codexConfigIntro }}</p>
           <pre><code>{{ codexConfigExample }}</code></pre>
@@ -355,6 +355,29 @@ const models = publicModels
 const appStore = useAppStore()
 const { locale } = useI18n()
 
+const SECTION_LABELS = {
+  'zh-CN': {
+    baseUrl: 'Base URL（接口地址）',
+    chat: '对话补全接口',
+    codex: 'Codex CLI / OpenCode 配置',
+  },
+  'zh-TW': {
+    baseUrl: 'Base URL（接口位址）',
+    chat: '對話補全接口',
+    codex: 'Codex CLI / OpenCode 設定',
+  },
+  en: {
+    baseUrl: 'Base URL',
+    chat: 'Chat Completions',
+    codex: 'Codex CLI / OpenCode Setup',
+  },
+  th: {
+    baseUrl: 'Base URL สำหรับ API',
+    chat: 'Chat Completions สำหรับสนทนา',
+    codex: 'การตั้งค่า Codex CLI / OpenCode',
+  },
+} as const
+
 const copyKey = computed(() => {
   const current = String(locale.value || '').toLowerCase()
   if (current.startsWith('zh-tw')) return 'zh-TW'
@@ -364,13 +387,14 @@ const copyKey = computed(() => {
 })
 
 const docs = computed(() => DOCS_COPY[copyKey.value])
+const sectionLabels = computed(() => SECTION_LABELS[copyKey.value])
 
 const docNav = computed(() => [
   { href: '#quickstart', label: docs.value.sections.quickstart },
-  { href: '#base-url', label: 'Base URL' },
+  { href: '#base-url', label: sectionLabels.value.baseUrl },
   { href: '#auth', label: docs.value.sections.auth },
-  { href: '#chat', label: 'Chat Completions' },
-  { href: '#codex', label: 'Codex / OpenCode' },
+  { href: '#chat', label: sectionLabels.value.chat },
+  { href: '#codex', label: sectionLabels.value.codex },
   { href: '#models', label: docs.value.sections.models },
   { href: '#billing', label: docs.value.sections.billing },
   { href: '#errors', label: docs.value.sections.errors },
