@@ -18,133 +18,85 @@
 
       <article class="min-w-0">
         <section class="rounded-lg border border-primary-100 bg-gradient-to-br from-primary-50 via-white to-cyan-50 p-6 dark:border-dark-800 dark:from-dark-900 dark:via-dark-900 dark:to-primary-950/30">
-          <p class="text-sm font-semibold text-primary-700 dark:text-primary-300">Developer Documentation</p>
-          <h1 class="mt-2 text-3xl font-bold text-slate-950 dark:text-white">Token API Fuel 开发文档</h1>
+          <p class="text-sm font-semibold text-primary-700 dark:text-primary-300">{{ docs.kicker }}</p>
+          <h1 class="mt-2 text-3xl font-bold text-slate-950 dark:text-white">{{ docs.title }}</h1>
           <p class="mt-4 max-w-3xl text-base leading-7 text-slate-600 dark:text-dark-200">
-            使用一个 API Key 调用平台已启用的主流 AI 模型。普通应用推荐使用 OpenAI Chat Completions 格式；Codex CLI 和 OpenCode 可使用本站兼容的 Responses 协议。
+            {{ docs.description }}
           </p>
         </section>
 
         <section id="quickstart" class="doc-section">
-          <h2>快速开始</h2>
+          <h2>{{ docs.sections.quickstart }}</h2>
           <ol>
-            <li>注册并登录控制台。</li>
-            <li>进入“API 密钥”创建一枚可用密钥。</li>
-            <li>确认充值余额充足。</li>
-            <li>按下方示例调用 <code>/v1/chat/completions</code>。</li>
+            <li v-for="step in docs.quickstartSteps" :key="step">{{ step }}</li>
           </ol>
         </section>
 
         <section id="base-url" class="doc-section">
           <h2>Base URL</h2>
-          <p>当前正式用户侧 API 地址：</p>
-          <pre><code>https://tokenapifuel.com</code></pre>
-          <p>OpenAI SDK 通常需要带 <code>/v1</code> 后缀：</p>
-          <pre><code>https://tokenapifuel.com/v1</code></pre>
-          <p>如果临时排查 HTTPS，可以短时间使用 HTTP；正式交付请优先使用 HTTPS。</p>
+          <p>{{ docs.baseUrl.current }}</p>
+          <pre><code>{{ gatewayBaseUrl }}</code></pre>
+          <p>{{ docs.baseUrl.sdk }}</p>
+          <pre><code>{{ apiBaseUrl }}</code></pre>
+          <p>{{ docs.baseUrl.httpsNote }}</p>
         </section>
 
         <section id="auth" class="doc-section">
-          <h2>认证方式</h2>
-          <p>所有 API 请求都需要在 Header 中携带 Bearer Token：</p>
+          <h2>{{ docs.sections.auth }}</h2>
+          <p>{{ docs.authDescription }}</p>
           <pre><code>Authorization: Bearer sk-your-api-key
 Content-Type: application/json</code></pre>
         </section>
 
         <section id="chat" class="doc-section">
           <h2>Chat Completions</h2>
-          <p>普通业务集成推荐使用该接口：</p>
+          <p>{{ docs.chatDescription }}</p>
           <pre><code>POST /v1/chat/completions</code></pre>
 
           <h3>cURL</h3>
-          <pre><code>curl https://tokenapifuel.com/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer sk-your-api-key" \
-  -d '{
-    "model": "deepseek-v3.2",
-    "messages": [
-      {"role": "user", "content": "用一句话介绍你自己"}
-    ]
-  }'</code></pre>
+          <pre><code>{{ curlExample }}</code></pre>
 
           <h3>Python</h3>
-          <pre><code>from openai import OpenAI
-
-client = OpenAI(
-    api_key="sk-your-api-key",
-    base_url="https://tokenapifuel.com/v1"
-)
-
-response = client.chat.completions.create(
-    model="deepseek-v3.2",
-    messages=[{"role": "user", "content": "用一句话介绍你自己"}]
-)
-
-print(response.choices[0].message.content)</code></pre>
+          <pre><code>{{ pythonExample }}</code></pre>
 
           <h3>Node.js</h3>
-          <pre><code>import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: "sk-your-api-key",
-  baseURL: "https://tokenapifuel.com/v1",
-});
-
-const response = await client.chat.completions.create({
-  model: "deepseek-v3.2",
-  messages: [{ role: "user", content: "用一句话介绍你自己" }],
-});
-
-console.log(response.choices[0].message.content);</code></pre>
+          <pre><code>{{ nodeExample }}</code></pre>
 
           <h3>Go</h3>
-          <pre><code>config := openai.DefaultConfig("sk-your-api-key")
-config.BaseURL = "https://tokenapifuel.com/v1"
-client := openai.NewClientWithConfig(config)</code></pre>
+          <pre><code>{{ goExample }}</code></pre>
         </section>
 
         <section id="codex" class="doc-section">
           <h2>Codex CLI / OpenCode</h2>
-          <p>本站已注册并兼容 <code>/v1/responses</code>、<code>/responses</code> 和 <code>/backend-api/codex/responses</code> 路由，因此 Codex CLI 示例保留 <code>wire_api = "responses"</code>。</p>
-          <p>请将以下内容放在 <code>~/.codex/config.toml</code> 或 <code>%userprofile%\.codex\config.toml</code> 的开头：</p>
-          <pre><code>model_provider = "OpenAI"
-model = "deepseek-v3.2"
-review_model = "deepseek-v3.2"
-disable_response_storage = true
-network_access = "enabled"
-windows_wsl_setup_acknowledged = true
+          <p>{{ docs.codexDescription }}</p>
+          <p>{{ docs.codexConfigIntro }}</p>
+          <pre><code>{{ codexConfigExample }}</code></pre>
 
-[model_providers.OpenAI]
-name = "OpenAI"
-base_url = "https://tokenapifuel.com"
-wire_api = "responses"
-requires_openai_auth = true</code></pre>
-
-          <p><code>auth.json</code> 示例：</p>
+          <p>{{ docs.authJsonExample }}</p>
           <pre><code>{
   "OPENAI_API_KEY": "sk-your-api-key"
 }</code></pre>
         </section>
 
         <section id="models" class="doc-section">
-          <h2>模型列表</h2>
-          <p>推荐使用模型广场展示的模型名作为请求参数。当前常用模型包括：</p>
+          <h2>{{ docs.sections.models }}</h2>
+          <p>{{ docs.modelsDescription }}</p>
           <div class="overflow-hidden rounded-lg border border-slate-200 dark:border-dark-800">
             <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-dark-800">
               <thead class="bg-slate-50 text-left font-semibold text-slate-600 dark:bg-dark-800 dark:text-dark-200">
                 <tr>
-                  <th class="px-4 py-3">模型</th>
-                  <th class="px-4 py-3">供应商</th>
-                  <th class="px-4 py-3">输入价格</th>
-                  <th class="px-4 py-3">输出价格</th>
+                  <th class="px-4 py-3">{{ docs.table.model }}</th>
+                  <th class="px-4 py-3">{{ docs.table.provider }}</th>
+                  <th class="px-4 py-3">{{ docs.table.input }}</th>
+                  <th class="px-4 py-3">{{ docs.table.output }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
                 <tr v-for="model in models" :key="model.id">
                   <td class="px-4 py-3 font-semibold">{{ model.displayName }}</td>
                   <td class="px-4 py-3">{{ model.provider }}</td>
-                  <td class="px-4 py-3">{{ model.inputPrice }} / {{ model.unit }}</td>
-                  <td class="px-4 py-3">{{ model.outputPrice }} / {{ model.unit }}</td>
+                  <td class="px-4 py-3">{{ formatTokenPrice(model.inputPrice) }}</td>
+                  <td class="px-4 py-3">{{ formatTokenPrice(model.outputPrice) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -152,25 +104,23 @@ requires_openai_auth = true</code></pre>
         </section>
 
         <section id="billing" class="doc-section">
-          <h2>计费与用量</h2>
-          <p>平台按用户 API Key 归属账户的充值余额扣减。每次成功调用会根据模型价格和 Token usage 计算费用，并记录扣费金额和调用状态，可在控制台“使用记录”查看。</p>
+          <h2>{{ docs.sections.billing }}</h2>
+          <p>{{ docs.billingDescription }}</p>
         </section>
 
         <section id="errors" class="doc-section">
-          <h2>常见错误</h2>
+          <h2>{{ docs.sections.errors }}</h2>
           <ul>
-            <li><code>401</code>：API Key 缺失、错误或已停用。</li>
-            <li><code>402</code>：账户充值余额不足。</li>
-            <li><code>404</code>：模型名称不存在或未启用。</li>
-            <li><code>429</code>：请求过于频繁，请稍后重试。</li>
-            <li><code>500</code>：网关或上游异常，请联系平台管理员。</li>
+            <li v-for="item in docs.errors" :key="item.code">
+              <code>{{ item.code }}</code>: {{ item.description }}
+            </li>
           </ul>
         </section>
       </article>
 
       <aside class="hidden lg:block">
         <div class="sticky top-24 rounded-lg border border-slate-200 bg-white p-4 text-sm dark:border-dark-800 dark:bg-dark-900">
-          <h2 class="font-bold text-slate-900 dark:text-white">本页目录</h2>
+          <h2 class="font-bold text-slate-900 dark:text-white">{{ docs.pageToc }}</h2>
           <div class="mt-3 space-y-2">
             <a
               v-for="item in docNav"
@@ -188,20 +138,317 @@ requires_openai_auth = true</code></pre>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import { publicModels } from '@/constants/publicModels'
+import { useAppStore } from '@/stores'
+
+type DocsCopy = {
+  kicker: string
+  title: string
+  description: string
+  pageToc: string
+  sections: Record<'quickstart' | 'auth' | 'models' | 'billing' | 'errors', string>
+  quickstartSteps: string[]
+  baseUrl: {
+    current: string
+    sdk: string
+    httpsNote: string
+  }
+  authDescription: string
+  chatDescription: string
+  codexDescription: string
+  codexConfigIntro: string
+  authJsonExample: string
+  modelsDescription: string
+  billingDescription: string
+  table: {
+    model: string
+    provider: string
+    input: string
+    output: string
+  }
+  errors: Array<{ code: string; description: string }>
+}
+
+const DOCS_COPY: Record<string, DocsCopy> = {
+  'zh-CN': {
+    kicker: '开发文档',
+    title: 'Token API Fuel 开发文档',
+    description: '使用一个 API Key 调用平台已启用的主流 AI 模型。普通应用推荐使用 OpenAI Chat Completions 格式；Codex CLI 和 OpenCode 可使用本站兼容的 Responses 协议。',
+    pageToc: '本页目录',
+    sections: {
+      quickstart: '快速开始',
+      auth: '认证方式',
+      models: '模型列表',
+      billing: '计费与用量',
+      errors: '常见错误',
+    },
+    quickstartSteps: [
+      '注册并登录控制台。',
+      '进入“API 密钥”创建一枚可用密钥。',
+      '确认充值余额充足。',
+      '按下方示例调用 /v1/chat/completions。',
+    ],
+    baseUrl: {
+      current: '当前正式用户侧 API 地址：',
+      sdk: 'OpenAI SDK 通常需要带 /v1 后缀：',
+      httpsNote: '正式交付请优先使用 HTTPS。如果临时排查证书或 443 端口问题，可以短时间使用 HTTP。',
+    },
+    authDescription: '所有 API 请求都需要在 Header 中携带 Bearer Token：',
+    chatDescription: '普通业务集成推荐使用该接口：',
+    codexDescription: '本站兼容 /v1/responses、/responses 和 /backend-api/codex/responses 路由，因此 Codex CLI 示例保留 wire_api = "responses"。',
+    codexConfigIntro: '请将以下内容放在 ~/.codex/config.toml 或 %userprofile%\\.codex\\config.toml 的开头：',
+    authJsonExample: 'auth.json 示例：',
+    modelsDescription: '推荐使用模型广场展示的模型名作为请求参数。当前常用模型包括：',
+    billingDescription: '平台按用户 API Key 归属账户的充值余额扣减。每次成功调用会根据模型价格和 Token usage 计算费用，并记录扣费金额和调用状态，可在控制台“使用记录”查看。',
+    table: {
+      model: '模型',
+      provider: '供应商',
+      input: '输入价格',
+      output: '输出价格',
+    },
+    errors: [
+      { code: '401', description: 'API Key 缺失、错误或已停用。' },
+      { code: '402', description: '账户充值余额不足。' },
+      { code: '404', description: '模型名称不存在或未启用。' },
+      { code: '429', description: '请求过于频繁，请稍后重试。' },
+      { code: '500', description: '网关或上游异常，请联系平台管理员。' },
+    ],
+  },
+  'zh-TW': {
+    kicker: '開發文件',
+    title: 'Token API Fuel 開發文件',
+    description: '使用一個 API Key 呼叫平台已啟用的主流 AI 模型。一般應用建議使用 OpenAI Chat Completions 格式；Codex CLI 和 OpenCode 可使用本站相容的 Responses 協議。',
+    pageToc: '本頁目錄',
+    sections: {
+      quickstart: '快速開始',
+      auth: '認證方式',
+      models: '模型列表',
+      billing: '計費與用量',
+      errors: '常見錯誤',
+    },
+    quickstartSteps: [
+      '註冊並登入控制台。',
+      '進入「API 金鑰」建立一枚可用金鑰。',
+      '確認充值餘額充足。',
+      '按下方範例呼叫 /v1/chat/completions。',
+    ],
+    baseUrl: {
+      current: '目前正式用戶側 API 位址：',
+      sdk: 'OpenAI SDK 通常需要帶 /v1 後綴：',
+      httpsNote: '正式交付請優先使用 HTTPS。若臨時排查憑證或 443 連接埠問題，可以短時間使用 HTTP。',
+    },
+    authDescription: '所有 API 請求都需要在 Header 中攜帶 Bearer Token：',
+    chatDescription: '一般業務整合建議使用此接口：',
+    codexDescription: '本站相容 /v1/responses、/responses 和 /backend-api/codex/responses 路由，因此 Codex CLI 範例保留 wire_api = "responses"。',
+    codexConfigIntro: '請將以下內容放在 ~/.codex/config.toml 或 %userprofile%\\.codex\\config.toml 的開頭：',
+    authJsonExample: 'auth.json 範例：',
+    modelsDescription: '建議使用模型廣場展示的模型名作為請求參數。目前常用模型包括：',
+    billingDescription: '平台按用戶 API Key 歸屬帳戶的充值餘額扣減。每次成功呼叫會根據模型價格和 Token usage 計算費用，並記錄扣費金額和呼叫狀態，可在控制台「使用記錄」查看。',
+    table: {
+      model: '模型',
+      provider: '供應商',
+      input: '輸入價格',
+      output: '輸出價格',
+    },
+    errors: [
+      { code: '401', description: 'API Key 缺失、錯誤或已停用。' },
+      { code: '402', description: '帳戶充值餘額不足。' },
+      { code: '404', description: '模型名稱不存在或未啟用。' },
+      { code: '429', description: '請求過於頻繁，請稍後重試。' },
+      { code: '500', description: '網關或上游異常，請聯絡平台管理員。' },
+    ],
+  },
+  en: {
+    kicker: 'Developer Documentation',
+    title: 'Token API Fuel Developer Docs',
+    description: 'Use one API key to call the enabled mainstream AI models on this gateway. Standard applications should use OpenAI Chat Completions; Codex CLI and OpenCode can use the compatible Responses protocol.',
+    pageToc: 'On this page',
+    sections: {
+      quickstart: 'Quick Start',
+      auth: 'Authentication',
+      models: 'Model List',
+      billing: 'Billing and Usage',
+      errors: 'Common Errors',
+    },
+    quickstartSteps: [
+      'Create an account and sign in to the console.',
+      'Open API Keys and create an active key.',
+      'Make sure your top-up balance is sufficient.',
+      'Call /v1/chat/completions using the examples below.',
+    ],
+    baseUrl: {
+      current: 'Current production API base URL for users:',
+      sdk: 'OpenAI SDKs usually require the /v1 suffix:',
+      httpsNote: 'Use HTTPS for production delivery. HTTP should only be used temporarily while diagnosing certificate or port 443 issues.',
+    },
+    authDescription: 'Every API request must include a Bearer token in the request headers:',
+    chatDescription: 'Use this endpoint for normal business integrations:',
+    codexDescription: 'This gateway is compatible with /v1/responses, /responses, and /backend-api/codex/responses, so the Codex CLI example keeps wire_api = "responses".',
+    codexConfigIntro: 'Place the following at the beginning of ~/.codex/config.toml or %userprofile%\\.codex\\config.toml:',
+    authJsonExample: 'auth.json example:',
+    modelsDescription: 'Use the model names shown in the model marketplace as request parameters. Common enabled models include:',
+    billingDescription: 'Charges are deducted from the top-up balance of the account that owns the API key. Each successful request calculates cost from model pricing and token usage, then records the charged amount and request status. You can review details in Console > Usage.',
+    table: {
+      model: 'Model',
+      provider: 'Provider',
+      input: 'Input Price',
+      output: 'Output Price',
+    },
+    errors: [
+      { code: '401', description: 'The API key is missing, invalid, or disabled.' },
+      { code: '402', description: 'The account top-up balance is insufficient.' },
+      { code: '404', description: 'The model name does not exist or is not enabled.' },
+      { code: '429', description: 'Too many requests. Please retry later.' },
+      { code: '500', description: 'Gateway or upstream error. Contact the platform administrator.' },
+    ],
+  },
+  th: {
+    kicker: 'เอกสารสำหรับนักพัฒนา',
+    title: 'เอกสาร Token API Fuel',
+    description: 'ใช้ API Key เดียวเพื่อเรียกใช้โมเดล AI หลักที่เปิดใช้งานบนเกตเวย์นี้ แอปทั่วไปแนะนำให้ใช้รูปแบบ OpenAI Chat Completions ส่วน Codex CLI และ OpenCode ใช้โปรโตคอล Responses ที่รองรับได้',
+    pageToc: 'สารบัญหน้านี้',
+    sections: {
+      quickstart: 'เริ่มต้นอย่างรวดเร็ว',
+      auth: 'การยืนยันตัวตน',
+      models: 'รายการโมเดล',
+      billing: 'การคิดเงินและการใช้งาน',
+      errors: 'ข้อผิดพลาดที่พบบ่อย',
+    },
+    quickstartSteps: [
+      'สมัครบัญชีและเข้าสู่ระบบคอนโซล',
+      'ไปที่ API Keys แล้วสร้างคีย์ที่ใช้งานได้',
+      'ตรวจสอบว่ายอดเติมเงินเพียงพอ',
+      'เรียก /v1/chat/completions ตามตัวอย่างด้านล่าง',
+    ],
+    baseUrl: {
+      current: 'Base URL สำหรับผู้ใช้ในระบบจริง:',
+      sdk: 'OpenAI SDK มักต้องใช้ suffix /v1:',
+      httpsNote: 'ระบบจริงควรใช้ HTTPS ก่อนเสมอ ใช้ HTTP ชั่วคราวได้เฉพาะตอนตรวจสอบใบรับรองหรือพอร์ต 443',
+    },
+    authDescription: 'ทุกคำขอ API ต้องใส่ Bearer Token ใน Header:',
+    chatDescription: 'ใช้ endpoint นี้สำหรับการเชื่อมต่อธุรกิจทั่วไป:',
+    codexDescription: 'เกตเวย์นี้รองรับ /v1/responses, /responses และ /backend-api/codex/responses ดังนั้นตัวอย่าง Codex CLI จึงใช้ wire_api = "responses"',
+    codexConfigIntro: 'ใส่ค่าต่อไปนี้ไว้ตอนต้นของ ~/.codex/config.toml หรือ %userprofile%\\.codex\\config.toml:',
+    authJsonExample: 'ตัวอย่าง auth.json:',
+    modelsDescription: 'ใช้ชื่อโมเดลจากหน้าโมเดลเป็นพารามิเตอร์ในคำขอ โมเดลที่เปิดใช้งานหลักได้แก่:',
+    billingDescription: 'ระบบจะหักค่าใช้จ่ายจากยอดเติมเงินของบัญชีที่เป็นเจ้าของ API Key ทุกคำขอที่สำเร็จจะคำนวณจากราคาโมเดลและจำนวน Token ที่ใช้ พร้อมบันทึกยอดหักและสถานะคำขอ สามารถดูรายละเอียดได้ที่ Console > Usage',
+    table: {
+      model: 'โมเดล',
+      provider: 'ผู้ให้บริการ',
+      input: 'ราคา Input',
+      output: 'ราคา Output',
+    },
+    errors: [
+      { code: '401', description: 'API Key หายไป ไม่ถูกต้อง หรือถูกปิดใช้งาน' },
+      { code: '402', description: 'ยอดเติมเงินในบัญชีไม่เพียงพอ' },
+      { code: '404', description: 'ไม่มีชื่อโมเดลนี้ หรือยังไม่ได้เปิดใช้งาน' },
+      { code: '429', description: 'คำขอถี่เกินไป กรุณาลองใหม่ภายหลัง' },
+      { code: '500', description: 'เกตเวย์หรือ upstream ผิดปกติ กรุณาติดต่อผู้ดูแลระบบ' },
+    ],
+  },
+}
 
 const models = publicModels
-const docNav = [
-  { href: '#quickstart', label: '快速开始' },
+const appStore = useAppStore()
+const { locale } = useI18n()
+
+const copyKey = computed(() => {
+  const current = String(locale.value || '').toLowerCase()
+  if (current.startsWith('zh-tw')) return 'zh-TW'
+  if (current.startsWith('en')) return 'en'
+  if (current.startsWith('th')) return 'th'
+  return 'zh-CN'
+})
+
+const docs = computed(() => DOCS_COPY[copyKey.value])
+
+const docNav = computed(() => [
+  { href: '#quickstart', label: docs.value.sections.quickstart },
   { href: '#base-url', label: 'Base URL' },
-  { href: '#auth', label: '认证方式' },
+  { href: '#auth', label: docs.value.sections.auth },
   { href: '#chat', label: 'Chat Completions' },
   { href: '#codex', label: 'Codex / OpenCode' },
-  { href: '#models', label: '模型列表' },
-  { href: '#billing', label: '计费与用量' },
-  { href: '#errors', label: '常见错误' },
-]
+  { href: '#models', label: docs.value.sections.models },
+  { href: '#billing', label: docs.value.sections.billing },
+  { href: '#errors', label: docs.value.sections.errors },
+])
+
+const gatewayBaseUrl = computed(() => {
+  const base = appStore.apiBaseUrl?.trim() || 'https://tokenapifuel.com'
+  return base.replace(/^http:\/\/tokenapifuel\.com/i, 'https://tokenapifuel.com').replace(/\/+$/, '')
+})
+
+const apiBaseUrl = computed(() => `${gatewayBaseUrl.value}/v1`)
+
+const examplePrompt = computed(() => {
+  if (copyKey.value === 'th') return 'แนะนำตัวเองด้วยประโยคเดียว'
+  if (copyKey.value === 'en') return 'Introduce yourself in one sentence'
+  if (copyKey.value === 'zh-TW') return '用一句話介紹你自己'
+  return '用一句话介绍你自己'
+})
+
+const curlExample = computed(() => `curl ${apiBaseUrl.value}/chat/completions \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer sk-your-api-key" \\
+  -d '{
+    "model": "deepseek-v3.2",
+    "messages": [
+      {"role": "user", "content": "${examplePrompt.value}"}
+    ]
+  }'`)
+
+const pythonExample = computed(() => `from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-your-api-key",
+    base_url="${apiBaseUrl.value}"
+)
+
+response = client.chat.completions.create(
+    model="deepseek-v3.2",
+    messages=[{"role": "user", "content": "${examplePrompt.value}"}]
+)
+
+print(response.choices[0].message.content)`)
+
+const nodeExample = computed(() => `import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "sk-your-api-key",
+  baseURL: "${apiBaseUrl.value}",
+});
+
+const response = await client.chat.completions.create({
+  model: "deepseek-v3.2",
+  messages: [{ role: "user", content: "${examplePrompt.value}" }],
+});
+
+console.log(response.choices[0].message.content);`)
+
+const goExample = computed(() => `config := openai.DefaultConfig("sk-your-api-key")
+config.BaseURL = "${apiBaseUrl.value}"
+client := openai.NewClientWithConfig(config)`)
+
+const codexConfigExample = computed(() => `model_provider = "OpenAI"
+model = "deepseek-v3.2"
+review_model = "deepseek-v3.2"
+disable_response_storage = true
+network_access = "enabled"
+windows_wsl_setup_acknowledged = true
+
+[model_providers.OpenAI]
+name = "OpenAI"
+base_url = "${gatewayBaseUrl.value}"
+wire_api = "responses"
+requires_openai_auth = true`)
+
+function formatTokenPrice(value?: number | null): string {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return '-'
+  return `฿${(value * 1_000_000).toFixed(4)} / 1M Tokens`
+}
 </script>
 
 <style scoped>

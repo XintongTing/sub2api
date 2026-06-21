@@ -35,6 +35,14 @@
           </router-link>
         </nav>
 
+        <router-link
+          v-if="user"
+          to="/purchase"
+          class="hidden shrink-0 whitespace-nowrap rounded-lg border border-primary-200 bg-primary-50 px-3 py-1.5 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-100 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300 dark:hover:bg-primary-500/20 sm:inline-flex"
+        >
+          {{ t('payment.tabTopUp') }}
+        </router-link>
+
         <LocaleSwitcher />
 
         <div

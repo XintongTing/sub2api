@@ -32,6 +32,13 @@
           <Icon v-else name="moon" size="md" />
         </button>
         <router-link
+          v-if="isAuthenticated"
+          to="/purchase"
+          class="hidden rounded-md border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 transition-colors hover:bg-primary-100 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300 dark:hover:bg-primary-500/20 sm:inline-flex"
+        >
+          {{ t('payment.tabTopUp') }}
+        </router-link>
+        <router-link
           :to="isAuthenticated ? '/dashboard' : '/login'"
           class="hidden rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-primary-600/20 transition-colors hover:bg-primary-700 sm:inline-flex"
         >
@@ -65,6 +72,14 @@
         @click="mobileOpen = false"
       >
         {{ isAuthenticated ? t('publicNav.console') : t('publicNav.login') }}
+      </router-link>
+      <router-link
+        v-if="isAuthenticated"
+        to="/purchase"
+        class="mt-2 block rounded-md border border-primary-200 bg-primary-50 px-3 py-2 text-center text-sm font-semibold text-primary-700 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300"
+        @click="mobileOpen = false"
+      >
+        {{ t('payment.tabTopUp') }}
       </router-link>
     </div>
   </header>
