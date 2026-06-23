@@ -126,7 +126,7 @@ const updatedAt = computed(() =>
   isAdminComplianceDocument.value
     ? ''
     : isCustomerRegistrationNotice.value
-      ? '2026-06-08'
+      ? '2026-06-20'
       : settings.value?.login_agreement_updated_at || ''
 )
 const documentTypeLabel = computed(() =>

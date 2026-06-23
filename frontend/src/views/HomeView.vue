@@ -113,7 +113,7 @@
       <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p class="text-sm font-semibold text-primary-700 dark:text-primary-300">Model Marketplace</p>
+            <p class="text-sm font-semibold text-primary-700 dark:text-primary-300">{{ copy.modelMarketplace }}</p>
             <h2 class="mt-2 text-3xl font-bold text-slate-950 dark:text-white">{{ copy.featuredModels }}</h2>
           </div>
           <router-link to="/models" class="text-sm font-semibold text-primary-700 hover:text-primary-800 dark:text-primary-300">
@@ -134,10 +134,10 @@
               </span>
             </div>
             <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-600 dark:text-dark-300">
-              {{ model.description }}
+              {{ modelDescription(model) }}
             </p>
             <div class="mt-4 text-sm text-slate-500 dark:text-dark-400">
-              {{ model.billing }} / {{ model.unit }}
+              {{ modelBillingLabel(model) }} / {{ model.unit }}
             </div>
           </router-link>
         </div>
@@ -175,7 +175,11 @@ import { useI18n } from 'vue-i18n'
 import { useAppStore, useAuthStore } from '@/stores'
 import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import Icon from '@/components/icons/Icon.vue'
-import { publicModels } from '@/constants/publicModels'
+import {
+  localizePublicModelDescription,
+  publicModels,
+  type PublicModelInfo,
+} from '@/constants/publicModels'
 
 const CONTACT_EMAIL = 'service@tokenapifuel.com'
 
@@ -188,6 +192,7 @@ const homeContent = computed(() => appStore.cachedPublicSettings?.home_content |
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const userIdentity = computed(() => authStore.user?.email || authStore.user?.username || 'OneAPI User')
 const models = publicModels
+const currentLocale = computed(() => String(locale.value || 'zh-CN'))
 
 const apiBaseUrl = computed(() => {
   const base = appStore.apiBaseUrl?.trim() || 'https://tokenapifuel.com'
@@ -220,6 +225,9 @@ const localized = {
     billing: '计费',
     usageBased: '按用量扣费',
     featuredModels: '主推模型',
+    modelMarketplace: '模型广场',
+    tokenBilling: '按量计费',
+    requestBilling: '按次计费',
     viewAllModels: '查看全部模型',
     apiDocs: 'API 接入说明',
     terms: '服务条款',
@@ -249,6 +257,9 @@ const localized = {
     billing: 'Billing',
     usageBased: 'Usage based',
     featuredModels: 'Featured models',
+    modelMarketplace: 'Model Marketplace',
+    tokenBilling: 'Token billing',
+    requestBilling: 'Per request',
     viewAllModels: 'View all models',
     apiDocs: 'API guide',
     terms: 'Terms',
@@ -278,6 +289,9 @@ const localized = {
     billing: 'การคิดเงิน',
     usageBased: 'คิดตามการใช้งาน',
     featuredModels: 'โมเดลแนะนำ',
+    modelMarketplace: 'ตลาดโมเดล',
+    tokenBilling: 'คิดเงินตาม Token',
+    requestBilling: 'คิดต่อครั้ง',
     viewAllModels: 'ดูโมเดลทั้งหมด',
     apiDocs: 'คู่มือ API',
     terms: 'เงื่อนไขบริการ',
@@ -301,6 +315,14 @@ type FeatureIcon = 'key' | 'creditCard' | 'chart'
 const featureCards = computed(() =>
   copy.value.featureCards.map(([icon, title, description]) => ({ icon: icon as FeatureIcon, title, description }))
 )
+
+function modelDescription(model: PublicModelInfo): string {
+  return localizePublicModelDescription(model, currentLocale.value)
+}
+
+function modelBillingLabel(model: PublicModelInfo): string {
+  return model.billingMode === 'request' ? copy.value.requestBilling : copy.value.tokenBilling
+}
 
 const contactText = computed(() => appStore.contactInfo || CONTACT_EMAIL)
 const contactHref = computed(() => `mailto:${CONTACT_EMAIL}`)

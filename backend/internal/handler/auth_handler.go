@@ -203,7 +203,7 @@ func (h *AuthHandler) recordRegistrationAgreement(ctx context.Context, userID in
 	}
 	version = strings.TrimSpace(version)
 	if version == "" {
-		version = "customer-registration-notice-2026-06-08"
+		version = "customer-registration-notice-2026-06-20"
 	}
 
 	definitions := []struct {

@@ -164,10 +164,10 @@
               </div>
 
               <p class="mt-4 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-slate-600 dark:text-dark-300">
-                {{ model.description }}
+                {{ modelDescription(model) }}
               </p>
               <div class="mt-4 flex flex-wrap gap-2">
-                <span v-for="tag in model.tags.slice(0, 4)" :key="tag" class="tag-pill">{{ tag }}</span>
+                <span v-for="tag in modelTags(model).slice(0, 4)" :key="tag" class="tag-pill">{{ tag }}</span>
                 <span v-if="model.tags.length > 4" class="tag-pill">+{{ model.tags.length - 4 }}</span>
               </div>
             </article>
@@ -225,7 +225,7 @@
         <div class="space-y-6 p-5">
           <section>
             <h3 class="font-bold">{{ text.basicInfo }}</h3>
-            <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-dark-300">{{ selectedModel.description }}</p>
+            <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-dark-300">{{ modelDescription(selectedModel) }}</p>
           </section>
           <section>
             <h3 class="font-bold">{{ text.apiEndpoint }}</h3>
@@ -256,7 +256,13 @@ import { useI18n } from 'vue-i18n'
 import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { listPublicModels, type PublicModelDTO } from '@/api/publicModels'
-import { publicModels, type PublicModelInfo } from '@/constants/publicModels'
+import {
+  localizePublicModelDescription,
+  localizePublicModelTag,
+  localizePublicModelTags,
+  publicModels,
+  type PublicModelInfo,
+} from '@/constants/publicModels'
 import { useAppStore } from '@/stores'
 
 const COPY = {
@@ -295,6 +301,7 @@ const COPY = {
     basicInfo: '基本信息',
     apiEndpoint: 'API 端点',
     priceSummary: '价格摘要',
+    publicModelApiUnavailable: '公开模型接口暂不可用',
   },
   'zh-TW': {
     filters: '篩選',
@@ -331,6 +338,7 @@ const COPY = {
     basicInfo: '基本資訊',
     apiEndpoint: 'API 端點',
     priceSummary: '價格摘要',
+    publicModelApiUnavailable: '公開模型介面暫不可用',
   },
   en: {
     filters: 'Filters',
@@ -367,6 +375,7 @@ const COPY = {
     basicInfo: 'Basic Info',
     apiEndpoint: 'API Endpoint',
     priceSummary: 'Price Summary',
+    publicModelApiUnavailable: 'Public model API is unavailable',
   },
   th: {
     filters: 'ตัวกรอง',
@@ -374,7 +383,7 @@ const COPY = {
     provider: 'ผู้ให้บริการ',
     billingType: 'การคิดเงิน',
     tags: 'แท็ก',
-    endpointType: 'Endpoint',
+    endpointType: 'ประเภท Endpoint',
     all: 'ทั้งหมด',
     allProviders: 'ผู้ให้บริการทั้งหมด',
     allModels: 'โมเดลทั้งหมด',
@@ -401,8 +410,9 @@ const COPY = {
     emptyDescription: 'ลองเปลี่ยนคำค้นหรือรีเซ็ตตัวกรอง',
     fallbackNotice: ' กำลังแสดงโมเดลสำรองแบบคงที่',
     basicInfo: 'ข้อมูลพื้นฐาน',
-    apiEndpoint: 'API Endpoint',
+    apiEndpoint: 'ปลายทาง API',
     priceSummary: 'สรุปราคา',
+    publicModelApiUnavailable: 'API โมเดลสาธารณะยังไม่พร้อมใช้งาน',
   },
 } as const
 
@@ -457,6 +467,7 @@ const copyKey = computed<CopyKey>(() => {
   return 'zh-CN'
 })
 const text = computed(() => COPY[copyKey.value])
+const activeLocale = computed(() => String(locale.value || 'zh-CN'))
 
 const billingModes = computed(() => [
   { label: text.value.all, value: 'all' },
@@ -475,7 +486,7 @@ const tagOptions = computed(() => [
   { label: text.value.all, value: 'all' },
   ...Array.from(new Set(models.value.flatMap(model => model.tags || []).filter(Boolean)))
     .sort()
-    .map(tag => ({ label: tag, value: tag })),
+    .map(tag => ({ label: localizePublicModelTag(tag, activeLocale.value), value: tag })),
 ])
 
 const endpointTypes = computed(() => [
@@ -493,7 +504,9 @@ const apiBaseUrl = computed(() => {
 const filteredModels = computed(() => {
   const keyword = search.value.trim().toLowerCase()
   return models.value.filter((model) => {
-    const matchesSearch = !keyword || [model.name, model.displayName, model.provider, model.description, ...model.tags]
+    const localizedDescription = modelDescription(model)
+    const localizedTags = modelTags(model)
+    const matchesSearch = !keyword || [model.name, model.displayName, model.provider, model.description, localizedDescription, ...model.tags, ...localizedTags]
       .filter(Boolean)
       .some(value => value.toLowerCase().includes(keyword))
     const matchesProvider = selectedProvider.value === 'all' || model.provider === selectedProvider.value
@@ -517,7 +530,7 @@ onMounted(async () => {
       models.value = remote.map(mapRemoteModel)
     }
   } catch (error) {
-    loadError.value = error instanceof Error ? error.message : 'Public model API is unavailable'
+    loadError.value = error instanceof Error ? error.message : text.value.publicModelApiUnavailable
     models.value = publicModels
   } finally {
     isLoading.value = false
@@ -543,6 +556,7 @@ function mapRemoteModel(model: PublicModelDTO): PublicModelInfo {
     perRequestPrice: model.per_request_price ?? known?.perRequestPrice ?? null,
     unit: model.unit || known?.unit || '1M Tokens',
     endpointTypes: model.endpoint_types?.length ? model.endpoint_types : (known?.endpointTypes || ['openai:/v1/chat/completions']),
+    descriptionI18n: known?.descriptionI18n,
     description: model.description || known?.description || '',
     tags: model.tags?.length ? model.tags : (known?.tags || []),
   }
@@ -558,6 +572,14 @@ function resetFilters(): void {
 
 function billingLabel(mode: string): string {
   return mode === 'request' ? text.value.requestBilling : text.value.tokenBilling
+}
+
+function modelDescription(model: PublicModelInfo): string {
+  return localizePublicModelDescription(model, activeLocale.value)
+}
+
+function modelTags(model: PublicModelInfo): string[] {
+  return localizePublicModelTags(model.tags || [], activeLocale.value)
 }
 
 function formatTokenPrice(value?: number | null): string {

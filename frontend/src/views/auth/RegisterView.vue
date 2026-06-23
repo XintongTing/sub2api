@@ -949,7 +949,7 @@ async function handleRegister(): Promise<void> {
           promo_code: formData.promo_code || undefined,
           invitation_code: formData.invitation_code || undefined,
           agreement_accepted: true,
-          agreement_version: 'customer-registration-notice-2026-06-08',
+          agreement_version: 'customer-registration-notice-2026-06-20',
           ...(affCode ? { aff_code: affCode } : {})
         })
       )
@@ -967,7 +967,7 @@ async function handleRegister(): Promise<void> {
       promo_code: formData.promo_code || undefined,
       invitation_code: formData.invitation_code || undefined,
       agreement_accepted: true,
-      agreement_version: 'customer-registration-notice-2026-06-08',
+      agreement_version: 'customer-registration-notice-2026-06-20',
       ...(affCode ? { aff_code: affCode } : {})
     })
     clearAffiliateReferralCode()
