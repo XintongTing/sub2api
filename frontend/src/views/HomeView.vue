@@ -88,7 +88,7 @@
   -H "Authorization: Bearer sk-your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "DeepSeek-V3",
+    "model": "deepseek-v4-flash",
     "messages": [{"role":"user","content":"Hello"}]
   }'</code></pre>
               <div class="mt-6 grid gap-3 sm:grid-cols-3">
@@ -176,6 +176,7 @@ import { useAppStore, useAuthStore } from '@/stores'
 import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import Icon from '@/components/icons/Icon.vue'
 import {
+  dedupePublicModels,
   localizePublicModelDescription,
   publicModels,
   type PublicModelInfo,
@@ -191,7 +192,7 @@ const siteName = computed(() => appStore.siteName || 'OneAPI')
 const homeContent = computed(() => appStore.cachedPublicSettings?.home_content || '')
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const userIdentity = computed(() => authStore.user?.email || authStore.user?.username || 'OneAPI User')
-const models = publicModels
+const models = dedupePublicModels(publicModels).filter(model => model.endpointTypes.includes('openai:/v1/chat/completions')).slice(0, 5)
 const currentLocale = computed(() => String(locale.value || 'zh-CN'))
 
 const apiBaseUrl = computed(() => {

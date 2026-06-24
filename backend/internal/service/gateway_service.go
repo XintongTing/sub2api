@@ -10034,10 +10034,22 @@ func (s *GatewayService) GetAvailableModels(ctx context.Context, groupID *int64,
 		return nil
 	}
 
-	// Convert to slice
+	// Convert to a canonical, de-duplicated slice. Huosanyun legacy aliases are
+	// kept for request compatibility in channel mapping, but /v1/models should
+	// expose upstream model IDs and hide the customer-excluded defaults.
+	canonicalSeen := make(map[string]struct{}, len(modelSet))
 	models := make([]string, 0, len(modelSet))
 	for model := range modelSet {
-		models = append(models, model)
+		canonical := CanonicalHuosanyunModelName(model)
+		if canonical == "" || IsExcludedHuosanyunModel(model) || IsExcludedHuosanyunModel(canonical) {
+			continue
+		}
+		key := strings.ToLower(canonical)
+		if _, ok := canonicalSeen[key]; ok {
+			continue
+		}
+		canonicalSeen[key] = struct{}{}
+		models = append(models, canonical)
 	}
 	sort.Strings(models)
 

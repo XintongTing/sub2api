@@ -166,7 +166,7 @@
 <script setup lang="ts">
 import { computed, defineComponent, h, reactive, ref } from 'vue'
 import Icon from '@/components/icons/Icon.vue'
-import { publicModels } from '@/constants/publicModels'
+import { dedupePublicModels, publicModels } from '@/constants/publicModels'
 
 interface ChatMessage {
   id: number
@@ -230,10 +230,10 @@ const UsageCard = defineComponent({
   },
 })
 
-const businessModels = publicModels
+const businessModels = dedupePublicModels(publicModels).filter(model => model.endpointTypes.includes('openai:/v1/chat/completions'))
 const apiKey = ref('')
 const group = ref('default')
-const selectedModel = ref(businessModels.find(model => model.displayName === 'DeepSeek-V3')?.displayName || businessModels[0]?.displayName || 'DeepSeek-V3')
+const selectedModel = ref(businessModels.find(model => model.displayName === 'deepseek-v4-flash')?.displayName || businessModels[0]?.displayName || 'deepseek-v4-flash')
 const customRequestEnabled = ref(false)
 const customRequestJson = ref('{\n  "max_tokens": 512\n}')
 const imageUrlEnabled = ref(false)

@@ -123,6 +123,8 @@ type channelModelPricingResponse struct {
 	ImageOutputPrice *float64                  `json:"image_output_price"`
 	PerRequestPrice  *float64                  `json:"per_request_price"`
 	Intervals        []pricingIntervalResponse `json:"intervals"`
+	CreatedAt        string                    `json:"created_at"`
+	UpdatedAt        string                    `json:"updated_at"`
 }
 
 type pricingIntervalResponse struct {
@@ -230,6 +232,8 @@ func pricingToResponse(p *service.ChannelModelPricing) channelModelPricingRespon
 		ImageOutputPrice: p.ImageOutputPrice,
 		PerRequestPrice:  p.PerRequestPrice,
 		Intervals:        intervals,
+		CreatedAt:        p.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:        p.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 

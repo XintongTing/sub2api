@@ -193,37 +193,55 @@ func (h *AvailableChannelHandler) ListPublicModels(c *gin.Context) {
 		return
 	}
 
-	allowedModels := publicBusinessModelSet()
 	byName := make(map[string]publicModelPricing)
+	addModel := func(rawName, platform, channelName string, pricing *service.ChannelModelPricing) {
+		name := service.CanonicalHuosanyunModelName(rawName)
+		if name == "" || strings.Contains(name, "*") || service.IsExcludedHuosanyunModel(name) {
+			return
+		}
+		key := strings.ToLower(name)
+		item, exists := byName[key]
+		if !exists {
+			item = publicModelPricing{
+				Name:          name,
+				Provider:      publicModelProvider(name, platform, channelName),
+				BillingMode:   string(service.BillingModeToken),
+				Currency:      "THB",
+				Unit:          "1M Tokens",
+				EndpointTypes: publicModelEndpointTypes(name),
+				Tags:          publicModelTags(name),
+				Description:   publicModelDescription(name),
+			}
+		}
+		mergePublicPricing(&item, pricing)
+		byName[key] = item
+	}
+
 	for _, ch := range channels {
 		if ch.Status != service.StatusActive {
 			continue
 		}
 		for _, model := range ch.SupportedModels {
-			name := strings.TrimSpace(model.Name)
-			if name == "" {
-				continue
-			}
-			key := strings.ToLower(name)
-			if _, ok := allowedModels[key]; !ok {
-				continue
-			}
-			item, exists := byName[key]
-			if !exists {
-				item = publicModelPricing{
-					Name:          name,
-					Provider:      publicModelProvider(name, model.Platform, ch.Name),
-					BillingMode:   string(service.BillingModeToken),
-					Currency:      "THB",
-					Unit:          "1M Tokens",
-					EndpointTypes: publicModelEndpointTypes(name),
-					Tags:          publicModelTags(name),
-					Description:   publicModelDescription(name),
-				}
-			}
-			mergePublicPricing(&item, model.Pricing)
-			byName[key] = item
+			addModel(model.Name, model.Platform, ch.Name, model.Pricing)
 		}
+	}
+
+	// Catalog entries are only a non-secret fallback for models that do not exist
+	// in channel pricing yet. Do not fill blank channel prices from static data;
+	// an operator may intentionally leave a manual price empty.
+	for _, pricing := range service.HuosanyunCatalogPricing() {
+		if len(pricing.Models) == 0 {
+			continue
+		}
+		name := service.CanonicalHuosanyunModelName(pricing.Models[0])
+		if name == "" || service.IsExcludedHuosanyunModel(name) {
+			continue
+		}
+		if _, exists := byName[strings.ToLower(name)]; exists {
+			continue
+		}
+		pricingCopy := pricing.Clone()
+		addModel(name, pricing.Platform, "Huosanyun", &pricingCopy)
 	}
 
 	out := make([]publicModelPricing, 0, len(byName))
@@ -239,18 +257,6 @@ func (h *AvailableChannelHandler) ListPublicModels(c *gin.Context) {
 
 	response.Success(c, out)
 }
-
-func publicBusinessModelSet() map[string]struct{} {
-	set := make(map[string]struct{})
-	for _, spec := range service.DefaultHuosanyunCatalog() {
-		set[strings.ToLower(strings.TrimSpace(spec.Model))] = struct{}{}
-		for _, alias := range spec.Aliases {
-			set[strings.ToLower(strings.TrimSpace(alias))] = struct{}{}
-		}
-	}
-	return set
-}
-
 // buildPlatformSections 把一个渠道按 visibleGroups 的平台集合拆成有序的 section 列表：
 // 每个 section 对应一个平台，只包含该平台的 groups 和 supported_models。
 // 输出按 platform 字母序稳定排序，便于前端等效比较与回归测试。
@@ -448,7 +454,10 @@ func publicModelProvider(modelName, platform, channelName string) string {
 
 func publicModelTags(modelName string) []string {
 	name := strings.ToLower(modelName)
-	tags := []string{"OpenAI-compatible", "Token billing"}
+	tags := []string{"Token billing"}
+	if !strings.Contains(name, "seedance") && !strings.Contains(name, "kling") {
+		tags = append(tags, "OpenAI-compatible")
+	}
 	switch {
 	case strings.Contains(name, "deepseek"):
 		tags = append(tags, "Reasoning", "Coding")
@@ -460,8 +469,8 @@ func publicModelTags(modelName string) []string {
 		tags = append(tags, "Long context", "Office analysis")
 	case strings.Contains(name, "kling"):
 		tags = append(tags, "Video generation", "Per request")
-	case strings.Contains(name, "doubao"):
-		tags = append(tags, "Multimodal", "Content generation")
+	case strings.Contains(name, "doubao") || strings.Contains(name, "seedance"):
+		tags = append(tags, "Video endpoint", "Content generation")
 	case strings.Contains(name, "minimax"):
 		tags = append(tags, "Text generation", "Long-form writing")
 	default:

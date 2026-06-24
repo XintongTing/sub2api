@@ -742,12 +742,13 @@ const adminNavItems = computed((): NavItem[] => {
     { path: '/admin/users?focus=balance', label: '余额/积分管理', icon: CreditCardIcon, hideInSimpleMode: true },
     {
       path: '/admin/channels',
-      label: '渠道与模型价格',
+      label: '模型与价格',
       icon: ChannelIcon,
       hideInSimpleMode: true,
       expandOnly: true,
       children: [
-        { path: '/admin/channels/pricing', label: '渠道与模型价格', icon: PriceTagIcon },
+        { path: '/admin/model-pricing', label: '模型价格设置', icon: PriceTagIcon },
+        { path: '/admin/channels/pricing', label: '高级渠道配置', icon: ChannelIcon },
         { path: '/admin/channels/monitor', label: '渠道监控', icon: SignalIcon, featureFlag: flagChannelMonitor },
       ],
     },
@@ -759,7 +760,7 @@ const adminNavItems = computed((): NavItem[] => {
       expandOnly: true,
       featureFlag: flagAdminPayment,
       children: [
-        { path: '/admin/orders/plans', label: '套餐管理', icon: CreditCardIcon },
+        { path: '/admin/orders/plans', label: '充值金额设置', icon: CreditCardIcon },
         { path: '/admin/orders', label: '订单管理', icon: OrderIcon },
         { path: '/admin/orders/dashboard', label: '支付数据', icon: ChartIcon },
       ],

@@ -33,6 +33,8 @@ export interface ChannelModelPricing {
   image_output_price: number | null
   per_request_price: number | null
   intervals: PricingInterval[]
+  created_at?: string
+  updated_at?: string
 }
 
 export interface AccountStatsPricingRule {

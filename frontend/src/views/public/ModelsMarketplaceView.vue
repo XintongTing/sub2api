@@ -230,8 +230,8 @@
           <section>
             <h3 class="font-bold">{{ text.apiEndpoint }}</h3>
             <div class="mt-2 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm dark:border-dark-800 dark:bg-dark-950">
-              <div class="font-mono">POST {{ apiBaseUrl }}/chat/completions</div>
-              <div class="mt-1 text-slate-500">OpenAI compatible / model = {{ selectedModel.name }}</div>
+              <div class="font-mono">{{ endpointDisplay(selectedModel) }}</div>
+              <div class="mt-1 text-slate-500">{{ endpointDescription(selectedModel) }} / model = {{ selectedModel.name }}</div>
             </div>
           </section>
           <section>
@@ -257,6 +257,7 @@ import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { listPublicModels, type PublicModelDTO } from '@/api/publicModels'
 import {
+  dedupePublicModels,
   localizePublicModelDescription,
   localizePublicModelTag,
   localizePublicModelTags,
@@ -447,7 +448,7 @@ const route = useRoute()
 const { locale } = useI18n()
 const appStore = useAppStore()
 
-const models = ref<PublicModelInfo[]>(publicModels)
+const models = ref<PublicModelInfo[]>(dedupePublicModels(publicModels))
 const isLoading = ref(false)
 const loadError = ref('')
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
@@ -527,11 +528,11 @@ onMounted(async () => {
   try {
     const remote = await listPublicModels()
     if (remote.length > 0) {
-      models.value = remote.map(mapRemoteModel)
+      models.value = dedupePublicModels(remote.map(mapRemoteModel))
     }
   } catch (error) {
     loadError.value = error instanceof Error ? error.message : text.value.publicModelApiUnavailable
-    models.value = publicModels
+    models.value = dedupePublicModels(publicModels)
   } finally {
     isLoading.value = false
   }
@@ -542,18 +543,18 @@ function mapRemoteModel(model: PublicModelDTO): PublicModelInfo {
   return {
     id: model.name,
     name: model.name,
-    displayName: known?.displayName || model.name,
+    displayName: model.name,
     provider: model.provider || known?.provider || 'OneAPI',
     upstreamModel: model.name,
     type: known?.type || 'Chat',
     billing: model.billing_mode === 'request' ? text.value.requestBilling : text.value.tokenBilling,
     billingMode: model.billing_mode || known?.billingMode || 'token',
     currency: model.currency || known?.currency || 'THB',
-    inputPrice: model.input_price ?? known?.inputPrice ?? null,
-    outputPrice: model.output_price ?? known?.outputPrice ?? null,
-    cacheReadPrice: model.cache_read_price ?? known?.cacheReadPrice ?? null,
-    cacheWritePrice: model.cache_write_price ?? known?.cacheWritePrice ?? null,
-    perRequestPrice: model.per_request_price ?? known?.perRequestPrice ?? null,
+    inputPrice: model.input_price ?? null,
+    outputPrice: model.output_price ?? null,
+    cacheReadPrice: model.cache_read_price ?? null,
+    cacheWritePrice: model.cache_write_price ?? null,
+    perRequestPrice: model.per_request_price ?? null,
     unit: model.unit || known?.unit || '1M Tokens',
     endpointTypes: model.endpoint_types?.length ? model.endpoint_types : (known?.endpointTypes || ['openai:/v1/chat/completions']),
     descriptionI18n: known?.descriptionI18n,
@@ -580,6 +581,19 @@ function modelDescription(model: PublicModelInfo): string {
 
 function modelTags(model: PublicModelInfo): string[] {
   return localizePublicModelTags(model.tags || [], activeLocale.value)
+}
+
+function endpointDisplay(model: PublicModelInfo): string {
+  const endpoint = model.endpointTypes[0] || 'openai:/v1/chat/completions'
+  if (endpoint.startsWith('openai:')) {
+    return `POST ${apiBaseUrl.value}${endpoint.replace(/^openai:\/v1/, '')}`
+  }
+  return endpoint
+}
+
+function endpointDescription(model: PublicModelInfo): string {
+  const endpoint = model.endpointTypes[0] || ''
+  return endpoint.startsWith('openai:') ? 'OpenAI compatible' : 'Special endpoint'
 }
 
 function formatTokenPrice(value?: number | null): string {

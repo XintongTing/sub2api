@@ -141,7 +141,7 @@ Content-Type: application/json</code></pre>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import PublicTopNav from '@/components/public/PublicTopNav.vue'
-import { publicModels } from '@/constants/publicModels'
+import { dedupePublicModels, publicModels } from '@/constants/publicModels'
 import { useAppStore } from '@/stores'
 
 type DocsCopy = {
@@ -351,7 +351,7 @@ const DOCS_COPY: Record<string, DocsCopy> = {
   },
 }
 
-const models = publicModels
+const models = dedupePublicModels(publicModels)
 const appStore = useAppStore()
 const { locale } = useI18n()
 
@@ -418,7 +418,7 @@ const curlExample = computed(() => `curl ${apiBaseUrl.value}/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer sk-your-api-key" \\
   -d '{
-    "model": "deepseek-v3.2",
+    "model": "deepseek-v4-flash",
     "messages": [
       {"role": "user", "content": "${examplePrompt.value}"}
     ]
@@ -432,7 +432,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="deepseek-v3.2",
+    model="deepseek-v4-flash",
     messages=[{"role": "user", "content": "${examplePrompt.value}"}]
 )
 
@@ -446,7 +446,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: "deepseek-v3.2",
+  model: "deepseek-v4-flash",
   messages: [{ role: "user", content: "${examplePrompt.value}" }],
 });
 
@@ -457,8 +457,8 @@ config.BaseURL = "${apiBaseUrl.value}"
 client := openai.NewClientWithConfig(config)`)
 
 const codexConfigExample = computed(() => `model_provider = "OpenAI"
-model = "deepseek-v3.2"
-review_model = "deepseek-v3.2"
+model = "deepseek-v4-flash"
+review_model = "deepseek-v4-flash"
 disable_response_storage = true
 network_access = "enabled"
 windows_wsl_setup_acknowledged = true
