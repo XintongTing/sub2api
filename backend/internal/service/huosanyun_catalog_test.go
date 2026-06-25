@@ -1,6 +1,9 @@
 package service
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestDefaultHuosanyunCatalogContainsAllowedRealIDsAndAliases(t *testing.T) {
 	catalog := DefaultHuosanyunCatalog()
@@ -40,6 +43,21 @@ func TestDefaultHuosanyunCatalogContainsAllowedRealIDsAndAliases(t *testing.T) {
 	}
 }
 
+func TestHuosanyunSeedanceCatalogIsPublicButNotChatCallableByDefault(t *testing.T) {
+	foundSeedance := false
+	for _, pricing := range HuosanyunCatalogPricing() {
+		if len(pricing.Models) == 0 || !strings.Contains(strings.ToLower(pricing.Models[0]), "seedance") {
+			continue
+		}
+		foundSeedance = true
+		if pricing.IsAPIEnabled() {
+			t.Fatalf("seedance model %s should not be exposed through chat completions by default", pricing.Models[0])
+		}
+	}
+	if !foundSeedance {
+		t.Fatalf("expected seedance catalog entries")
+	}
+}
 func TestMergeHuosanyunCatalogPreservesCustomPricingWithoutOverwrite(t *testing.T) {
 	customPrice := 0.123
 	existing := []ChannelModelPricing{

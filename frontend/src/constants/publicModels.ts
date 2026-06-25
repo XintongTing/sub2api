@@ -29,39 +29,39 @@ export const ALL_PROVIDERS_LABEL = 'All providers'
 const descriptions: Record<string, Partial<Record<PublicModelLocale, string>>> = {
   deepseek: {
     'zh-CN': 'DeepSeek 模型，适合通用对话、复杂推理、代码生成和企业文本处理。',
-    'zh-TW': 'DeepSeek 模型，適合通用對話、複雜推理、程式碼生成和企業文字處理。',
+    'zh-TW': 'DeepSeek 模型，適合通用對話、複雜推理、程式碼生成和企業文本處理。',
     en: 'DeepSeek model for general chat, complex reasoning, code generation, and enterprise text processing.',
-    th: 'โมเดล DeepSeek สำหรับแชททั่วไป การให้เหตุผลซับซ้อน การสร้างโค้ด และการประมวลผลข้อความองค์กร',
+    th: 'โมเดล DeepSeek สำหรับแชตทั่วไป การให้เหตุผลที่ซับซ้อน การเขียนโค้ด และงานประมวลผลข้อความระดับองค์กร',
   },
   glm: {
     'zh-CN': 'GLM 模型，适合文本生成、工具调用、办公自动化和结构化任务。',
-    'zh-TW': 'GLM 模型，適合文字生成、工具調用、辦公自動化和結構化任務。',
+    'zh-TW': 'GLM 模型，適合文本生成、工具調用、辦公自動化和結構化任務。',
     en: 'GLM model for text generation, tool use, office automation, and structured tasks.',
-    th: 'โมเดล GLM สำหรับการสร้างข้อความ การใช้เครื่องมือ งานสำนักงานอัตโนมัติ และงานแบบมีโครงสร้าง',
+    th: 'โมเดล GLM สำหรับสร้างข้อความ เรียกใช้เครื่องมือ งานอัตโนมัติในสำนักงาน และงานแบบมีโครงสร้าง',
   },
   kimi: {
     'zh-CN': 'Kimi 模型，适合长上下文理解、检索增强、办公分析和 Agent 任务。',
     'zh-TW': 'Kimi 模型，適合長上下文理解、檢索增強、辦公分析和 Agent 任務。',
     en: 'Kimi model for long-context understanding, retrieval-augmented workflows, office analysis, and agent tasks.',
-    th: 'โมเดล Kimi สำหรับบริบทยาว เวิร์กโฟลว์ที่ใช้การค้นคืน การวิเคราะห์เอกสาร และงาน Agent',
+    th: 'โมเดล Kimi สำหรับบริบทยาว เวิร์กโฟลว์แบบเสริมการค้นคืน การวิเคราะห์งานเอกสาร และงาน Agent',
   },
   qwen: {
     'zh-CN': 'Qwen 模型，适合日常对话、内容创作、知识问答和低延迟业务调用。',
     'zh-TW': 'Qwen 模型，適合日常對話、內容創作、知識問答和低延遲業務調用。',
     en: 'Qwen model for daily chat, content creation, knowledge Q&A, and low-latency business calls.',
-    th: 'โมเดล Qwen สำหรับแชทประจำวัน การสร้างคอนเทนต์ ถามตอบความรู้ และงานธุรกิจที่ต้องการความหน่วงต่ำ',
+    th: 'โมเดล Qwen สำหรับแชตประจำวัน การสร้างคอนเทนต์ ถามตอบความรู้ และงานที่ต้องการความหน่วงต่ำ',
   },
   minimax: {
     'zh-CN': 'MiniMax 模型，适合通用对话、长文本写作、创意内容生成和业务集成。',
-    'zh-TW': 'MiniMax 模型，適合通用對話、長文寫作、創意內容生成和業務整合。',
+    'zh-TW': 'MiniMax 模型，適合通用對話、長文本寫作、創意內容生成和業務整合。',
     en: 'MiniMax model for general chat, long-form writing, creative content generation, and business integration.',
-    th: 'โมเดล MiniMax สำหรับแชททั่วไป งานเขียนยาว การสร้างคอนเทนต์เชิงสร้างสรรค์ และการเชื่อมต่อธุรกิจ',
+    th: 'โมเดล MiniMax สำหรับแชตทั่วไป การเขียนข้อความยาว การสร้างคอนเทนต์เชิงสร้างสรรค์ และการเชื่อมต่อธุรกิจ',
   },
   seedance: {
-    'zh-CN': 'Doubao Seedance 模型，按上游端点能力用于视频或多模态内容生成场景。',
-    'zh-TW': 'Doubao Seedance 模型，依上游端點能力用於影片或多模態內容生成場景。',
+    'zh-CN': 'Doubao Seedance 模型，面向视频或多模态内容生成场景，具体能力取决于上游端点。',
+    'zh-TW': 'Doubao Seedance 模型，面向影片或多模態內容生成場景，具體能力取決於上游端點。',
     en: 'Doubao Seedance model for video or multimodal content generation, depending on the upstream endpoint capability.',
-    th: 'โมเดล Doubao Seedance สำหรับงานวิดีโอหรือคอนเทนต์หลายรูปแบบ ตามความสามารถของ endpoint upstream',
+    th: 'โมเดล Doubao Seedance สำหรับสร้างวิดีโอหรือคอนเทนต์หลายรูปแบบ โดยขึ้นอยู่กับความสามารถของปลายทางต้นทาง',
   },
 }
 
@@ -272,7 +272,7 @@ export const publicModels: PublicModelInfo[] = [
     endpointTypes: ['openai:/v1/chat/completions'],
     description: descriptionFor('qwen'),
     descriptionI18n: descriptions.qwen,
-    tags: ['OpenAI-compatible', 'Token billing', 'Fast response', 'General chat'],
+    tags: ['OpenAI-compatible', 'Token billing', 'General chat', 'Fast response'],
   },
   {
     id: 'qwen3.6-plus',
@@ -290,86 +290,154 @@ export const publicModels: PublicModelInfo[] = [
     endpointTypes: ['openai:/v1/chat/completions'],
     description: descriptionFor('qwen'),
     descriptionI18n: descriptions.qwen,
-    tags: ['OpenAI-compatible', 'Token billing', 'Fast response', 'General chat'],
+    tags: ['OpenAI-compatible', 'Token billing', 'General chat', 'Reasoning'],
   },
 ]
 
-const tagLabels: Record<string, Record<PublicModelLocale, string>> = {
-  'Fast response': { 'zh-CN': '快速响应', 'zh-TW': '快速回應', en: 'Fast response', th: 'ตอบสนองรวดเร็ว' },
-  'General chat': { 'zh-CN': '通用对话', 'zh-TW': '通用對話', en: 'General chat', th: 'สนทนาทั่วไป' },
-  'Cost effective': { 'zh-CN': '高性价比', 'zh-TW': '高性價比', en: 'Cost effective', th: 'คุ้มค่า' },
-  Reasoning: { 'zh-CN': '推理', 'zh-TW': '推理', en: 'Reasoning', th: 'การให้เหตุผล' },
-  Coding: { 'zh-CN': '代码', 'zh-TW': '程式碼', en: 'Coding', th: 'เขียนโค้ด' },
-  'Text generation': { 'zh-CN': '文本生成', 'zh-TW': '文字生成', en: 'Text generation', th: 'สร้างข้อความ' },
-  'Office automation': { 'zh-CN': '办公自动化', 'zh-TW': '辦公自動化', en: 'Office automation', th: 'งานสำนักงานอัตโนมัติ' },
-  'Office analysis': { 'zh-CN': '办公分析', 'zh-TW': '辦公分析', en: 'Office analysis', th: 'วิเคราะห์งานเอกสาร' },
-  Lightweight: { 'zh-CN': '轻量', 'zh-TW': '輕量', en: 'Lightweight', th: 'เบาและเร็ว' },
-  'Advanced reasoning': { 'zh-CN': '高级推理', 'zh-TW': '高階推理', en: 'Advanced reasoning', th: 'เหตุผลขั้นสูง' },
-  'Tool use': { 'zh-CN': '工具调用', 'zh-TW': '工具調用', en: 'Tool use', th: 'ใช้เครื่องมือ' },
-  'Business workflows': { 'zh-CN': '业务流程', 'zh-TW': '業務流程', en: 'Business workflows', th: 'เวิร์กโฟลว์ธุรกิจ' },
-  'Pro capability': { 'zh-CN': '专业能力', 'zh-TW': '專業能力', en: 'Pro capability', th: 'ความสามารถระดับโปร' },
-  'Complex reasoning': { 'zh-CN': '复杂推理', 'zh-TW': '複雜推理', en: 'Complex reasoning', th: 'เหตุผลซับซ้อน' },
-  'Long context': { 'zh-CN': '长上下文', 'zh-TW': '長上下文', en: 'Long context', th: 'บริบทยาว' },
-  'Long-form writing': { 'zh-CN': '长文写作', 'zh-TW': '長文寫作', en: 'Long-form writing', th: 'งานเขียนยาว' },
-  'OpenAI-compatible': { 'zh-CN': 'OpenAI 兼容', 'zh-TW': 'OpenAI 相容', en: 'OpenAI-compatible', th: 'รองรับ OpenAI' },
-  'Token billing': { 'zh-CN': '按量计费', 'zh-TW': '按量計費', en: 'Token billing', th: 'คิดเงินตาม Token' },
-  'Video endpoint': { 'zh-CN': '视频端点', 'zh-TW': '影片端點', en: 'Video endpoint', th: 'Endpoint วิดีโอ' },
-  'Content generation': { 'zh-CN': '内容生成', 'zh-TW': '內容生成', en: 'Content generation', th: 'สร้างคอนเทนต์' },
-  Multimodal: { 'zh-CN': '多模态', 'zh-TW': '多模態', en: 'Multimodal', th: 'หลายรูปแบบ' },
-  'General model': { 'zh-CN': '通用模型', 'zh-TW': '通用模型', en: 'General model', th: 'โมเดลทั่วไป' },
-}
+const aliasToCanonical = new Map<string, string>([
+  ['deepseek-pro', 'deepseek-v4-pro'],
+  ['glm4-air', 'glm-4.7'],
+  ['glm4-plus', 'glm-5'],
+  ['qwen3-turbo', 'qwen-plus'],
+])
 
-const aliasToCanonical: Record<string, string> = {
-  'qwen3-turbo': 'qwen-plus',
-  'deepseek-pro': 'deepseek-v4-pro',
-  'glm4-air': 'glm-4.7',
-  'glm4-plus': 'glm-5',
+export function normalizePublicModelLocale(locale: string): PublicModelLocale {
+  const value = locale.toLowerCase()
+  if (value.startsWith('zh-tw')) return 'zh-TW'
+  if (value.startsWith('en')) return 'en'
+  if (value.startsWith('th')) return 'th'
+  return 'zh-CN'
 }
 
 export function canonicalPublicModelName(name: string): string {
-  const trimmed = name.trim()
+  const trimmed = String(name || '').trim()
   if (!trimmed) return ''
-  return aliasToCanonical[trimmed.toLowerCase()] || trimmed
+  return aliasToCanonical.get(trimmed.toLowerCase()) || trimmed
 }
 
 export function isPublicModelExcluded(name: string): boolean {
-  const normalized = name.trim().toLowerCase()
+  const normalized = String(name || '').trim().toLowerCase()
   return normalized === 'deepseek-v3.2' || normalized === 'deepseek-v3' || normalized.startsWith('kling')
 }
 
 export function dedupePublicModels(models: PublicModelInfo[]): PublicModelInfo[] {
   const seen = new Set<string>()
-  const out: PublicModelInfo[] = []
+  const output: PublicModelInfo[] = []
+
   for (const model of models) {
-    const canonical = canonicalPublicModelName(model.name || model.id || model.displayName)
-    if (!canonical || isPublicModelExcluded(canonical) || isPublicModelExcluded(model.name) || isPublicModelExcluded(model.displayName)) {
-      continue
-    }
-    const key = canonical.toLowerCase()
+    const rawValues = [model.id, model.name, model.displayName, model.upstreamModel].filter(Boolean) as string[]
+    if (rawValues.some(isPublicModelExcluded)) continue
+
+    const canonicalName = canonicalPublicModelName(model.name || model.id || model.displayName)
+    if (!canonicalName || isPublicModelExcluded(canonicalName)) continue
+
+    const key = canonicalName.toLowerCase()
     if (seen.has(key)) continue
     seen.add(key)
-    out.push({
+
+    output.push({
       ...model,
-      id: canonical,
-      name: canonical,
-      displayName: canonical,
-      upstreamModel: canonical,
+      id: canonicalName,
+      name: canonicalName,
+      displayName: canonicalName,
+      upstreamModel: canonicalName,
+      currency: model.currency || 'THB',
+      tags: Array.from(new Set(model.tags || [])),
     })
   }
-  return out
+
+  return output.sort((a, b) => a.name.localeCompare(b.name))
 }
 
-export function normalizePublicModelLocale(locale: string): PublicModelLocale {
-  if (locale.startsWith('zh-TW')) return 'zh-TW'
-  if (locale.startsWith('en')) return 'en'
-  if (locale.startsWith('th')) return 'th'
-  return 'zh-CN'
+export function findPublicModelByName(name: string): PublicModelInfo | undefined {
+  const canonicalName = canonicalPublicModelName(name).toLowerCase()
+  return publicModels.find(model => model.name.toLowerCase() === canonicalName)
 }
 
 export function localizePublicModelDescription(model: PublicModelInfo, locale: string): string {
   const key = normalizePublicModelLocale(locale)
-  const known = findPublicModelByName(model.name) || findPublicModelByName(model.displayName)
-  return model.descriptionI18n?.[key] || known?.descriptionI18n?.[key] || model.description
+  return model.descriptionI18n?.[key] || model.descriptionI18n?.en || model.description || ''
+}
+
+const tagLabels: Record<string, Partial<Record<PublicModelLocale, string>>> = {
+  'OpenAI-compatible': {
+    'zh-CN': 'OpenAI 兼容',
+    'zh-TW': 'OpenAI 相容',
+    en: 'OpenAI-compatible',
+    th: 'รองรับ OpenAI',
+  },
+  'Token billing': {
+    'zh-CN': '按量计费',
+    'zh-TW': '按量計費',
+    en: 'Token billing',
+    th: 'คิดตามโทเคน',
+  },
+  'Reasoning': {
+    'zh-CN': '推理',
+    'zh-TW': '推理',
+    en: 'Reasoning',
+    th: 'เหตุผล',
+  },
+  'Fast response': {
+    'zh-CN': '快速响应',
+    'zh-TW': '快速回應',
+    en: 'Fast response',
+    th: 'ตอบสนองเร็ว',
+  },
+  'Coding': {
+    'zh-CN': '代码',
+    'zh-TW': '程式碼',
+    en: 'Coding',
+    th: 'เขียนโค้ด',
+  },
+  'Text generation': {
+    'zh-CN': '文本生成',
+    'zh-TW': '文本生成',
+    en: 'Text generation',
+    th: 'สร้างข้อความ',
+  },
+  'Tool use': {
+    'zh-CN': '工具调用',
+    'zh-TW': '工具調用',
+    en: 'Tool use',
+    th: 'ใช้เครื่องมือ',
+  },
+  'Video endpoint': {
+    'zh-CN': '视频端点',
+    'zh-TW': '影片端點',
+    en: 'Video endpoint',
+    th: 'ปลายทางวิดีโอ',
+  },
+  'Content generation': {
+    'zh-CN': '内容生成',
+    'zh-TW': '內容生成',
+    en: 'Content generation',
+    th: 'สร้างคอนเทนต์',
+  },
+  'Long context': {
+    'zh-CN': '长上下文',
+    'zh-TW': '長上下文',
+    en: 'Long context',
+    th: 'บริบทยาว',
+  },
+  'Office analysis': {
+    'zh-CN': '办公分析',
+    'zh-TW': '辦公分析',
+    en: 'Office analysis',
+    th: 'วิเคราะห์งานเอกสาร',
+  },
+  'Long-form writing': {
+    'zh-CN': '长文写作',
+    'zh-TW': '長文寫作',
+    en: 'Long-form writing',
+    th: 'เขียนข้อความยาว',
+  },
+  'General chat': {
+    'zh-CN': '通用对话',
+    'zh-TW': '通用對話',
+    en: 'General chat',
+    th: 'แชตทั่วไป',
+  },
 }
 
 export function localizePublicModelTag(tag: string, locale: string): string {
@@ -379,20 +447,4 @@ export function localizePublicModelTag(tag: string, locale: string): string {
 
 export function localizePublicModelTags(tags: string[], locale: string): string[] {
   return tags.map(tag => localizePublicModelTag(tag, locale))
-}
-
-export function findPublicModelByName(name: string): PublicModelInfo | undefined {
-  const normalized = canonicalPublicModelName(name).trim().toLowerCase()
-  return publicModels.find((model) =>
-    [model.id, model.name, model.displayName, model.upstreamModel]
-      .filter(Boolean)
-      .some((value) => canonicalPublicModelName(value).toLowerCase() === normalized)
-  )
-}
-
-export function makeProviderOptions(models: PublicModelInfo[]): string[] {
-  return [
-    ALL_PROVIDERS_LABEL,
-    ...Array.from(new Set(models.map((model) => model.provider).filter(Boolean))),
-  ]
 }

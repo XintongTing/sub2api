@@ -156,8 +156,8 @@
               </div>
 
               <div class="mt-3 space-y-1.5 text-sm text-slate-700 dark:text-dark-200">
-                <PriceLine :label="text.inputPrice" :value="formatTokenPrice(model.inputPrice)" :visible="showPrices" :hidden-label="text.hidden" />
-                <PriceLine :label="text.outputPrice" :value="formatTokenPrice(model.outputPrice)" :visible="showPrices" :hidden-label="text.hidden" />
+                <PriceLine v-if="model.billingMode !== 'request'" :label="text.inputPrice" :value="formatTokenPrice(model.inputPrice)" :visible="showPrices" :hidden-label="text.hidden" />
+                <PriceLine v-if="model.billingMode !== 'request'" :label="text.outputPrice" :value="formatTokenPrice(model.outputPrice)" :visible="showPrices" :hidden-label="text.hidden" />
                 <PriceLine v-if="model.cacheReadPrice" :label="text.cacheReadPrice" :value="formatTokenPrice(model.cacheReadPrice)" :visible="showPrices" :hidden-label="text.hidden" />
                 <PriceLine v-if="model.cacheWritePrice" :label="text.cacheWritePrice" :value="formatTokenPrice(model.cacheWritePrice)" :visible="showPrices" :hidden-label="text.hidden" />
                 <PriceLine v-if="model.perRequestPrice" :label="text.perRequestPrice" :value="formatRequestPrice(model.perRequestPrice)" :visible="showPrices" :hidden-label="text.hidden" />
@@ -190,9 +190,9 @@
                   <td class="px-4 py-3 font-semibold">{{ model.displayName }}</td>
                   <td class="px-4 py-3">{{ model.provider }}</td>
                   <td class="px-4 py-3">{{ billingLabel(model.billingMode) }}</td>
-                  <td class="px-4 py-3">{{ showPrices ? formatTokenPrice(model.inputPrice) : text.hidden }}</td>
-                  <td class="px-4 py-3">{{ showPrices ? formatTokenPrice(model.outputPrice) : text.hidden }}</td>
-                  <td class="px-4 py-3">{{ model.endpointTypes[0] || '/v1/chat/completions' }}</td>
+                  <td class="px-4 py-3">{{ showPrices ? tableInputPrice(model) : text.hidden }}</td>
+                  <td class="px-4 py-3">{{ showPrices ? tableOutputPrice(model) : text.hidden }}</td>
+                  <td class="px-4 py-3">{{ endpointLabel(model.endpointTypes[0]) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -237,10 +237,11 @@
           <section>
             <h3 class="font-bold">{{ text.priceSummary }}</h3>
             <div class="mt-3 grid gap-3 sm:grid-cols-2">
-              <div class="price-card"><span>{{ text.inputPrice }}</span><strong>{{ formatTokenPrice(selectedModel.inputPrice) }}</strong></div>
-              <div class="price-card"><span>{{ text.outputPrice }}</span><strong>{{ formatTokenPrice(selectedModel.outputPrice) }}</strong></div>
-              <div class="price-card"><span>{{ text.cacheReadPrice }}</span><strong>{{ formatTokenPrice(selectedModel.cacheReadPrice) }}</strong></div>
-              <div class="price-card"><span>{{ text.cacheWritePrice }}</span><strong>{{ formatTokenPrice(selectedModel.cacheWritePrice) }}</strong></div>
+              <div v-if="selectedModel.billingMode !== 'request'" class="price-card"><span>{{ text.inputPrice }}</span><strong>{{ formatTokenPrice(selectedModel.inputPrice) }}</strong></div>
+              <div v-if="selectedModel.billingMode !== 'request'" class="price-card"><span>{{ text.outputPrice }}</span><strong>{{ formatTokenPrice(selectedModel.outputPrice) }}</strong></div>
+              <div v-if="selectedModel.cacheReadPrice" class="price-card"><span>{{ text.cacheReadPrice }}</span><strong>{{ formatTokenPrice(selectedModel.cacheReadPrice) }}</strong></div>
+              <div v-if="selectedModel.cacheWritePrice" class="price-card"><span>{{ text.cacheWritePrice }}</span><strong>{{ formatTokenPrice(selectedModel.cacheWritePrice) }}</strong></div>
+              <div v-if="selectedModel.perRequestPrice" class="price-card"><span>{{ text.perRequestPrice }}</span><strong>{{ formatRequestPrice(selectedModel.perRequestPrice) }}</strong></div>
             </div>
           </section>
         </div>
@@ -257,16 +258,59 @@ import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { listPublicModels, type PublicModelDTO } from '@/api/publicModels'
 import {
+  canonicalPublicModelName,
   dedupePublicModels,
+  findPublicModelByName,
   localizePublicModelDescription,
   localizePublicModelTag,
   localizePublicModelTags,
+  normalizePublicModelLocale,
   publicModels,
   type PublicModelInfo,
 } from '@/constants/publicModels'
 import { useAppStore } from '@/stores'
 
-const COPY = {
+type CopyKey = 'zh-CN' | 'zh-TW' | 'en' | 'th'
+
+const COPY: Record<CopyKey, {
+  filters: string
+  reset: string
+  provider: string
+  billingType: string
+  tags: string
+  endpointType: string
+  all: string
+  allProviders: string
+  allModels: string
+  modelCount: (count: number) => string
+  heroDescription: string
+  viewDocs: string
+  searchPlaceholder: string
+  copyBaseUrl: string
+  showPrices: string
+  cardView: string
+  tableView: string
+  model: string
+  inputPrice: string
+  outputPrice: string
+  cacheReadPrice: string
+  cacheWritePrice: string
+  perRequestPrice: string
+  tokenBilling: string
+  requestBilling: string
+  hidden: string
+  unset: string
+  each: string
+  emptyTitle: string
+  emptyDescription: string
+  fallbackNotice: string
+  basicInfo: string
+  apiEndpoint: string
+  priceSummary: string
+  publicModelApiUnavailable: string
+  openaiEndpoint: string
+  specialEndpoint: string
+}> = {
   'zh-CN': {
     filters: '筛选',
     reset: '重置',
@@ -277,7 +321,7 @@ const COPY = {
     all: '全部',
     allProviders: '全部供应商',
     allModels: '全部模型',
-    modelCount: (count: number) => `共 ${count} 个模型`,
+    modelCount: count => `共 ${count} 个模型`,
     heroDescription: '查看本站已接入的 AI 模型与公开价格。实际扣费以后台模型价格、API Key 权限和账户充值余额为准。',
     viewDocs: '查看接入文档',
     searchPlaceholder: '模糊搜索模型名称',
@@ -303,6 +347,8 @@ const COPY = {
     apiEndpoint: 'API 端点',
     priceSummary: '价格摘要',
     publicModelApiUnavailable: '公开模型接口暂不可用',
+    openaiEndpoint: 'OpenAI 兼容端点',
+    specialEndpoint: '专用端点，请以后台启用状态为准',
   },
   'zh-TW': {
     filters: '篩選',
@@ -314,8 +360,8 @@ const COPY = {
     all: '全部',
     allProviders: '全部供應商',
     allModels: '全部模型',
-    modelCount: (count: number) => `共 ${count} 個模型`,
-    heroDescription: '查看本站已接入的 AI 模型與公開價格。實際扣費以後台模型價格、API Key 權限和帳戶充值餘額為準。',
+    modelCount: count => `共 ${count} 個模型`,
+    heroDescription: '查看本站已接入的 AI 模型與公開價格。實際扣費以後台模型價格、API Key 權限和帳戶儲值餘額為準。',
     viewDocs: '查看接入文件',
     searchPlaceholder: '模糊搜尋模型名稱',
     copyBaseUrl: '複製 Base URL',
@@ -335,11 +381,13 @@ const COPY = {
     each: '次',
     emptyTitle: '沒有找到匹配模型',
     emptyDescription: '換一個關鍵字或重置篩選條件。',
-    fallbackNotice: '，目前展示靜態兜底模型。',
+    fallbackNotice: '，目前展示靜態備用模型。',
     basicInfo: '基本資訊',
     apiEndpoint: 'API 端點',
     priceSummary: '價格摘要',
-    publicModelApiUnavailable: '公開模型介面暫不可用',
+    publicModelApiUnavailable: '公開模型接口暫不可用',
+    openaiEndpoint: 'OpenAI 相容端點',
+    specialEndpoint: '專用端點，請以後台啟用狀態為準',
   },
   en: {
     filters: 'Filters',
@@ -351,7 +399,7 @@ const COPY = {
     all: 'All',
     allProviders: 'All providers',
     allModels: 'All models',
-    modelCount: (count: number) => `${count} models`,
+    modelCount: count => `${count} models`,
     heroDescription: 'Explore the AI models enabled on this gateway and their public prices. Actual billing follows backend model pricing, API key permissions, and account top-up balance.',
     viewDocs: 'View docs',
     searchPlaceholder: 'Search model names',
@@ -372,52 +420,54 @@ const COPY = {
     each: 'request',
     emptyTitle: 'No models found',
     emptyDescription: 'Try another keyword or reset the filters.',
-    fallbackNotice: '; showing the static fallback models.',
+    fallbackNotice: '; showing static fallback models.',
     basicInfo: 'Basic Info',
     apiEndpoint: 'API Endpoint',
     priceSummary: 'Price Summary',
     publicModelApiUnavailable: 'Public model API is unavailable',
+    openaiEndpoint: 'OpenAI-compatible endpoint',
+    specialEndpoint: 'Special endpoint. Availability depends on admin settings.',
   },
   th: {
     filters: 'ตัวกรอง',
     reset: 'รีเซ็ต',
     provider: 'ผู้ให้บริการ',
-    billingType: 'การคิดเงิน',
+    billingType: 'รูปแบบคิดค่าบริการ',
     tags: 'แท็ก',
-    endpointType: 'ประเภท Endpoint',
+    endpointType: 'ประเภทปลายทาง',
     all: 'ทั้งหมด',
     allProviders: 'ผู้ให้บริการทั้งหมด',
     allModels: 'โมเดลทั้งหมด',
-    modelCount: (count: number) => `${count} โมเดล`,
-    heroDescription: 'ดูโมเดล AI ที่เปิดใช้งานบนเกตเวย์นี้และราคาสาธารณะ การหักเงินจริงอิงตามราคาหลังบ้าน สิทธิ์ API Key และยอดเติมเงินในบัญชี',
-    viewDocs: 'ดูเอกสาร',
+    modelCount: count => `${count} โมเดล`,
+    heroDescription: 'ดูโมเดล AI ที่เปิดใช้งานบนเกตเวย์นี้และราคาสาธารณะ การคิดเงินจริงอ้างอิงราคาหลังบ้าน สิทธิ์ API Key และยอดเงินคงเหลือของบัญชี',
+    viewDocs: 'ดูเอกสาร API',
     searchPlaceholder: 'ค้นหาชื่อโมเดล',
     copyBaseUrl: 'คัดลอก Base URL',
     showPrices: 'แสดงราคา',
     cardView: 'การ์ด',
     tableView: 'ตาราง',
     model: 'โมเดล',
-    inputPrice: 'ราคา Input',
-    outputPrice: 'ราคา Output',
-    cacheReadPrice: 'ราคา Cache Read',
-    cacheWritePrice: 'ราคา Cache Write',
+    inputPrice: 'ราคาอินพุต',
+    outputPrice: 'ราคาเอาต์พุต',
+    cacheReadPrice: 'ราคาอ่านแคช',
+    cacheWritePrice: 'ราคาสร้างแคช',
     perRequestPrice: 'ราคาต่อครั้ง',
-    tokenBilling: 'คิดตาม Token',
+    tokenBilling: 'คิดตามโทเคน',
     requestBilling: 'คิดต่อครั้ง',
     hidden: 'ซ่อน',
     unset: 'ยังไม่ได้ตั้งค่า',
     each: 'ครั้ง',
-    emptyTitle: 'ไม่พบโมเดล',
-    emptyDescription: 'ลองเปลี่ยนคำค้นหรือรีเซ็ตตัวกรอง',
-    fallbackNotice: ' กำลังแสดงโมเดลสำรองแบบคงที่',
+    emptyTitle: 'ไม่พบโมเดลที่ตรงกัน',
+    emptyDescription: 'ลองเปลี่ยนคำค้นหาหรือรีเซ็ตตัวกรอง',
+    fallbackNotice: ' ขณะนี้แสดงรายการสำรองแบบคงที่',
     basicInfo: 'ข้อมูลพื้นฐาน',
     apiEndpoint: 'ปลายทาง API',
     priceSummary: 'สรุปราคา',
-    publicModelApiUnavailable: 'API โมเดลสาธารณะยังไม่พร้อมใช้งาน',
+    publicModelApiUnavailable: 'API รายการโมเดลสาธารณะยังไม่พร้อมใช้งาน',
+    openaiEndpoint: 'ปลายทางที่รองรับ OpenAI',
+    specialEndpoint: 'ปลายทางเฉพาะ โปรดอ้างอิงสถานะการเปิดใช้งานในหลังบ้าน',
   },
-} as const
-
-type CopyKey = keyof typeof COPY
+}
 
 const FilterSection = defineComponent({
   props: { title: { type: String, required: true } },
@@ -460,13 +510,7 @@ const viewMode = ref<'card' | 'table'>('card')
 const showPrices = ref(true)
 const selectedModel = ref<PublicModelInfo | null>(null)
 
-const copyKey = computed<CopyKey>(() => {
-  const value = String(locale.value || 'zh-CN')
-  if (value.startsWith('zh-TW')) return 'zh-TW'
-  if (value.startsWith('en')) return 'en'
-  if (value.startsWith('th')) return 'th'
-  return 'zh-CN'
-})
+const copyKey = computed<CopyKey>(() => normalizePublicModelLocale(String(locale.value || 'zh-CN')))
 const text = computed(() => COPY[copyKey.value])
 const activeLocale = computed(() => String(locale.value || 'zh-CN'))
 
@@ -479,14 +523,14 @@ const billingModes = computed(() => [
 const providerOptions = computed(() => [
   { label: text.value.allProviders, value: 'all' },
   ...Array.from(new Set(models.value.map(model => model.provider).filter(Boolean)))
-    .sort()
+    .sort((a, b) => a.localeCompare(b))
     .map(provider => ({ label: provider, value: provider })),
 ])
 
 const tagOptions = computed(() => [
   { label: text.value.all, value: 'all' },
   ...Array.from(new Set(models.value.flatMap(model => model.tags || []).filter(Boolean)))
-    .sort()
+    .sort((a, b) => localizePublicModelTag(a, activeLocale.value).localeCompare(localizePublicModelTag(b, activeLocale.value)))
     .map(tag => ({ label: localizePublicModelTag(tag, activeLocale.value), value: tag })),
 ])
 
@@ -494,12 +538,12 @@ const endpointTypes = computed(() => [
   { label: text.value.all, value: 'all' },
   ...Array.from(new Set(models.value.flatMap(model => model.endpointTypes || []).filter(Boolean)))
     .sort()
-    .map(endpoint => ({ label: endpoint.replace(/^openai:/, ''), value: endpoint })),
+    .map(endpoint => ({ label: endpointLabel(endpoint), value: endpoint })),
 ])
 
 const apiBaseUrl = computed(() => {
   const base = appStore.apiBaseUrl?.trim() || 'https://tokenapifuel.com'
-  return `${base.replace(/^http:\/\/tokenapifuel\.com/i, 'https://tokenapifuel.com').replace(/\/$/, '')}/v1`
+  return `${base.replace(/^http:\/\/tokenapifuel\.com/i, 'https://tokenapifuel.com').replace(/\/+$/, '')}/v1`
 })
 
 const filteredModels = computed(() => {
@@ -507,7 +551,7 @@ const filteredModels = computed(() => {
   return models.value.filter((model) => {
     const localizedDescription = modelDescription(model)
     const localizedTags = modelTags(model)
-    const matchesSearch = !keyword || [model.name, model.displayName, model.provider, model.description, localizedDescription, ...model.tags, ...localizedTags]
+    const matchesSearch = !keyword || [model.name, model.displayName, model.provider, model.description, localizedDescription, ...model.tags, ...localizedTags, ...model.endpointTypes]
       .filter(Boolean)
       .some(value => value.toLowerCase().includes(keyword))
     const matchesProvider = selectedProvider.value === 'all' || model.provider === selectedProvider.value
@@ -539,22 +583,24 @@ onMounted(async () => {
 })
 
 function mapRemoteModel(model: PublicModelDTO): PublicModelInfo {
-  const known = publicModels.find(item => item.name === model.name || item.displayName === model.name)
+  const canonicalName = canonicalPublicModelName(model.name)
+  const known = findPublicModelByName(canonicalName)
+  const billingMode = normalizeBillingMode(model.billing_mode || known?.billingMode)
   return {
-    id: model.name,
-    name: model.name,
-    displayName: model.name,
+    id: canonicalName,
+    name: canonicalName,
+    displayName: canonicalName,
     provider: model.provider || known?.provider || 'OneAPI',
-    upstreamModel: model.name,
-    type: known?.type || 'Chat',
-    billing: model.billing_mode === 'request' ? text.value.requestBilling : text.value.tokenBilling,
-    billingMode: model.billing_mode || known?.billingMode || 'token',
+    upstreamModel: canonicalName,
+    type: known?.type || (billingMode === 'request' ? 'Task' : 'Chat'),
+    billing: billingLabel(billingMode),
+    billingMode,
     currency: model.currency || known?.currency || 'THB',
-    inputPrice: model.input_price ?? null,
-    outputPrice: model.output_price ?? null,
-    cacheReadPrice: model.cache_read_price ?? null,
-    cacheWritePrice: model.cache_write_price ?? null,
-    perRequestPrice: model.per_request_price ?? null,
+    inputPrice: model.input_price ?? known?.inputPrice ?? null,
+    outputPrice: model.output_price ?? known?.outputPrice ?? null,
+    cacheReadPrice: model.cache_read_price ?? known?.cacheReadPrice ?? null,
+    cacheWritePrice: model.cache_write_price ?? known?.cacheWritePrice ?? null,
+    perRequestPrice: model.per_request_price ?? known?.perRequestPrice ?? null,
     unit: model.unit || known?.unit || '1M Tokens',
     endpointTypes: model.endpoint_types?.length ? model.endpoint_types : (known?.endpointTypes || ['openai:/v1/chat/completions']),
     descriptionI18n: known?.descriptionI18n,
@@ -571,8 +617,14 @@ function resetFilters(): void {
   selectedEndpoint.value = 'all'
 }
 
+function normalizeBillingMode(mode?: string): string {
+  const normalized = String(mode || '').trim().toLowerCase()
+  if (normalized === 'request' || normalized === 'per_request' || normalized === 'image') return 'request'
+  return 'token'
+}
+
 function billingLabel(mode: string): string {
-  return mode === 'request' ? text.value.requestBilling : text.value.tokenBilling
+  return normalizeBillingMode(mode) === 'request' ? text.value.requestBilling : text.value.tokenBilling
 }
 
 function modelDescription(model: PublicModelInfo): string {
@@ -583,17 +635,24 @@ function modelTags(model: PublicModelInfo): string[] {
   return localizePublicModelTags(model.tags || [], activeLocale.value)
 }
 
+function endpointLabel(endpoint?: string): string {
+  if (!endpoint) return '/v1/chat/completions'
+  if (endpoint.startsWith('openai:')) return endpoint.replace(/^openai:/, '')
+  if (endpoint === 'video') return 'Video'
+  return endpoint
+}
+
 function endpointDisplay(model: PublicModelInfo): string {
   const endpoint = model.endpointTypes[0] || 'openai:/v1/chat/completions'
   if (endpoint.startsWith('openai:')) {
     return `POST ${apiBaseUrl.value}${endpoint.replace(/^openai:\/v1/, '')}`
   }
-  return endpoint
+  return endpointLabel(endpoint)
 }
 
 function endpointDescription(model: PublicModelInfo): string {
   const endpoint = model.endpointTypes[0] || ''
-  return endpoint.startsWith('openai:') ? 'OpenAI compatible' : 'Special endpoint'
+  return endpoint.startsWith('openai:') ? text.value.openaiEndpoint : text.value.specialEndpoint
 }
 
 function formatTokenPrice(value?: number | null): string {
@@ -604,6 +663,14 @@ function formatTokenPrice(value?: number | null): string {
 function formatRequestPrice(value?: number | null): string {
   if (typeof value !== 'number' || !Number.isFinite(value)) return text.value.unset
   return `฿${value.toFixed(4)} / ${text.value.each}`
+}
+
+function tableInputPrice(model: PublicModelInfo): string {
+  return model.billingMode === 'request' ? formatRequestPrice(model.perRequestPrice) : formatTokenPrice(model.inputPrice)
+}
+
+function tableOutputPrice(model: PublicModelInfo): string {
+  return model.billingMode === 'request' ? '-' : formatTokenPrice(model.outputPrice)
 }
 
 async function copyBaseUrl(): Promise<void> {
@@ -641,14 +708,14 @@ async function copyModelName(name: string): Promise<void> {
 }
 
 .price-card {
-  @apply flex flex-col gap-1 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm dark:border-dark-800 dark:bg-dark-950;
+  @apply rounded-md border border-slate-200 bg-slate-50 p-3 text-sm dark:border-dark-800 dark:bg-dark-950;
 }
 
 .price-card span {
-  @apply text-slate-500 dark:text-dark-400;
+  @apply block text-slate-500 dark:text-dark-400;
 }
 
 .price-card strong {
-  @apply text-slate-950 dark:text-white;
+  @apply mt-1 block text-slate-950 dark:text-white;
 }
 </style>

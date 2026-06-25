@@ -345,6 +345,7 @@ func toUserSupportedModels(
 	allowedPlatforms map[string]struct{},
 ) []userSupportedModel {
 	out := make([]userSupportedModel, 0, len(src))
+	seen := make(map[string]struct{}, len(src))
 	for i := range src {
 		m := src[i]
 		if !m.PublicVisible || !m.APIEnabled {
@@ -355,8 +356,17 @@ func toUserSupportedModels(
 				continue
 			}
 		}
+		name := service.CanonicalHuosanyunModelName(m.Name)
+		if name == "" || service.IsExcludedHuosanyunModel(name) || service.IsExcludedHuosanyunModel(m.Name) {
+			continue
+		}
+		key := strings.ToLower(m.Platform + ":" + name)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
 		out = append(out, userSupportedModel{
-			Name:     m.Name,
+			Name:     name,
 			Platform: m.Platform,
 			Pricing:  toUserPricing(m.Pricing),
 		})

@@ -413,7 +413,7 @@ func (c *Channel) SupportedModelNames(platform string) []string {
 		if platform != "" && model.Platform != platform {
 			continue
 		}
-		if !model.APIEnabled {
+		if !model.PublicVisible || !model.APIEnabled {
 			continue
 		}
 		name := strings.TrimSpace(model.Name)

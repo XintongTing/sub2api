@@ -141,7 +141,7 @@ Content-Type: application/json</code></pre>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import PublicTopNav from '@/components/public/PublicTopNav.vue'
-import { dedupePublicModels, publicModels } from '@/constants/publicModels'
+import { dedupePublicModels, publicModels, normalizePublicModelLocale } from '@/constants/publicModels'
 import { useAppStore } from '@/stores'
 
 type DocsCopy = {
@@ -172,7 +172,9 @@ type DocsCopy = {
   errors: Array<{ code: string; description: string }>
 }
 
-const DOCS_COPY: Record<string, DocsCopy> = {
+type CopyKey = 'zh-CN' | 'zh-TW' | 'en' | 'th'
+
+const DOCS_COPY: Record<CopyKey, DocsCopy> = {
   'zh-CN': {
     kicker: '开发文档',
     title: 'Token API Fuel 开发文档',
@@ -194,7 +196,7 @@ const DOCS_COPY: Record<string, DocsCopy> = {
     baseUrl: {
       current: '当前正式用户侧 API 地址：',
       sdk: 'OpenAI SDK 通常需要带 /v1 后缀：',
-      httpsNote: '正式交付请优先使用 HTTPS。如果临时排查证书或 443 端口问题，可以短时间使用 HTTP。',
+      httpsNote: '正式交付请优先使用 HTTPS。若临时排查证书或 443 端口问题，可短时间使用 HTTP。',
     },
     authDescription: '所有 API 请求都需要在 Header 中携带 Bearer Token：',
     chatDescription: '普通业务集成推荐使用该接口：',
@@ -202,7 +204,7 @@ const DOCS_COPY: Record<string, DocsCopy> = {
     codexConfigIntro: '请将以下内容放在 ~/.codex/config.toml 或 %userprofile%\\.codex\\config.toml 的开头：',
     authJsonExample: 'auth.json 示例：',
     modelsDescription: '推荐使用模型广场展示的模型名作为请求参数。当前常用模型包括：',
-    billingDescription: '平台按用户 API Key 归属账户的充值余额扣减。每次成功调用会根据模型价格和 Token usage 计算费用，并记录扣费金额和调用状态，可在控制台“使用记录”查看。',
+    billingDescription: '平台按 API Key 归属账户的充值余额扣减。每次成功调用会根据后台模型价格和 token usage 计算费用，并记录扣费金额和调用状态，可在控制台“使用记录”查看。',
     table: {
       model: '模型',
       provider: '供应商',
@@ -220,7 +222,7 @@ const DOCS_COPY: Record<string, DocsCopy> = {
   'zh-TW': {
     kicker: '開發文件',
     title: 'Token API Fuel 開發文件',
-    description: '使用一個 API Key 呼叫平台已啟用的主流 AI 模型。一般應用建議使用 OpenAI Chat Completions 格式；Codex CLI 和 OpenCode 可使用本站相容的 Responses 協議。',
+    description: '使用一個 API Key 調用平台已啟用的主流 AI 模型。一般應用建議使用 OpenAI Chat Completions 格式；Codex CLI 和 OpenCode 可使用本站相容的 Responses 協議。',
     pageToc: '本頁目錄',
     sections: {
       quickstart: '快速開始',
@@ -232,21 +234,21 @@ const DOCS_COPY: Record<string, DocsCopy> = {
     quickstartSteps: [
       '註冊並登入控制台。',
       '進入「API 金鑰」建立一枚可用金鑰。',
-      '確認充值餘額充足。',
-      '按下方範例呼叫 /v1/chat/completions。',
+      '確認儲值餘額充足。',
+      '按下方範例調用 /v1/chat/completions。',
     ],
     baseUrl: {
-      current: '目前正式用戶側 API 位址：',
+      current: '目前正式使用者側 API 地址：',
       sdk: 'OpenAI SDK 通常需要帶 /v1 後綴：',
-      httpsNote: '正式交付請優先使用 HTTPS。若臨時排查憑證或 443 連接埠問題，可以短時間使用 HTTP。',
+      httpsNote: '正式交付請優先使用 HTTPS。若臨時排查憑證或 443 連接埠問題，可短時間使用 HTTP。',
     },
     authDescription: '所有 API 請求都需要在 Header 中攜帶 Bearer Token：',
     chatDescription: '一般業務整合建議使用此接口：',
     codexDescription: '本站相容 /v1/responses、/responses 和 /backend-api/codex/responses 路由，因此 Codex CLI 範例保留 wire_api = "responses"。',
     codexConfigIntro: '請將以下內容放在 ~/.codex/config.toml 或 %userprofile%\\.codex\\config.toml 的開頭：',
     authJsonExample: 'auth.json 範例：',
-    modelsDescription: '建議使用模型廣場展示的模型名作為請求參數。目前常用模型包括：',
-    billingDescription: '平台按用戶 API Key 歸屬帳戶的充值餘額扣減。每次成功呼叫會根據模型價格和 Token usage 計算費用，並記錄扣費金額和呼叫狀態，可在控制台「使用記錄」查看。',
+    modelsDescription: '建議使用模型廣場展示的模型名稱作為請求參數。目前常用模型包括：',
+    billingDescription: '平台按 API Key 歸屬帳戶的儲值餘額扣減。每次成功調用會根據後台模型價格和 token usage 計算費用，並記錄扣費金額和調用狀態，可在控制台「使用記錄」查看。',
     table: {
       model: '模型',
       provider: '供應商',
@@ -255,7 +257,7 @@ const DOCS_COPY: Record<string, DocsCopy> = {
     },
     errors: [
       { code: '401', description: 'API Key 缺失、錯誤或已停用。' },
-      { code: '402', description: '帳戶充值餘額不足。' },
+      { code: '402', description: '帳戶儲值餘額不足。' },
       { code: '404', description: '模型名稱不存在或未啟用。' },
       { code: '429', description: '請求過於頻繁，請稍後重試。' },
       { code: '500', description: '網關或上游異常，請聯絡平台管理員。' },
@@ -290,7 +292,7 @@ const DOCS_COPY: Record<string, DocsCopy> = {
     codexConfigIntro: 'Place the following at the beginning of ~/.codex/config.toml or %userprofile%\\.codex\\config.toml:',
     authJsonExample: 'auth.json example:',
     modelsDescription: 'Use the model names shown in the model marketplace as request parameters. Common enabled models include:',
-    billingDescription: 'Charges are deducted from the top-up balance of the account that owns the API key. Each successful request calculates cost from model pricing and token usage, then records the charged amount and request status. You can review details in Console > Usage.',
+    billingDescription: 'Charges are deducted from the top-up balance of the account that owns the API key. Each successful request calculates cost from backend model pricing and token usage, then records the charged amount and request status. You can review details in Console > Usage.',
     table: {
       model: 'Model',
       provider: 'Provider',
@@ -307,9 +309,9 @@ const DOCS_COPY: Record<string, DocsCopy> = {
   },
   th: {
     kicker: 'เอกสารสำหรับนักพัฒนา',
-    title: 'เอกสาร Token API Fuel',
-    description: 'ใช้ API Key เดียวเพื่อเรียกใช้โมเดล AI หลักที่เปิดใช้งานบนเกตเวย์นี้ แอปทั่วไปแนะนำให้ใช้รูปแบบ OpenAI Chat Completions ส่วน Codex CLI และ OpenCode ใช้โปรโตคอล Responses ที่รองรับได้',
-    pageToc: 'สารบัญหน้านี้',
+    title: 'เอกสารนักพัฒนา Token API Fuel',
+    description: 'ใช้ API Key เดียวเพื่อเรียกใช้โมเดล AI ที่เปิดใช้งานบนเกตเวย์นี้ แอปทั่วไปแนะนำให้ใช้รูปแบบ OpenAI Chat Completions ส่วน Codex CLI และ OpenCode ใช้โปรโตคอล Responses ที่รองรับได้',
+    pageToc: 'หัวข้อในหน้านี้',
     sections: {
       quickstart: 'เริ่มต้นอย่างรวดเร็ว',
       auth: 'การยืนยันตัวตน',
@@ -319,34 +321,34 @@ const DOCS_COPY: Record<string, DocsCopy> = {
     },
     quickstartSteps: [
       'สมัครบัญชีและเข้าสู่ระบบคอนโซล',
-      'ไปที่ API Keys แล้วสร้างคีย์ที่ใช้งานได้',
-      'ตรวจสอบว่ายอดเติมเงินเพียงพอ',
+      'ไปที่ API Keys แล้วสร้างคีย์ที่เปิดใช้งาน',
+      'ตรวจสอบว่ายอดเงินเติมเงินเพียงพอ',
       'เรียก /v1/chat/completions ตามตัวอย่างด้านล่าง',
     ],
     baseUrl: {
-      current: 'Base URL สำหรับผู้ใช้ในระบบจริง:',
-      sdk: 'OpenAI SDK มักต้องใช้ suffix /v1:',
-      httpsNote: 'ระบบจริงควรใช้ HTTPS ก่อนเสมอ ใช้ HTTP ชั่วคราวได้เฉพาะตอนตรวจสอบใบรับรองหรือพอร์ต 443',
+      current: 'Base URL สำหรับ API ฝั่งผู้ใช้:',
+      sdk: 'OpenAI SDK มักต้องใส่ /v1 ต่อท้าย:',
+      httpsNote: 'สำหรับการใช้งานจริงควรใช้ HTTPS ส่วน HTTP ใช้ชั่วคราวเฉพาะตอนตรวจสอบปัญหาใบรับรองหรือพอร์ต 443',
     },
-    authDescription: 'ทุกคำขอ API ต้องใส่ Bearer Token ใน Header:',
-    chatDescription: 'ใช้ endpoint นี้สำหรับการเชื่อมต่อธุรกิจทั่วไป:',
+    authDescription: 'ทุกคำขอ API ต้องใส่ Bearer token ใน header:',
+    chatDescription: 'ใช้ปลายทางนี้สำหรับการเชื่อมต่อธุรกิจทั่วไป:',
     codexDescription: 'เกตเวย์นี้รองรับ /v1/responses, /responses และ /backend-api/codex/responses ดังนั้นตัวอย่าง Codex CLI จึงใช้ wire_api = "responses"',
-    codexConfigIntro: 'ใส่ค่าต่อไปนี้ไว้ตอนต้นของ ~/.codex/config.toml หรือ %userprofile%\\.codex\\config.toml:',
+    codexConfigIntro: 'ใส่ค่าต่อไปนี้ไว้ที่ส่วนต้นของ ~/.codex/config.toml หรือ %userprofile%\\.codex\\config.toml:',
     authJsonExample: 'ตัวอย่าง auth.json:',
-    modelsDescription: 'ใช้ชื่อโมเดลจากหน้าโมเดลเป็นพารามิเตอร์ในคำขอ โมเดลที่เปิดใช้งานหลักได้แก่:',
-    billingDescription: 'ระบบจะหักค่าใช้จ่ายจากยอดเติมเงินของบัญชีที่เป็นเจ้าของ API Key ทุกคำขอที่สำเร็จจะคำนวณจากราคาโมเดลและจำนวน Token ที่ใช้ พร้อมบันทึกยอดหักและสถานะคำขอ สามารถดูรายละเอียดได้ที่ Console > Usage',
+    modelsDescription: 'ใช้ชื่อโมเดลจาก Model Marketplace เป็นพารามิเตอร์ในคำขอ โมเดลที่เปิดใช้งานทั่วไปมีดังนี้:',
+    billingDescription: 'ค่าใช้จ่ายจะหักจากยอดเติมเงินของบัญชีที่เป็นเจ้าของ API Key ทุกคำขอที่สำเร็จจะคำนวณจากราคาหลังบ้านของโมเดลและ token usage แล้วบันทึกยอดที่หักและสถานะคำขอ ตรวจสอบได้ที่ Console > Usage',
     table: {
       model: 'โมเดล',
       provider: 'ผู้ให้บริการ',
-      input: 'ราคา Input',
-      output: 'ราคา Output',
+      input: 'ราคาอินพุต',
+      output: 'ราคาเอาต์พุต',
     },
     errors: [
       { code: '401', description: 'API Key หายไป ไม่ถูกต้อง หรือถูกปิดใช้งาน' },
-      { code: '402', description: 'ยอดเติมเงินในบัญชีไม่เพียงพอ' },
-      { code: '404', description: 'ไม่มีชื่อโมเดลนี้ หรือยังไม่ได้เปิดใช้งาน' },
-      { code: '429', description: 'คำขอถี่เกินไป กรุณาลองใหม่ภายหลัง' },
-      { code: '500', description: 'เกตเวย์หรือ upstream ผิดปกติ กรุณาติดต่อผู้ดูแลระบบ' },
+      { code: '402', description: 'ยอดเงินเติมเงินของบัญชีไม่เพียงพอ' },
+      { code: '404', description: 'ไม่มีชื่อโมเดลนี้หรือยังไม่ได้เปิดใช้งาน' },
+      { code: '429', description: 'ส่งคำขอบ่อยเกินไป โปรดลองใหม่ภายหลัง' },
+      { code: '500', description: 'เกิดข้อผิดพลาดที่เกตเวย์หรือต้นทาง โปรดติดต่อผู้ดูแลแพลตฟอร์ม' },
     ],
   },
 }
@@ -355,14 +357,14 @@ const models = dedupePublicModels(publicModels)
 const appStore = useAppStore()
 const { locale } = useI18n()
 
-const SECTION_LABELS = {
+const SECTION_LABELS: Record<CopyKey, { baseUrl: string; chat: string; codex: string }> = {
   'zh-CN': {
     baseUrl: 'Base URL（接口地址）',
     chat: '对话补全接口',
     codex: 'Codex CLI / OpenCode 配置',
   },
   'zh-TW': {
-    baseUrl: 'Base URL（接口位址）',
+    baseUrl: 'Base URL（接口地址）',
     chat: '對話補全接口',
     codex: 'Codex CLI / OpenCode 設定',
   },
@@ -372,20 +374,13 @@ const SECTION_LABELS = {
     codex: 'Codex CLI / OpenCode Setup',
   },
   th: {
-    baseUrl: 'Base URL สำหรับ API',
-    chat: 'Chat Completions สำหรับสนทนา',
-    codex: 'การตั้งค่า Codex CLI / OpenCode',
+    baseUrl: 'Base URL ของ API',
+    chat: 'Chat Completions',
+    codex: 'ตั้งค่า Codex CLI / OpenCode',
   },
-} as const
+}
 
-const copyKey = computed(() => {
-  const current = String(locale.value || '').toLowerCase()
-  if (current.startsWith('zh-tw')) return 'zh-TW'
-  if (current.startsWith('en')) return 'en'
-  if (current.startsWith('th')) return 'th'
-  return 'zh-CN'
-})
-
+const copyKey = computed<CopyKey>(() => normalizePublicModelLocale(String(locale.value || 'zh-CN')))
 const docs = computed(() => DOCS_COPY[copyKey.value])
 const sectionLabels = computed(() => SECTION_LABELS[copyKey.value])
 
@@ -408,7 +403,7 @@ const gatewayBaseUrl = computed(() => {
 const apiBaseUrl = computed(() => `${gatewayBaseUrl.value}/v1`)
 
 const examplePrompt = computed(() => {
-  if (copyKey.value === 'th') return 'แนะนำตัวเองด้วยประโยคเดียว'
+  if (copyKey.value === 'th') return 'แนะนำตัวเองในหนึ่งประโยค'
   if (copyKey.value === 'en') return 'Introduce yourself in one sentence'
   if (copyKey.value === 'zh-TW') return '用一句話介紹你自己'
   return '用一句话介绍你自己'

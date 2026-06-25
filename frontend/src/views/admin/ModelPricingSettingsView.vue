@@ -176,7 +176,7 @@ const PriceInput = defineComponent({
     return () => h('input', {
       value: props.modelValue,
       inputmode: 'decimal',
-      placeholder: 'Not set',
+      placeholder: '未设置',
       class: 'w-28 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-950 dark:text-white',
       onInput: (event: Event) => emit('update:modelValue', (event.target as HTMLInputElement).value),
     })
@@ -270,7 +270,7 @@ function parsePrice(value: string): number | null {
   if (!trimmed) return null
   const parsed = Number(trimmed)
   if (!Number.isFinite(parsed) || parsed < 0) {
-    throw new Error('Price must be a number greater than or equal to 0')
+    throw new Error('价格必须是大于或等于 0 的数字')
   }
   return parsed
 }

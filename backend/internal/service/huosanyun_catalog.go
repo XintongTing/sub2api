@@ -95,6 +95,9 @@ func HuosanyunCatalogPricing() []ChannelModelPricing {
 		if spec.PerRequestTHB > 0 {
 			p.PerRequestPrice = floatPtr(spec.PerRequestTHB)
 		}
+		if strings.Contains(strings.ToLower(spec.Model), "seedance") {
+			p.APIEnabled = boolPtr(false)
+		}
 		out = append(out, p)
 	}
 	return out
@@ -197,5 +200,9 @@ func MergeHuosanyunAliases(mapping map[string]map[string]string, overwrite bool)
 }
 
 func floatPtr(v float64) *float64 {
+	return &v
+}
+
+func boolPtr(v bool) *bool {
 	return &v
 }
