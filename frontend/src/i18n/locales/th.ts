@@ -226,7 +226,7 @@ const th = deepMergeMessages(en, {
     paymentMethod: 'วิธีชำระเงิน',
     tabTopUp: 'เติมเงิน',
     tabSubscribe: 'สมัครสมาชิก',
-    noPlans: 'ไม่มีแพ็กเกจสมัครสมาชิก',
+    noPlans: 'ยังไม่มีจำนวนเงินเติมเงิน',
     notAvailable: 'ยังไม่สามารถเติมเงินได้',
     amountNoMethod: 'ไม่มีวิธีชำระเงินที่รองรับจำนวนนี้',
     amountTooLow: 'จำนวนขั้นต่ำคือ {min}',

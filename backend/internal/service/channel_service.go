@@ -594,15 +594,15 @@ func resolveMapping(lk *channelLookup, groupID int64, model string) ChannelMappi
 // checkRestricted 基于已查找的渠道信息检查模型是否被限制。
 // 只在本平台的定价列表中查找。
 func checkRestricted(lk *channelLookup, groupID int64, model string) bool {
+	modelLower := strings.ToLower(model)
+	pricing := lookupPricingAcrossPlatforms(lk.cache, groupID, lk.platform, modelLower)
+	if pricing != nil && !pricing.IsAPIEnabled() {
+		return true
+	}
 	if !lk.channel.RestrictModels {
 		return false
 	}
-	modelLower := strings.ToLower(model)
-	// 使用与查找定价相同的跨平台逻辑
-	if lookupPricingAcrossPlatforms(lk.cache, groupID, lk.platform, modelLower) != nil {
-		return false
-	}
-	return true
+	return pricing == nil
 }
 
 // ReplaceModelInBody 替换请求体 JSON 中的 model 字段。

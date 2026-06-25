@@ -88,7 +88,7 @@ func RegisterPaymentRoutes(
 			adminOrders.POST("/:id/refund", adminPaymentHandler.ProcessRefund)
 		}
 
-		// Subscription Plans
+		// Recharge Amounts
 		plans := adminGroup.Group("/plans")
 		{
 			plans.GET("", adminPaymentHandler.ListPlans)

@@ -71,6 +71,8 @@ type channelModelPricingRequest struct {
 	CacheReadPrice   *float64                 `json:"cache_read_price" binding:"omitempty,min=0"`
 	ImageOutputPrice *float64                 `json:"image_output_price" binding:"omitempty,min=0"`
 	PerRequestPrice  *float64                 `json:"per_request_price" binding:"omitempty,min=0"`
+	PublicVisible    *bool                    `json:"public_visible"`
+	APIEnabled       *bool                    `json:"api_enabled"`
 	Intervals        []pricingIntervalRequest `json:"intervals"`
 }
 
@@ -122,6 +124,8 @@ type channelModelPricingResponse struct {
 	CacheReadPrice   *float64                  `json:"cache_read_price"`
 	ImageOutputPrice *float64                  `json:"image_output_price"`
 	PerRequestPrice  *float64                  `json:"per_request_price"`
+	PublicVisible    bool                      `json:"public_visible"`
+	APIEnabled       bool                      `json:"api_enabled"`
 	Intervals        []pricingIntervalResponse `json:"intervals"`
 	CreatedAt        string                    `json:"created_at"`
 	UpdatedAt        string                    `json:"updated_at"`
@@ -231,6 +235,8 @@ func pricingToResponse(p *service.ChannelModelPricing) channelModelPricingRespon
 		CacheReadPrice:   p.CacheReadPrice,
 		ImageOutputPrice: p.ImageOutputPrice,
 		PerRequestPrice:  p.PerRequestPrice,
+		PublicVisible:    p.IsPublicVisible(),
+		APIEnabled:       p.IsAPIEnabled(),
 		Intervals:        intervals,
 		CreatedAt:        p.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:        p.UpdatedAt.Format("2006-01-02T15:04:05Z"),
@@ -284,6 +290,8 @@ func pricingRequestToService(reqs []channelModelPricingRequest) []service.Channe
 			CacheReadPrice:   r.CacheReadPrice,
 			ImageOutputPrice: r.ImageOutputPrice,
 			PerRequestPrice:  r.PerRequestPrice,
+			PublicVisible:    r.PublicVisible,
+			APIEnabled:       r.APIEnabled,
 			Intervals:        intervals,
 		})
 	}

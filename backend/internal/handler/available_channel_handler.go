@@ -194,12 +194,21 @@ func (h *AvailableChannelHandler) ListPublicModels(c *gin.Context) {
 	}
 
 	byName := make(map[string]publicModelPricing)
+	hiddenModels := make(map[string]struct{})
 	addModel := func(rawName, platform, channelName string, pricing *service.ChannelModelPricing) {
 		name := service.CanonicalHuosanyunModelName(rawName)
 		if name == "" || strings.Contains(name, "*") || service.IsExcludedHuosanyunModel(name) {
 			return
 		}
 		key := strings.ToLower(name)
+		if pricing != nil && !pricing.IsPublicVisible() {
+			hiddenModels[key] = struct{}{}
+			delete(byName, key)
+			return
+		}
+		if _, hidden := hiddenModels[key]; hidden {
+			return
+		}
 		item, exists := byName[key]
 		if !exists {
 			item = publicModelPricing{
@@ -222,6 +231,15 @@ func (h *AvailableChannelHandler) ListPublicModels(c *gin.Context) {
 			continue
 		}
 		for _, model := range ch.SupportedModels {
+			if !model.PublicVisible {
+				name := service.CanonicalHuosanyunModelName(model.Name)
+				if name != "" {
+					key := strings.ToLower(name)
+					hiddenModels[key] = struct{}{}
+					delete(byName, key)
+				}
+				continue
+			}
 			addModel(model.Name, model.Platform, ch.Name, model.Pricing)
 		}
 	}
@@ -237,7 +255,11 @@ func (h *AvailableChannelHandler) ListPublicModels(c *gin.Context) {
 		if name == "" || service.IsExcludedHuosanyunModel(name) {
 			continue
 		}
-		if _, exists := byName[strings.ToLower(name)]; exists {
+		key := strings.ToLower(name)
+		if _, hidden := hiddenModels[key]; hidden {
+			continue
+		}
+		if _, exists := byName[key]; exists {
 			continue
 		}
 		pricingCopy := pricing.Clone()
@@ -325,6 +347,9 @@ func toUserSupportedModels(
 	out := make([]userSupportedModel, 0, len(src))
 	for i := range src {
 		m := src[i]
+		if !m.PublicVisible || !m.APIEnabled {
+			continue
+		}
 		if allowedPlatforms != nil {
 			if _, ok := allowedPlatforms[m.Platform]; !ok {
 				continue

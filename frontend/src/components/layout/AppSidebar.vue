@@ -754,7 +754,7 @@ const adminNavItems = computed((): NavItem[] => {
     },
     {
       path: '/admin/orders',
-      label: '订单与套餐',
+      label: '订单与充值',
       icon: OrderIcon,
       hideInSimpleMode: true,
       expandOnly: true,

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <AppLayout>
     <div class="space-y-6">
       <div class="rounded-lg border border-emerald-100 bg-gradient-to-r from-primary-700 via-primary-600 to-cyan-500 p-6 text-white shadow-sm">
@@ -120,9 +120,15 @@
                 <td class="px-4 py-3 align-top"><PriceInput v-model="row.cacheWritePriceText" @update:model-value="markDirty(row)" /></td>
                 <td class="px-4 py-3 align-top"><PriceInput v-model="row.perRequestPriceText" @update:model-value="markDirty(row)" /></td>
                 <td class="px-4 py-3 align-top">
-                  <div class="flex flex-col gap-1 text-xs">
-                    <span :class="row.publicVisible ? 'text-emerald-600' : 'text-slate-400'">{{ row.publicVisible ? '前台显示' : '未显示' }}</span>
-                    <span :class="row.callable ? 'text-emerald-600' : 'text-slate-400'">{{ row.callable ? '允许调用' : '未启用' }}</span>
+                  <div class="flex flex-col gap-2 text-xs text-slate-600 dark:text-dark-200">
+                    <label class="inline-flex items-center gap-2">
+                      <input v-model="row.publicVisible" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" @change="markDirty(row)" />
+                      <span>前台显示</span>
+                    </label>
+                    <label class="inline-flex items-center gap-2">
+                      <input v-model="row.apiEnabled" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" @change="markDirty(row)" />
+                      <span>允许调用</span>
+                    </label>
                   </div>
                 </td>
                 <td class="px-4 py-3 align-top text-xs text-slate-500 dark:text-dark-300">{{ formatDate(row.updatedAt) }}</td>
@@ -195,7 +201,7 @@ interface PricingRow {
   cacheWritePriceText: string
   perRequestPriceText: string
   publicVisible: boolean
-  callable: boolean
+  apiEnabled: boolean
   updatedAt?: string
   source: 'channel' | 'fallback'
   dirty: boolean
@@ -316,8 +322,8 @@ function rowFromPricing(channel: Channel, entry: ChannelModelPricing, entryIndex
     cacheReadPriceText: formatTokenPrice(entry.cache_read_price),
     cacheWritePriceText: formatTokenPrice(entry.cache_write_price),
     perRequestPriceText: formatDirectPrice(entry.per_request_price),
-    publicVisible: channel.status === CHANNEL_STATUS_ACTIVE,
-    callable: channel.status === CHANNEL_STATUS_ACTIVE,
+    publicVisible: entry.public_visible ?? (channel.status === CHANNEL_STATUS_ACTIVE),
+    apiEnabled: entry.api_enabled ?? (channel.status === CHANNEL_STATUS_ACTIVE),
     updatedAt: entry.updated_at || channel.updated_at,
     source: 'channel',
     dirty: false,
@@ -345,7 +351,7 @@ function fallbackRow(model: PublicModelInfo): PricingRow {
     cacheWritePriceText: formatTokenPrice(model.cacheWritePrice),
     perRequestPriceText: formatDirectPrice(model.perRequestPrice),
     publicVisible: Boolean(primaryChannel.value && primaryChannel.value.status === CHANNEL_STATUS_ACTIVE),
-    callable: false,
+    apiEnabled: Boolean(primaryChannel.value && primaryChannel.value.status === CHANNEL_STATUS_ACTIVE),
     updatedAt: primaryChannel.value?.updated_at,
     source: 'fallback',
     dirty: false,
@@ -436,6 +442,8 @@ function applyRowPrice(entry: ChannelModelPricing, row: PricingRow): ChannelMode
     cache_read_price: parseTokenPrice(row.cacheReadPriceText),
     cache_write_price: parseTokenPrice(row.cacheWritePriceText),
     per_request_price: parseDirectPrice(row.perRequestPriceText),
+    public_visible: row.publicVisible,
+    api_enabled: row.apiEnabled,
   }
 }
 
