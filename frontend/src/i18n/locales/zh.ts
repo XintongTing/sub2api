@@ -1465,6 +1465,11 @@ export default {
 
   // Admin
   admin: {
+    modelPricing: {
+      title: '模型价格设置',
+      description: '维护可售模型的泰铢售价、展示信息和调用开关',
+    },
+
     // Dashboard
     dashboard: {
       title: '管理控制台',

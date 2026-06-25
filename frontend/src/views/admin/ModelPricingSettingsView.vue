@@ -77,9 +77,12 @@
       </div>
 
       <div v-else class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-dark-800 dark:bg-dark-900">
-        <div class="overflow-x-auto">
-          <table class="min-w-[1320px] w-full divide-y divide-slate-200 text-sm dark:divide-dark-700">
-            <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-dark-800 dark:text-dark-300">
+        <div class="border-b border-slate-100 bg-slate-50/80 px-4 py-2 text-xs text-slate-500 dark:border-dark-800 dark:bg-dark-900 dark:text-dark-300">
+          表格可横向拖动；页面放大时，请使用表格底部滚动条查看右侧更新时间和保存操作。
+        </div>
+        <div class="max-h-[calc(100vh-300px)] min-h-[360px] overflow-auto overscroll-contain">
+          <table class="w-full min-w-[1760px] divide-y divide-slate-200 text-sm dark:divide-dark-700">
+            <thead class="sticky top-0 z-10 bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-dark-800 dark:text-dark-300">
               <tr>
                 <th class="px-4 py-3">模型</th>
                 <th class="px-4 py-3">供应商</th>

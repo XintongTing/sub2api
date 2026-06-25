@@ -282,6 +282,13 @@ const th = deepMergeMessages(en, {
     loginAgreement: 'ข้อตกลงการเข้าสู่ระบบ',
   },
 
+  admin: {
+    modelPricing: {
+      title: 'ตั้งค่าราคาโมเดล',
+      description: 'จัดการราคา THB ข้อมูลที่แสดงในตลาดโมเดล และสถานะการเรียกใช้ API ของโมเดลที่ขายได้',
+    },
+  },
+
   user: {
     profile: {
       title: 'ตั้งค่าบัญชี',

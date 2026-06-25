@@ -1461,6 +1461,11 @@ export default {
 
   // Admin
   admin: {
+    modelPricing: {
+      title: 'Model Pricing Settings',
+      description: 'Manage THB prices, marketplace metadata, and API availability for sellable models',
+    },
+
     // Dashboard
     dashboard: {
       title: 'Admin Dashboard',
