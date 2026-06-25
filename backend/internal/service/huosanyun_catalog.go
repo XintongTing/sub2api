@@ -6,7 +6,6 @@ import "strings"
 // pricing. Prices are user-facing THB sell prices, not upstream CNY cost prices.
 type HuosanyunModelSpec struct {
 	Model           string
-	Aliases         []string
 	BillingMode     BillingMode
 	InputTHBPer1M   float64
 	OutputTHBPer1M  float64
@@ -17,38 +16,43 @@ type HuosanyunModelSpec struct {
 
 // DefaultHuosanyunCatalog is the verified model set for TokenAPIFuel's Huosanyun
 // OpenAI-compatible channel. It keeps upstream model IDs as the primary names;
-// legacy aliases are retained only for compatibility mappings, not public cards.
+// legacy customer-facing aliases are intentionally excluded from public and API
+// model lists so users only see and call real upstream model IDs.
 func DefaultHuosanyunCatalog() []HuosanyunModelSpec {
 	return []HuosanyunModelSpec{
 		{Model: "deepseek-v4-flash", BillingMode: BillingModeToken, InputTHBPer1M: 15, OutputTHBPer1M: 30, CacheReadTHB1M: 0.3},
-		{Model: "deepseek-v4-pro", Aliases: []string{"DeepSeek-Pro"}, BillingMode: BillingModeToken, InputTHBPer1M: 180, OutputTHBPer1M: 360, CacheReadTHB1M: 36},
+		{Model: "deepseek-v4-pro", BillingMode: BillingModeToken, InputTHBPer1M: 180, OutputTHBPer1M: 360, CacheReadTHB1M: 36},
 		{Model: "doubao-seedance-2-0-fast-idle-260128", BillingMode: BillingModeToken, InputTHBPer1M: 555, OutputTHBPer1M: 555},
 		{Model: "doubao-seedance-2-0-idle-260128", BillingMode: BillingModeToken, InputTHBPer1M: 765, OutputTHBPer1M: 765},
-		{Model: "glm-4.7", Aliases: []string{"GLM4-Air"}, BillingMode: BillingModeToken, InputTHBPer1M: 4.05, OutputTHBPer1M: 16.5, CacheReadTHB1M: 8.22},
-		{Model: "glm-5", Aliases: []string{"GLM4-Plus"}, BillingMode: BillingModeToken, InputTHBPer1M: 11.25, OutputTHBPer1M: 36},
+		{Model: "glm-4.7", BillingMode: BillingModeToken, InputTHBPer1M: 4.05, OutputTHBPer1M: 16.5, CacheReadTHB1M: 8.22},
+		{Model: "glm-5", BillingMode: BillingModeToken, InputTHBPer1M: 11.25, OutputTHBPer1M: 36},
 		{Model: "glm-5.1", BillingMode: BillingModeToken, InputTHBPer1M: 90, OutputTHBPer1M: 360, CacheReadTHB1M: 18, CacheWriteTHB1M: 112.5},
 		{Model: "kimi-k2.5", BillingMode: BillingModeToken, InputTHBPer1M: 8.25, OutputTHBPer1M: 41.4},
 		{Model: "kimi-k2.6", BillingMode: BillingModeToken, InputTHBPer1M: 97.5, OutputTHBPer1M: 405, CacheReadTHB1M: 15},
 		{Model: "MiniMax-M2.5", BillingMode: BillingModeToken},
-		{Model: "qwen-plus", Aliases: []string{"Qwen3-Turbo"}, BillingMode: BillingModeToken},
+		{Model: "qwen-plus", BillingMode: BillingModeToken},
 		{Model: "qwen3.6-plus", BillingMode: BillingModeToken},
 	}
 }
 
-// IsExcludedHuosanyunModel returns true for upstream models that TokenAPIFuel
-// must not expose by default. Admins can still add custom entries later, but
-// catalog sync, public model APIs, and /v1/models use this default guardrail.
+// IsExcludedHuosanyunModel returns true for upstream models or old public aliases
+// that TokenAPIFuel must not expose by default.
 func IsExcludedHuosanyunModel(model string) bool {
 	name := strings.ToLower(strings.TrimSpace(model))
 	if name == "" {
 		return false
 	}
-	return name == "deepseek-v3.2" || name == "deepseek-v3" || strings.HasPrefix(name, "kling")
+	switch name {
+	case "deepseek-v3.2", "deepseek-v3", "deepseek-pro", "qwen3-turbo", "glm4-air", "glm4-plus":
+		return true
+	default:
+		return strings.HasPrefix(name, "kling")
+	}
 }
 
-// CanonicalHuosanyunModelName maps legacy customer-facing aliases to upstream
-// model IDs. DeepSeek-V3 is intentionally not mapped because its historical
-// target was deepseek-v3.2, which the customer explicitly excluded.
+// CanonicalHuosanyunModelName keeps real upstream model IDs stable. Legacy
+// aliases are not canonicalized because the customer asked to hide and reject
+// those public-facing names.
 func CanonicalHuosanyunModelName(model string) string {
 	name := strings.TrimSpace(model)
 	if name == "" {
@@ -57,11 +61,6 @@ func CanonicalHuosanyunModelName(model string) string {
 	for _, spec := range DefaultHuosanyunCatalog() {
 		if strings.EqualFold(name, spec.Model) {
 			return spec.Model
-		}
-		for _, alias := range spec.Aliases {
-			if strings.EqualFold(name, alias) {
-				return spec.Model
-			}
 		}
 	}
 	return name
@@ -74,10 +73,9 @@ func HuosanyunCatalogPricing() []ChannelModelPricing {
 		if IsExcludedHuosanyunModel(spec.Model) {
 			continue
 		}
-		models := append([]string{spec.Model}, spec.Aliases...)
 		p := ChannelModelPricing{
 			Platform:    PlatformOpenAI,
-			Models:      models,
+			Models:      []string{spec.Model},
 			BillingMode: spec.BillingMode,
 		}
 		if spec.InputTHBPer1M > 0 {
@@ -104,15 +102,12 @@ func HuosanyunCatalogPricing() []ChannelModelPricing {
 }
 
 func HuosanyunAliasMapping() map[string]map[string]string {
-	mapping := map[string]map[string]string{PlatformOpenAI: {}}
+	mapping := map[string]map[string]string{PlatformOpenAI: map[string]string{}}
 	for _, spec := range DefaultHuosanyunCatalog() {
 		if IsExcludedHuosanyunModel(spec.Model) {
 			continue
 		}
 		mapping[PlatformOpenAI][spec.Model] = spec.Model
-		for _, alias := range spec.Aliases {
-			mapping[PlatformOpenAI][alias] = spec.Model
-		}
 	}
 	return mapping
 }
@@ -121,6 +116,10 @@ func huosanyunCatalogRemovalKeys() map[string]struct{} {
 	remove := map[string]struct{}{
 		"deepseek-v3.2": {},
 		"deepseek-v3":   {},
+		"deepseek-pro":  {},
+		"qwen3-turbo":   {},
+		"glm4-air":      {},
+		"glm4-plus":     {},
 	}
 	for _, p := range HuosanyunCatalogPricing() {
 		for _, model := range p.Models {
@@ -154,10 +153,27 @@ func MergeHuosanyunCatalog(pricing []ChannelModelPricing, overwrite bool) []Chan
 	existing := make(map[string]struct{})
 	for _, p := range pricing {
 		for _, model := range p.Models {
-			existing[strings.ToLower(strings.TrimSpace(model))] = struct{}{}
+			modelKey := strings.ToLower(strings.TrimSpace(model))
+			if IsExcludedHuosanyunModel(modelKey) {
+				continue
+			}
+			existing[modelKey] = struct{}{}
 		}
 	}
-	out := append([]ChannelModelPricing(nil), pricing...)
+	out := make([]ChannelModelPricing, 0, len(pricing)+len(catalog))
+	for _, p := range pricing {
+		keep := make([]string, 0, len(p.Models))
+		for _, model := range p.Models {
+			if !IsExcludedHuosanyunModel(model) {
+				keep = append(keep, model)
+			}
+		}
+		if len(keep) == 0 {
+			continue
+		}
+		p.Models = keep
+		out = append(out, p)
+	}
 	for _, p := range catalog {
 		skip := false
 		for _, model := range p.Models {
@@ -189,11 +205,9 @@ func MergeHuosanyunAliases(mapping map[string]map[string]string, overwrite bool)
 			out[PlatformOpenAI][src] = dst
 		}
 	}
-	if overwrite {
-		for src, dst := range out[PlatformOpenAI] {
-			if IsExcludedHuosanyunModel(src) || IsExcludedHuosanyunModel(dst) {
-				delete(out[PlatformOpenAI], src)
-			}
+	for src, dst := range out[PlatformOpenAI] {
+		if IsExcludedHuosanyunModel(src) || IsExcludedHuosanyunModel(dst) {
+			delete(out[PlatformOpenAI], src)
 		}
 	}
 	return out
@@ -202,4 +216,3 @@ func MergeHuosanyunAliases(mapping map[string]map[string]string, overwrite bool)
 func floatPtr(v float64) *float64 {
 	return &v
 }
-

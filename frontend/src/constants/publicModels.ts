@@ -294,12 +294,6 @@ export const publicModels: PublicModelInfo[] = [
   },
 ]
 
-const aliasToCanonical = new Map<string, string>([
-  ['deepseek-pro', 'deepseek-v4-pro'],
-  ['glm4-air', 'glm-4.7'],
-  ['glm4-plus', 'glm-5'],
-  ['qwen3-turbo', 'qwen-plus'],
-])
 
 export function normalizePublicModelLocale(locale: string): PublicModelLocale {
   const value = locale.toLowerCase()
@@ -312,12 +306,20 @@ export function normalizePublicModelLocale(locale: string): PublicModelLocale {
 export function canonicalPublicModelName(name: string): string {
   const trimmed = String(name || '').trim()
   if (!trimmed) return ''
-  return aliasToCanonical.get(trimmed.toLowerCase()) || trimmed
+  return trimmed
 }
 
 export function isPublicModelExcluded(name: string): boolean {
   const normalized = String(name || '').trim().toLowerCase()
-  return normalized === 'deepseek-v3.2' || normalized === 'deepseek-v3' || normalized.startsWith('kling')
+  return (
+    normalized === 'deepseek-v3.2' ||
+    normalized === 'deepseek-v3' ||
+    normalized === 'deepseek-pro' ||
+    normalized === 'qwen3-turbo' ||
+    normalized === 'glm4-air' ||
+    normalized === 'glm4-plus' ||
+    normalized.startsWith('kling')
+  )
 }
 
 export function dedupePublicModels(models: PublicModelInfo[]): PublicModelInfo[] {

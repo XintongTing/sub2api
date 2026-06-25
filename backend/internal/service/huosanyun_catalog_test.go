@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestDefaultHuosanyunCatalogContainsAllowedRealIDsAndAliases(t *testing.T) {
+func TestDefaultHuosanyunCatalogContainsAllowedRealIDsAndRejectsLegacyAliases(t *testing.T) {
 	catalog := DefaultHuosanyunCatalog()
 	seen := make(map[string]HuosanyunModelSpec, len(catalog))
 	for _, spec := range catalog {
@@ -27,19 +27,18 @@ func TestDefaultHuosanyunCatalogContainsAllowedRealIDsAndAliases(t *testing.T) {
 	}
 
 	mapping := HuosanyunAliasMapping()[PlatformOpenAI]
-	tests := map[string]string{
-		"DeepSeek-Pro": "deepseek-v4-pro",
-		"GLM4-Air":     "glm-4.7",
-		"GLM4-Plus":    "glm-5",
-		"Qwen3-Turbo":  "qwen-plus",
-	}
-	for alias, want := range tests {
-		if got := mapping[alias]; got != want {
-			t.Fatalf("alias %s mapped to %q, want %q", alias, got, want)
+	for _, model := range []string{"deepseek-v4-pro", "glm-4.7", "glm-5", "qwen-plus"} {
+		if got := mapping[model]; got != model {
+			t.Fatalf("real model %s mapped to %q", model, got)
 		}
 	}
-	if got := mapping["DeepSeek-V3"]; got != "" {
-		t.Fatalf("DeepSeek-V3 should not be mapped because deepseek-v3.2 is excluded, got %q", got)
+	for _, alias := range []string{"DeepSeek-Pro", "GLM4-Air", "GLM4-Plus", "Qwen3-Turbo", "DeepSeek-V3"} {
+		if got := mapping[alias]; got != "" {
+			t.Fatalf("legacy alias %s should not be mapped, got %q", alias, got)
+		}
+		if !IsExcludedHuosanyunModel(alias) {
+			t.Fatalf("legacy alias %s should be excluded", alias)
+		}
 	}
 }
 
@@ -107,24 +106,28 @@ func TestMergeHuosanyunCatalogOverwriteRemovesExcludedModels(t *testing.T) {
 	}
 }
 
-func TestMergeHuosanyunAliasesHonorsOverwrite(t *testing.T) {
+func TestMergeHuosanyunAliasesRemovesLegacyAliases(t *testing.T) {
 	existing := map[string]map[string]string{
 		PlatformOpenAI: {
-			"DeepSeek-Pro": "custom-upstream",
-			"DeepSeek-V3":  "custom-excluded",
+			"DeepSeek-Pro":   "custom-upstream",
+			"DeepSeek-V3":    "custom-excluded",
+			"deepseek-v4-pro": "custom-real",
 		},
 	}
 
 	kept := MergeHuosanyunAliases(existing, false)
-	if got := kept[PlatformOpenAI]["DeepSeek-Pro"]; got != "custom-upstream" {
-		t.Fatalf("alias overwrite disabled: got %q", got)
+	if got := kept[PlatformOpenAI]["DeepSeek-Pro"]; got != "" {
+		t.Fatalf("legacy alias should be removed even when overwrite is disabled, got %q", got)
+	}
+	if got := kept[PlatformOpenAI]["DeepSeek-V3"]; got != "" {
+		t.Fatalf("excluded alias should be removed, got %q", got)
+	}
+	if got := kept[PlatformOpenAI]["deepseek-v4-pro"]; got != "custom-real" {
+		t.Fatalf("real mapping should be preserved without overwrite, got %q", got)
 	}
 
 	overwritten := MergeHuosanyunAliases(existing, true)
-	if got := overwritten[PlatformOpenAI]["DeepSeek-Pro"]; got != "deepseek-v4-pro" {
-		t.Fatalf("alias overwrite enabled: got %q", got)
-	}
-	if got := overwritten[PlatformOpenAI]["DeepSeek-V3"]; got != "" {
-		t.Fatalf("excluded alias should be removed on overwrite, got %q", got)
+	if got := overwritten[PlatformOpenAI]["deepseek-v4-pro"]; got != "deepseek-v4-pro" {
+		t.Fatalf("real mapping should be refreshed on overwrite, got %q", got)
 	}
 }
