@@ -101,11 +101,41 @@
                   <div class="font-mono font-semibold text-slate-950 dark:text-white">{{ row.model }}</div>
                   <div class="mt-1 text-xs text-slate-500 dark:text-dark-300">{{ row.channelName || '待写入主渠道' }}</div>
                 </td>
-                <td class="px-4 py-3 align-top text-slate-700 dark:text-dark-200">{{ row.provider }}</td>
                 <td class="px-4 py-3 align-top">
-                  <span class="rounded-full bg-primary-50 px-2 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
-                    {{ row.endpointType }}
-                  </span>
+                  <div class="space-y-2">
+                    <input
+                      v-model.trim="row.provider"
+                      type="text"
+                      class="w-40 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-950 dark:text-white"
+                      placeholder="Provider"
+                      @input="markDirty(row)"
+                    />
+                    <input
+                      v-model.trim="row.tagsText"
+                      type="text"
+                      class="w-40 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-950 dark:text-dark-100"
+                      placeholder="Tags, comma separated"
+                      @input="markDirty(row)"
+                    />
+                  </div>
+                </td>
+                <td class="px-4 py-3 align-top">
+                  <div class="space-y-2">
+                    <input
+                      v-model.trim="row.endpointTypesText"
+                      type="text"
+                      class="w-52 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-950 dark:text-white"
+                      placeholder="openai:/v1/chat/completions"
+                      @input="markDirty(row)"
+                    />
+                    <textarea
+                      v-model.trim="row.descriptionText"
+                      rows="2"
+                      class="w-52 resize-y rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-950 dark:text-dark-100"
+                      placeholder="Marketplace description"
+                      @input="markDirty(row)"
+                    />
+                  </div>
                 </td>
                 <td class="px-4 py-3 align-top">
                   <select v-model="row.billingMode" class="w-32 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-dark-700 dark:bg-dark-950 dark:text-white" @change="markDirty(row)">
@@ -188,6 +218,9 @@ interface PricingRow {
   model: string
   provider: string
   endpointType: string
+  endpointTypesText: string
+  descriptionText: string
+  tagsText: string
   billingMode: BillingMode
   channelId: number | null
   channelName: string
@@ -230,7 +263,7 @@ const knownModels = computed(() => {
 const activeChannels = computed(() => channels.value.filter(channel => channel.status === CHANNEL_STATUS_ACTIVE))
 const primaryChannel = computed(() => activeChannels.value[0] || channels.value[0] || null)
 const dirtyRows = computed(() => rows.value.filter(row => row.dirty))
-const providers = computed(() => Array.from(new Set(rows.value.map(row => row.provider))).sort())
+const providers = computed(() => Array.from(new Set(rows.value.map(row => row.provider.trim()).filter(Boolean))).sort())
 
 const filteredRows = computed(() => {
   const q = search.value.trim().toLowerCase()
@@ -238,7 +271,7 @@ const filteredRows = computed(() => {
     if (providerFilter.value && row.provider !== providerFilter.value) return false
     if (billingFilter.value && row.billingMode !== billingFilter.value) return false
     if (!q) return true
-    return [row.model, row.provider, row.channelName, row.endpointType].some(value => value.toLowerCase().includes(q))
+    return [row.model, row.provider, row.channelName, row.endpointType, row.endpointTypesText, row.descriptionText, row.tagsText].some(value => value.toLowerCase().includes(q))
   })
 })
 
@@ -301,15 +334,50 @@ function providerFor(model: string, channel: Channel | null, known?: PublicModel
   return channel?.name || 'Custom'
 }
 
+function splitMetaList(value: string): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const item of value.split(',')) {
+    const trimmed = item.trim()
+    if (!trimmed) continue
+    const key = trimmed.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(trimmed)
+  }
+  return out
+}
+
+function listText(values: string[] | undefined): string {
+  return (values || []).filter(Boolean).join(', ')
+}
+
+function metadataFor(entry: ChannelModelPricing | undefined, model: string, channel: Channel | null, known?: PublicModelInfo) {
+  const endpointTypes = entry?.endpoint_types?.length ? entry.endpoint_types : (known?.endpointTypes?.length ? known.endpointTypes : [endpointFor(model, known)])
+  const tags = entry?.tags?.length ? entry.tags : (known?.tags || [])
+  return {
+    provider: entry?.provider?.trim() || providerFor(model, channel, known),
+    endpointTypes,
+    endpointTypesText: listText(endpointTypes),
+    endpointType: endpointTypes[0] || endpointFor(model, known),
+    descriptionText: entry?.description?.trim() || known?.description || '',
+    tagsText: listText(tags),
+  }
+}
+
 function rowFromPricing(channel: Channel, entry: ChannelModelPricing, entryIndex: number, modelName: string): PricingRow | null {
   const model = canonicalPublicModelName(modelName)
   if (!model || model.includes('*') || isPublicModelExcluded(model)) return null
   const known = knownModels.value.get(model.toLowerCase())
+  const meta = metadataFor(entry, model, channel, known)
   return {
     id: `${channel.id}:${entry.id || entryIndex}:${model.toLowerCase()}`,
     model,
-    provider: providerFor(model, channel, known),
-    endpointType: endpointFor(model, known),
+    provider: meta.provider,
+    endpointType: meta.endpointType,
+    endpointTypesText: meta.endpointTypesText,
+    descriptionText: meta.descriptionText,
+    tagsText: meta.tagsText,
     billingMode: (entry.billing_mode || BILLING_MODE_TOKEN) as BillingMode,
     channelId: channel.id,
     channelName: channel.name,
@@ -334,11 +402,16 @@ function rowFromPricing(channel: Channel, entry: ChannelModelPricing, entryIndex
 }
 
 function fallbackRow(model: PublicModelInfo): PricingRow {
+  const canonical = canonicalPublicModelName(model.name)
+  const meta = metadataFor(undefined, canonical, primaryChannel.value, model)
   return {
     id: `fallback:${model.name.toLowerCase()}`,
-    model: canonicalPublicModelName(model.name),
-    provider: model.provider,
-    endpointType: endpointFor(model.name, model),
+    model: canonical,
+    provider: meta.provider,
+    endpointType: meta.endpointType,
+    endpointTypesText: meta.endpointTypesText,
+    descriptionText: meta.descriptionText,
+    tagsText: meta.tagsText,
     billingMode: (model.billingMode || BILLING_MODE_TOKEN) as BillingMode,
     channelId: primaryChannel.value?.id || null,
     channelName: primaryChannel.value?.name || '',
@@ -444,6 +517,10 @@ function applyRowPrice(entry: ChannelModelPricing, row: PricingRow): ChannelMode
     per_request_price: parseDirectPrice(row.perRequestPriceText),
     public_visible: row.publicVisible,
     api_enabled: row.apiEnabled,
+    provider: row.provider.trim(),
+    endpoint_types: splitMetaList(row.endpointTypesText),
+    description: row.descriptionText.trim(),
+    tags: splitMetaList(row.tagsText),
   }
 }
 

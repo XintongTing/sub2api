@@ -73,6 +73,10 @@ type channelModelPricingRequest struct {
 	PerRequestPrice  *float64                 `json:"per_request_price" binding:"omitempty,min=0"`
 	PublicVisible    *bool                    `json:"public_visible"`
 	APIEnabled       *bool                    `json:"api_enabled"`
+	Provider         string                   `json:"provider" binding:"omitempty,max=100"`
+	EndpointTypes    []string                 `json:"endpoint_types" binding:"omitempty,max=20"`
+	Description      string                   `json:"description" binding:"omitempty,max=1000"`
+	Tags             []string                 `json:"tags" binding:"omitempty,max=50"`
 	Intervals        []pricingIntervalRequest `json:"intervals"`
 }
 
@@ -126,6 +130,10 @@ type channelModelPricingResponse struct {
 	PerRequestPrice  *float64                  `json:"per_request_price"`
 	PublicVisible    bool                      `json:"public_visible"`
 	APIEnabled       bool                      `json:"api_enabled"`
+	Provider         string                    `json:"provider"`
+	EndpointTypes    []string                  `json:"endpoint_types"`
+	Description      string                    `json:"description"`
+	Tags             []string                  `json:"tags"`
 	Intervals        []pricingIntervalResponse `json:"intervals"`
 	CreatedAt        string                    `json:"created_at"`
 	UpdatedAt        string                    `json:"updated_at"`
@@ -237,10 +245,36 @@ func pricingToResponse(p *service.ChannelModelPricing) channelModelPricingRespon
 		PerRequestPrice:  p.PerRequestPrice,
 		PublicVisible:    p.IsPublicVisible(),
 		APIEnabled:       p.IsAPIEnabled(),
+		Provider:         p.Provider,
+		EndpointTypes:    p.EndpointTypes,
+		Description:      p.Description,
+		Tags:             p.Tags,
 		Intervals:        intervals,
 		CreatedAt:        p.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:        p.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+}
+
+
+func cleanStringList(values []string) []string {
+	if len(values) == 0 {
+		return []string{}
+	}
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		key := strings.ToLower(value)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, value)
+	}
+	return out
 }
 
 func intervalToResponse(iv service.PricingInterval) pricingIntervalResponse {
@@ -292,6 +326,10 @@ func pricingRequestToService(reqs []channelModelPricingRequest) []service.Channe
 			PerRequestPrice:  r.PerRequestPrice,
 			PublicVisible:    r.PublicVisible,
 			APIEnabled:       r.APIEnabled,
+			Provider:         strings.TrimSpace(r.Provider),
+			EndpointTypes:    cleanStringList(r.EndpointTypes),
+			Description:      strings.TrimSpace(r.Description),
+			Tags:             cleanStringList(r.Tags),
 			Intervals:        intervals,
 		})
 	}

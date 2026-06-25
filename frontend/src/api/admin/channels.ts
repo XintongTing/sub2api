@@ -34,6 +34,10 @@ export interface ChannelModelPricing {
   per_request_price: number | null
   public_visible?: boolean
   api_enabled?: boolean
+  provider?: string
+  endpoint_types?: string[]
+  description?: string
+  tags?: string[]
   intervals: PricingInterval[]
   created_at?: string
   updated_at?: string

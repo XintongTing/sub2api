@@ -412,6 +412,18 @@ func mergePublicPricing(dst *publicModelPricing, p *service.ChannelModelPricing)
 	if p == nil {
 		return
 	}
+	if strings.TrimSpace(p.Provider) != "" {
+		dst.Provider = strings.TrimSpace(p.Provider)
+	}
+	if endpointTypes := normalizePublicStringList(p.EndpointTypes); len(endpointTypes) > 0 {
+		dst.EndpointTypes = endpointTypes
+	}
+	if strings.TrimSpace(p.Description) != "" {
+		dst.Description = strings.TrimSpace(p.Description)
+	}
+	if tags := normalizePublicStringList(p.Tags); len(tags) > 0 {
+		dst.Tags = tags
+	}
 	mode := string(p.BillingMode)
 	if mode == "" {
 		mode = string(service.BillingModeToken)
@@ -456,6 +468,28 @@ func mergePublicPricing(dst *publicModelPricing, p *service.ChannelModelPricing)
 			dst.PerRequestPrice = interval.PerRequestPrice
 		}
 	}
+}
+
+
+func normalizePublicStringList(values []string) []string {
+	if len(values) == 0 {
+		return nil
+	}
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		key := strings.ToLower(value)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, value)
+	}
+	return out
 }
 
 func publicModelProvider(modelName, platform, channelName string) string {

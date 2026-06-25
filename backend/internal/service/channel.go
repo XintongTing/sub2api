@@ -86,6 +86,10 @@ type ChannelModelPricing struct {
 	PerRequestPrice  *float64          // 默认按次计费价格（USD）
 	PublicVisible    *bool             // public marketplace visibility; nil means true
 	APIEnabled       *bool             // API call availability; nil means true
+	Provider         string            // optional public provider label override
+	EndpointTypes    []string          // optional public endpoint labels override
+	Description      string            // optional public marketplace description override
+	Tags             []string          // optional public marketplace tags override
 	Intervals        []PricingInterval // 区间定价列表
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
@@ -189,6 +193,14 @@ func (p ChannelModelPricing) Clone() ChannelModelPricing {
 	if p.Intervals != nil {
 		cp.Intervals = make([]PricingInterval, len(p.Intervals))
 		copy(cp.Intervals, p.Intervals)
+	}
+	if p.EndpointTypes != nil {
+		cp.EndpointTypes = make([]string, len(p.EndpointTypes))
+		copy(cp.EndpointTypes, p.EndpointTypes)
+	}
+	if p.Tags != nil {
+		cp.Tags = make([]string, len(p.Tags))
+		copy(cp.Tags, p.Tags)
 	}
 	return cp
 }
