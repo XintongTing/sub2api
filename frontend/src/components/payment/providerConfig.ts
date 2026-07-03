@@ -37,13 +37,14 @@ export const PROVIDER_SUPPORTED_TYPES: Record<string, string[]> = {
   stripe: ['card', 'alipay', 'wxpay', 'link'],
   airwallex: ['airwallex'],
   payoneer: ['payoneer'],
+  paypal: ['paypal'],
 }
 
 /** Available payment modes for EasyPay providers. */
 export const EASYPAY_PAYMENT_MODES = ['qrcode', 'popup'] as const
 
 /** Fixed display order for user-facing payment methods */
-export const METHOD_ORDER = ['payoneer', 'alipay', 'alipay_direct', 'wxpay', 'wxpay_direct', 'stripe', 'airwallex'] as const
+export const METHOD_ORDER = ['paypal', 'payoneer', 'alipay', 'alipay_direct', 'wxpay', 'wxpay_direct', 'stripe', 'airwallex'] as const
 
 /** Payment mode constants */
 export const PAYMENT_MODE_QRCODE = 'qrcode'
@@ -88,6 +89,7 @@ export const WEBHOOK_PATHS: Record<string, string> = {
   stripe: '/api/v1/payment/webhook/stripe',
   airwallex: '/api/v1/payment/webhook/airwallex',
   payoneer: '/api/v1/payment/webhook/payoneer',
+  paypal: '/api/v1/payment/webhook/paypal',
 }
 
 export const RETURN_PATH = '/payment/result'
@@ -98,6 +100,7 @@ export const PROVIDER_CALLBACK_PATHS: Record<string, CallbackPaths> = {
   alipay: { notifyUrl: WEBHOOK_PATHS.alipay, returnUrl: RETURN_PATH },
   wxpay: { notifyUrl: WEBHOOK_PATHS.wxpay },
   payoneer: { notifyUrl: WEBHOOK_PATHS.payoneer, returnUrl: RETURN_PATH },
+  paypal: { notifyUrl: WEBHOOK_PATHS.paypal, returnUrl: RETURN_PATH },
   // stripe: 不需要回调 URL 配置，Webhook 单独配置。
   // airwallex: 不需要回调 URL 配置，Webhook 在空中云汇后台配置。
 }
@@ -148,9 +151,20 @@ export const PROVIDER_CONFIG_FIELDS: Record<string, ConfigFieldDef[]> = {
       { value: 'sandbox', label: 'Sandbox' },
       { value: 'live', label: 'Live' },
     ] },
-    { key: 'apiBase', label: '', sensitive: false, defaultValue: 'https://api.sandbox.payoneer.com', hintKey: 'admin.settings.payment.field_payoneerApiBaseHint' },
-    { key: 'createPath', label: '', sensitive: false, defaultValue: '/checkout/payment', hintKey: 'admin.settings.payment.field_payoneerPathHint' },
-    { key: 'queryPath', label: '', sensitive: false, defaultValue: '/checkout/payment/{trade_no}', hintKey: 'admin.settings.payment.field_payoneerPathHint' },
+    { key: 'apiBase', label: '', sensitive: false, defaultValue: 'https://api.sandbox.payoneer.com' },
+    { key: 'currency', label: '', sensitive: false, defaultValue: 'THB', hintKey: 'admin.settings.payment.field_paymentCurrencyHint', options: PAYMENT_CURRENCY_OPTIONS },
+    { key: 'createPath', label: '', sensitive: false, defaultValue: '/checkout/payment', optional: true },
+    { key: 'queryPath', label: '', sensitive: false, defaultValue: '/checkout/payment/{trade_no}', optional: true },
+  ],
+  paypal: [
+    { key: 'clientId', label: '', sensitive: false },
+    { key: 'clientSecret', label: '', sensitive: true },
+    { key: 'webhookId', label: '', sensitive: false },
+    { key: 'environment', label: '', sensitive: false, defaultValue: 'sandbox', options: [
+      { value: 'sandbox', label: 'Sandbox' },
+      { value: 'live', label: 'Live' },
+    ] },
+    { key: 'apiBase', label: '', sensitive: false, defaultValue: 'https://api-m.sandbox.paypal.com', hintKey: 'admin.settings.payment.field_paypalApiBaseHint' },
     { key: 'currency', label: '', sensitive: false, defaultValue: 'THB', hintKey: 'admin.settings.payment.field_paymentCurrencyHint', options: PAYMENT_CURRENCY_OPTIONS },
   ],
 }

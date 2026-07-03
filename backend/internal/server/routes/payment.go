@@ -64,6 +64,7 @@ func RegisterPaymentRoutes(
 		webhook.POST("/stripe", webhookHandler.StripeWebhook)
 		webhook.POST("/airwallex", webhookHandler.AirwallexWebhook)
 		webhook.POST("/payoneer", webhookHandler.PayoneerWebhook)
+		webhook.POST("/paypal", webhookHandler.PayPalWebhook)
 	}
 
 	// --- Admin payment endpoints (admin auth) ---

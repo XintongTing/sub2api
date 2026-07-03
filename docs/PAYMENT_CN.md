@@ -25,6 +25,8 @@ OneAPI 内置支付系统，支持用户自助充值，无需部署独立的支�
 | **支付宝官方** | 桌面二维码扫码、移动端支付宝跳转 | 直接对接支付宝开放平台，桌面端返回二维码，移动端返回 WAP/唤起链接 |
 | **微信官方** | Native 扫码、H5、公众号/JSAPI 支付 | 直接对接微信支付 APIv3，按终端环境自动分流 |
 | **Stripe** | 银行卡、支付宝、微信支付、Link 等 | 国际支付，支持多币种 |
+| **Payoneer** | Payoneer Checkout | 通过 Payoneer 接入国际托管收银台 |
+| **PayPal** | PayPal Checkout | 通过 PayPal Orders API 接入国际托管收银台 |
 
 > 支付宝官方 / 微信官方与易支付可以同时作为后台服务商实例存在，但前台始终只展示 `支付宝`、`微信支付` 两个可见按钮。管理员需要分别为这两个按钮选择唯一支付来源：官方或易支付。官方渠道直接对接 API，资金直达商户账户，手续费更低；易支付通过第三方平台聚合，接入门槛更低。
 
@@ -154,6 +156,34 @@ OneAPI 内置支付系统，支持用户自助充值，无需部署独立的支�
 | **Publishable Key** | Stripe 可公开密钥（`pk_live_...` 或 `pk_test_...`） | 是 |
 | **Webhook Secret** | Stripe Webhook 签名密钥（`whsec_...`） | 是 |
 
+### PayPal
+
+通过 PayPal Orders v2 接入国际托管收银台。
+
+| 参数 | 说明 | 必填 |
+|------|------|------|
+| **Client ID** | PayPal REST 应用 Client ID | 是 |
+| **Client Secret** | PayPal REST 应用 Client Secret | 是 |
+| **Webhook ID** | 当前 Webhook 端点对应的 PayPal Webhook ID | 是 |
+| **环境** | Sandbox 或 Live | 是 |
+| **API 基础地址** | 默认使用 PayPal 沙箱 / 生产 API 地址 | 否 |
+| **支付币种** | PayPal 订单使用的币种 | 是 |
+
+### Payoneer
+
+通过 Payoneer 接入国际托管收银台。
+
+| 参数 | 说明 | 必填 |
+|------|------|------|
+| **Client ID** | Payoneer API Client ID | 是 |
+| **Client Secret** | Payoneer API Client Secret | 是 |
+| **Webhook Secret** | 用于校验 Payoneer Webhook 签名的密钥 | 是 |
+| **环境** | Sandbox 或 Live | 是 |
+| **API 基础地址** | 默认使用 Payoneer 沙箱 / 生产 API 地址 | 否 |
+| **支付币种** | Payoneer 支付使用的币种 | 是 |
+| **创建订单路径** | 仅在 Payoneer 提供自定义 API 路径时覆盖 | 否 |
+| **查询订单路径** | 仅在 Payoneer 提供自定义 API 路径时覆盖 | 否 |
+
 ---
 
 ## 服务商实例管理
@@ -195,6 +225,8 @@ OneAPI 内置支付系统，支持用户自助充值，无需部署独立的支�
 | **支付宝官方** | `https://your-domain.com/api/v1/payment/webhook/alipay` |
 | **微信官方** | `https://your-domain.com/api/v1/payment/webhook/wxpay` |
 | **Stripe** | `https://your-domain.com/api/v1/payment/webhook/stripe` |
+| **Payoneer** | `https://your-domain.com/api/v1/payment/webhook/payoneer` |
+| **PayPal** | `https://your-domain.com/api/v1/payment/webhook/paypal` |
 
 > 将 `your-domain.com` 替换为你的实际域名。EasyPay / 支付宝 / 微信的回调地址在添加服务商时自动填入，无需手动配置。
 
@@ -205,6 +237,13 @@ OneAPI 内置支付系统，支持用户自助充值，无需部署独立的支�
 3. 添加端点，填写回调地址
 4. 订阅事件：`payment_intent.succeeded`、`payment_intent.payment_failed`
 5. 将生成的 Webhook Secret（`whsec_...`）填入服务商配置
+
+### PayPal Webhook 设置
+
+1. 登录 [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/)
+2. 打开你的 REST 应用并添加 Webhook 端点
+3. 订阅事件：`CHECKOUT.ORDER.APPROVED`
+4. 将生成的 Webhook ID 填入服务商配置
 
 ### 注意事项
 

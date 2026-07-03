@@ -73,6 +73,12 @@ func (h *PaymentWebhookHandler) PayoneerWebhook(c *gin.Context) {
 	h.handleNotify(c, payment.TypePayoneer)
 }
 
+// PayPalWebhook handles PayPal Checkout webhook events.
+// POST /api/v1/payment/webhook/paypal
+func (h *PaymentWebhookHandler) PayPalWebhook(c *gin.Context) {
+	h.handleNotify(c, payment.TypePayPal)
+}
+
 // handleNotify is the shared logic for all provider webhook handlers.
 func (h *PaymentWebhookHandler) handleNotify(c *gin.Context, providerKey string) {
 	var rawBody string
@@ -176,10 +182,29 @@ func extractOutTradeNo(rawBody, providerKey string) string {
 			OrderID           string `json:"order_id"`
 		}
 		if err := json.Unmarshal([]byte(rawBody), &payload); err == nil {
-			if strings.TrimSpace(payload.MerchantReference) != "" {
-				return strings.TrimSpace(payload.MerchantReference)
+			if ref := strings.TrimSpace(payload.MerchantReference); ref != "" {
+				return ref
 			}
 			return strings.TrimSpace(payload.OrderID)
+		}
+	case payment.TypePayPal:
+		var payload struct {
+			Resource struct {
+				PurchaseUnits []struct {
+					CustomID    string `json:"custom_id"`
+					ReferenceID string `json:"reference_id"`
+				} `json:"purchase_units"`
+			} `json:"resource"`
+		}
+		if err := json.Unmarshal([]byte(rawBody), &payload); err == nil {
+			for _, unit := range payload.Resource.PurchaseUnits {
+				if customID := strings.TrimSpace(unit.CustomID); customID != "" {
+					return customID
+				}
+				if referenceID := strings.TrimSpace(unit.ReferenceID); referenceID != "" {
+					return referenceID
+				}
+			}
 		}
 	}
 	// For other providers (Stripe, Alipay direct, WxPay direct), the registry
@@ -225,7 +250,7 @@ func writeSuccessResponse(c *gin.Context, providerKey string) {
 	switch providerKey {
 	case payment.TypeWxpay:
 		c.JSON(http.StatusOK, wxpaySuccessResponse{Code: wxpaySuccessCode, Message: wxpaySuccessMessage})
-	case payment.TypeStripe, payment.TypeAirwallex, payment.TypePayoneer:
+	case payment.TypeStripe, payment.TypeAirwallex, payment.TypePayoneer, payment.TypePayPal:
 		c.String(http.StatusOK, "")
 	default:
 		c.String(http.StatusOK, "success")

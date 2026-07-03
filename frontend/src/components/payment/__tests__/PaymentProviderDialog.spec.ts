@@ -14,7 +14,7 @@ const messages: Record<string, string> = {
   'admin.settings.payment.stripeWebhookHint': 'Configure Stripe webhook.',
   'admin.settings.payment.stripeWebhookApiVersionHint': 'Use Stripe API version {version}.',
   'admin.settings.payment.airwallexWebhookHint': 'Select payment_intent.succeeded and use the latest stable API version.',
-  'admin.settings.payment.payoneerWebhookHint': 'Configure Payoneer Checkout webhook.',
+  'admin.settings.payment.paypalWebhookHint': 'Configure PayPal Checkout webhook.',
 }
 
 vi.mock('vue-i18n', () => ({
@@ -59,12 +59,14 @@ function mountDialog(options: { editing?: ProviderInstance | null } = {}) {
         { value: 'stripe', label: 'Stripe' },
         { value: 'airwallex', label: 'Airwallex' },
         { value: 'payoneer', label: 'Payoneer' },
+        { value: 'paypal', label: 'PayPal' },
       ],
       enabledKeyOptions: [
         { value: 'alipay', label: 'Alipay' },
         { value: 'wxpay', label: 'WeChat Pay' },
         { value: 'airwallex', label: 'Airwallex' },
         { value: 'payoneer', label: 'Payoneer' },
+        { value: 'paypal', label: 'PayPal' },
       ],
       allPaymentTypes: [
         { value: 'alipay', label: 'Alipay' },
@@ -133,14 +135,14 @@ describe('PaymentProviderDialog payment guide', () => {
     expect(wrapper.text()).toContain('/api/v1/payment/webhook/stripe')
   })
 
-  it('shows Payoneer webhook guidance with the fixed webhook URL', async () => {
+  it('shows PayPal webhook guidance with the fixed webhook URL', async () => {
     const wrapper = mountDialog()
 
-    ;(wrapper.vm as unknown as { reset: (key: string) => void }).reset('payoneer')
+    ;(wrapper.vm as unknown as { reset: (key: string) => void }).reset('paypal')
     await nextTick()
 
-    expect(wrapper.text()).toContain(messages['admin.settings.payment.payoneerWebhookHint'])
-    expect(wrapper.text()).toContain('/api/v1/payment/webhook/payoneer')
+    expect(wrapper.text()).toContain(messages['admin.settings.payment.paypalWebhookHint'])
+    expect(wrapper.text()).toContain('/api/v1/payment/webhook/paypal')
   })
 
   it('emits an empty Airwallex accountId when the admin clears it', async () => {

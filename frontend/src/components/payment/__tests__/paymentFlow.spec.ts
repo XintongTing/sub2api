@@ -39,7 +39,7 @@ describe('getVisibleMethods', () => {
       wxpay: methodLimit({ single_max: 100 }),
       stripe: methodLimit({ fee_rate: 3 }),
       airwallex: methodLimit({ single_min: 10 }),
-      payoneer: methodLimit({ single_min: 20 }),
+      paypal: methodLimit({ single_min: 20 }),
     })
 
     expect(visible).toEqual({
@@ -47,7 +47,7 @@ describe('getVisibleMethods', () => {
       wxpay: methodLimit({ single_max: 100 }),
       stripe: methodLimit({ fee_rate: 3 }),
       airwallex: methodLimit({ single_min: 10 }),
-      payoneer: methodLimit({ single_min: 20 }),
+      paypal: methodLimit({ single_min: 20 }),
     })
   })
 
@@ -166,6 +166,24 @@ describe('decidePaymentLaunch', () => {
     expect(decision.paymentState.paymentType).toBe('payoneer')
     expect(decision.paymentState.currency).toBe('THB')
     expect(decision.recovery.resumeToken).toBe('resume-payoneer')
+  })
+
+  it('uses hosted redirect flow for PayPal checkout URLs', () => {
+    const decision = decidePaymentLaunch(createOrderResult({
+      pay_url: 'https://checkout.paypal.example/session/abc',
+      payment_mode: 'redirect',
+      currency: 'THB',
+      resume_token: 'resume-paypal',
+    }), {
+      visibleMethod: 'paypal',
+      orderType: 'balance',
+      isMobile: false,
+    })
+
+    expect(decision.kind).toBe('redirect_waiting')
+    expect(decision.paymentState.paymentType).toBe('paypal')
+    expect(decision.paymentState.currency).toBe('THB')
+    expect(decision.recovery.resumeToken).toBe('resume-paypal')
   })
 
   it('prefers redirect on mobile when both pay_url and qr_code are present', () => {

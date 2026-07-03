@@ -51,6 +51,20 @@ describe('PROVIDER_CONFIG_FIELDS.stripe', () => {
   })
 })
 
+describe('PROVIDER_CONFIG_FIELDS.paypal', () => {
+  it('defines PayPal Checkout credentials and THB currency defaults', () => {
+    expect(PROVIDER_SUPPORTED_TYPES.paypal).toEqual(['paypal'])
+    expect(WEBHOOK_PATHS.paypal).toBe('/api/v1/payment/webhook/paypal')
+    expect(PROVIDER_CALLBACK_PATHS.paypal?.returnUrl).toBe('/payment/result')
+    expect(findField('paypal', 'clientId')?.sensitive).toBe(false)
+    expect(findField('paypal', 'clientSecret')?.sensitive).toBe(true)
+    expect(findField('paypal', 'webhookId')?.sensitive).toBe(false)
+    expect(findField('paypal', 'environment')?.defaultValue).toBe('sandbox')
+    expect(findField('paypal', 'apiBase')?.defaultValue).toBe('https://api-m.sandbox.paypal.com')
+    expect(findField('paypal', 'currency')?.defaultValue).toBe('THB')
+  })
+})
+
 describe('PROVIDER_CONFIG_FIELDS.payoneer', () => {
   it('defines Payoneer Checkout credentials and THB currency defaults', () => {
     expect(PROVIDER_SUPPORTED_TYPES.payoneer).toEqual(['payoneer'])
@@ -60,6 +74,7 @@ describe('PROVIDER_CONFIG_FIELDS.payoneer', () => {
     expect(findField('payoneer', 'clientSecret')?.sensitive).toBe(true)
     expect(findField('payoneer', 'webhookSecret')?.sensitive).toBe(true)
     expect(findField('payoneer', 'environment')?.defaultValue).toBe('sandbox')
+    expect(findField('payoneer', 'apiBase')?.defaultValue).toBe('https://api.sandbox.payoneer.com')
     expect(findField('payoneer', 'currency')?.defaultValue).toBe('THB')
   })
 })

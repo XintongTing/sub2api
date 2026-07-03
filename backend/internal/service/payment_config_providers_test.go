@@ -52,6 +52,13 @@ func TestValidateProviderRequest(t *testing.T) {
 			wantErr:        false,
 		},
 		{
+			name:           "valid paypal provider draft",
+			providerKey:    payment.TypePayPal,
+			providerName:   "PayPal Provider",
+			supportedTypes: payment.TypePayPal,
+			wantErr:        false,
+		},
+		{
 			name:           "valid payoneer provider draft",
 			providerKey:    payment.TypePayoneer,
 			providerName:   "Payoneer Provider",
@@ -164,6 +171,13 @@ func TestIsSensitiveProviderConfigField(t *testing.T) {
 		{payment.TypeAirwallex, "apiBase", false},
 		{payment.TypeAirwallex, "accountId", false},
 		{payment.TypeAirwallex, "currency", false},
+
+		// PayPal
+		{payment.TypePayPal, "clientSecret", true},
+		{payment.TypePayPal, "webhookId", false},
+		{payment.TypePayPal, "clientId", false},
+		{payment.TypePayPal, "environment", false},
+		{payment.TypePayPal, "currency", false},
 
 		// Payoneer
 		{payment.TypePayoneer, "clientSecret", true},

@@ -237,6 +237,7 @@ const th = deepMergeMessages(en, {
     groupFallback: 'กลุ่ม #{id}',
     methods: {
       payoneer: 'Payoneer',
+      paypal: 'PayPal',
       alipay: 'Alipay',
       wxpay: 'WeChat Pay',
       stripe: 'Stripe',
