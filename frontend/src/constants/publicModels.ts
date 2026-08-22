@@ -274,24 +274,6 @@ export const publicModels: PublicModelInfo[] = [
     descriptionI18n: descriptions.qwen,
     tags: ['OpenAI-compatible', 'Token billing', 'General chat', 'Fast response'],
   },
-  {
-    id: 'qwen3.6-plus',
-    name: 'qwen3.6-plus',
-    displayName: 'qwen3.6-plus',
-    provider: 'Qwen',
-    upstreamModel: 'qwen3.6-plus',
-    type: 'Chat',
-    billing: 'Token billing',
-    billingMode: 'token',
-    currency: 'THB',
-    inputPrice: null,
-    outputPrice: null,
-    unit: '1M Tokens',
-    endpointTypes: ['openai:/v1/chat/completions'],
-    description: descriptionFor('qwen'),
-    descriptionI18n: descriptions.qwen,
-    tags: ['OpenAI-compatible', 'Token billing', 'General chat', 'Reasoning'],
-  },
 ]
 
 

@@ -31,7 +31,6 @@ func DefaultHuosanyunCatalog() []HuosanyunModelSpec {
 		{Model: "kimi-k2.6", BillingMode: BillingModeToken, InputTHBPer1M: 97.5, OutputTHBPer1M: 405, CacheReadTHB1M: 15},
 		{Model: "MiniMax-M2.5", BillingMode: BillingModeToken},
 		{Model: "qwen-plus", BillingMode: BillingModeToken},
-		{Model: "qwen3.6-plus", BillingMode: BillingModeToken},
 	}
 }
 

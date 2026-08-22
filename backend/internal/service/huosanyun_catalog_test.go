@@ -15,7 +15,7 @@ func TestDefaultHuosanyunCatalogContainsAllowedRealIDsAndRejectsLegacyAliases(t 
 		}
 	}
 
-	for _, model := range []string{"deepseek-v4-flash", "deepseek-v4-pro", "glm-4.7", "glm-5", "glm-5.1", "MiniMax-M2.5", "qwen-plus", "qwen3.6-plus", "kimi-k2.5", "kimi-k2.6"} {
+	for _, model := range []string{"deepseek-v4-flash", "deepseek-v4-pro", "glm-4.7", "glm-5", "glm-5.1", "MiniMax-M2.5", "qwen-plus", "kimi-k2.5", "kimi-k2.6"} {
 		if _, ok := seen[model]; !ok {
 			t.Fatalf("expected catalog to contain %s", model)
 		}
