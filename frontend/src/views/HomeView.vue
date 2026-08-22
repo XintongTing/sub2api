@@ -156,13 +156,40 @@
       </section>
     </main>
 
-    <footer class="border-t border-slate-200 bg-white dark:border-dark-800 dark:bg-dark-950">
-      <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-        <span>(c) 2026 {{ siteName }}. All rights reserved.</span>
-        <div class="flex flex-wrap gap-4">
-          <router-link to="/docs" class="hover:text-slate-900 dark:hover:text-white">{{ copy.apiDocs }}</router-link>
-          <router-link to="/legal/terms" class="hover:text-slate-900 dark:hover:text-white">{{ copy.terms }}</router-link>
-          <a :href="contactHref" class="hover:text-slate-900 dark:hover:text-white">{{ contactText }}</a>
+    <footer class="border-t border-slate-200 bg-slate-950 text-slate-300 dark:border-dark-800">
+      <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr] lg:px-8">
+        <div>
+          <p class="font-bold text-white">Ekkamai Technology (Hong Kong) Company Limited</p>
+          <address class="mt-3 max-w-xl text-sm not-italic leading-6 text-slate-400">
+            <span class="block">Room 701, Unit 127, 7/F, Tower B, New Mandarin Plaza, 14 Science Museum Road, Tsim Sha Tsui, Kowloon</span>
+            <span class="mt-1 block">Phone: 66841850843</span>
+          </address>
+          <a :href="contactHref" class="mt-4 inline-flex text-sm font-semibold text-cyan-300 hover:text-cyan-200">{{ contactText }}</a>
+        </div>
+
+        <div>
+          <p class="text-sm font-bold uppercase tracking-wide text-white">{{ copy.serviceInformation }}</p>
+          <div class="mt-3 grid gap-2 text-sm text-slate-400">
+            <router-link to="/models" class="hover:text-white">{{ copy.modelsAndPricing }}</router-link>
+            <router-link to="/legal/company" class="hover:text-white">{{ copy.companyInformation }}</router-link>
+            <router-link to="/legal/payment-process" class="hover:text-white">{{ copy.paymentProcess }}</router-link>
+            <router-link to="/support" class="hover:text-white">{{ copy.customerSupport }}</router-link>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-sm font-bold uppercase tracking-wide text-white">{{ copy.policies }}</p>
+          <div class="mt-3 grid gap-2 text-sm text-slate-400">
+            <router-link to="/legal/terms" class="hover:text-white">{{ copy.terms }}</router-link>
+            <router-link to="/legal/privacy" class="hover:text-white">{{ copy.privacy }}</router-link>
+            <router-link to="/legal/delivery-policy" class="hover:text-white">{{ copy.delivery }}</router-link>
+            <router-link to="/legal/refund-policy" class="hover:text-white">{{ copy.refunds }}</router-link>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-white/10">
+        <div class="mx-auto max-w-7xl px-4 py-5 text-xs text-slate-500 sm:px-6 lg:px-8">
+          © 2026 Ekkamai Technology (Hong Kong) Company Limited. All rights reserved.
         </div>
       </div>
     </footer>
@@ -232,6 +259,15 @@ const localized = {
     viewAllModels: '查看全部模型',
     apiDocs: 'API 接入说明',
     terms: '服务条款',
+    serviceInformation: '服务信息',
+    modelsAndPricing: '产品与价格',
+    companyInformation: '公司信息',
+    paymentProcess: '支付流程',
+    customerSupport: '客户服务',
+    policies: '协议与政策',
+    privacy: '隐私政策',
+    delivery: '数字交付与物流政策',
+    refunds: '退换货及退款政策',
     featureCards: [
       ['key', '创建 API Key', '用户在控制台创建密钥，密钥额度与账户充值余额关联，方便运营和交付测试。'],
       ['creditCard', '充值余额', '钱包按固定泰铢金额充值，调用不同模型时按 Token 和模型价格实时扣费。'],
@@ -264,6 +300,15 @@ const localized = {
     viewAllModels: 'View all models',
     apiDocs: 'API guide',
     terms: 'Terms',
+    serviceInformation: 'Service information',
+    modelsAndPricing: 'Products & pricing',
+    companyInformation: 'Company information',
+    paymentProcess: 'Payment process',
+    customerSupport: 'Customer support',
+    policies: 'Legal & policies',
+    privacy: 'Privacy policy',
+    delivery: 'Digital delivery policy',
+    refunds: 'Refund policy',
     featureCards: [
       ['key', 'Create API keys', 'Create keys in the console. Key access is tied to account balance for easy operations and delivery testing.'],
       ['creditCard', 'THB top-up', 'Top up your wallet with fixed THB amounts. Calls are charged by model price and token usage.'],
@@ -296,6 +341,15 @@ const localized = {
     viewAllModels: 'ดูโมเดลทั้งหมด',
     apiDocs: 'คู่มือ API',
     terms: 'เงื่อนไขบริการ',
+    serviceInformation: 'ข้อมูลบริการ',
+    modelsAndPricing: 'ผลิตภัณฑ์และราคา',
+    companyInformation: 'ข้อมูลบริษัท',
+    paymentProcess: 'ขั้นตอนการชำระเงิน',
+    customerSupport: 'ฝ่ายบริการลูกค้า',
+    policies: 'ข้อกำหนดและนโยบาย',
+    privacy: 'นโยบายความเป็นส่วนตัว',
+    delivery: 'นโยบายการส่งมอบดิจิทัล',
+    refunds: 'นโยบายคืนเงิน',
     featureCards: [
       ['key', 'สร้าง API Key', 'สร้างคีย์ในคอนโซลและผูกกับยอดเงินในบัญชีเพื่อทดสอบและส่งมอบได้ง่าย'],
       ['creditCard', 'เติมเงิน THB', 'เติมเงินเป็นจำนวนเงินบาทแบบคงที่ และหักตามราคาโมเดลกับ Token ที่ใช้จริง'],

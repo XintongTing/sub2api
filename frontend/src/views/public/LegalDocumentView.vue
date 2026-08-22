@@ -96,7 +96,12 @@ import { sanitizeUrl } from '@/utils/url'
 import type { LoginAgreementDocument, PublicSettings } from '@/types'
 import zhAdminCompliance from '../../../../docs/legal/admin-compliance.zh.md?raw'
 import enAdminCompliance from '../../../../docs/legal/admin-compliance.en.md?raw'
-import customerRegistrationNoticeZh from '../../../../docs/legal/customer-registration-notice.zh.md?raw'
+import companyInformation from '../../../../docs/legal/company-information.md?raw'
+import deliveryPolicy from '../../../../docs/legal/delivery-policy.md?raw'
+import paymentProcess from '../../../../docs/legal/payment-process.md?raw'
+import privacyPolicy from '../../../../docs/legal/privacy-policy.md?raw'
+import refundPolicy from '../../../../docs/legal/refund-policy.md?raw'
+import termsOfService from '../../../../docs/legal/terms-of-service.md?raw'
 
 type LegalDocumentIcon = 'document' | 'shield' | 'globe' | 'cog'
 
@@ -113,9 +118,17 @@ marked.setOptions({
 
 const documentId = computed(() => String(route.params.documentId || ''))
 const isAdminComplianceDocument = computed(() => documentId.value === 'admin-compliance')
-const isCustomerRegistrationNotice = computed(() =>
-  ['terms', 'customer-registration-notice', 'service-agreement'].includes(documentId.value)
-)
+const bundledDocuments: Record<string, LoginAgreementDocument> = {
+  terms: { id: 'terms', title: 'Terms of Service / 用户服务协议', content_md: termsOfService },
+  'customer-registration-notice': { id: 'terms', title: 'Terms of Service / 用户服务协议', content_md: termsOfService },
+  'service-agreement': { id: 'terms', title: 'Terms of Service / 用户服务协议', content_md: termsOfService },
+  privacy: { id: 'privacy', title: 'Privacy Policy / 隐私政策', content_md: privacyPolicy },
+  'delivery-policy': { id: 'delivery-policy', title: 'Digital Delivery and Logistics Policy / 数字交付与物流政策', content_md: deliveryPolicy },
+  'refund-policy': { id: 'refund-policy', title: 'Refund Policy / 退换货及退款政策', content_md: refundPolicy },
+  'payment-process': { id: 'payment-process', title: 'Payment Process / 支付流程', content_md: paymentProcess },
+  company: { id: 'company', title: 'Company Information / 公司信息', content_md: companyInformation },
+}
+const isBundledDocument = computed(() => Boolean(bundledDocuments[documentId.value]))
 const documents = computed(() => settings.value?.login_agreement_documents ?? [])
 const siteName = computed(() => settings.value?.site_name || 'OneAPI')
 const siteLogo = computed(() => sanitizeUrl(settings.value?.site_logo || '', {
@@ -125,8 +138,8 @@ const siteLogo = computed(() => sanitizeUrl(settings.value?.site_logo || '', {
 const updatedAt = computed(() =>
   isAdminComplianceDocument.value
     ? ''
-    : isCustomerRegistrationNotice.value
-      ? '2026-07-03'
+    : isBundledDocument.value
+      ? '2026-08-14'
       : settings.value?.login_agreement_updated_at || ''
 )
 const documentTypeLabel = computed(() =>
@@ -141,12 +154,8 @@ const currentDocument = computed<LoginAgreementDocument | null>(() => {
       content_md: getLocale().startsWith('zh') ? zhAdminCompliance : enAdminCompliance
     }
   }
-  if (isCustomerRegistrationNotice.value) {
-    return {
-      id: 'terms',
-      title: '客户注册告知函（暨服务协议）',
-      content_md: customerRegistrationNoticeZh
-    }
+  if (bundledDocuments[documentId.value]) {
+    return bundledDocuments[documentId.value]
   }
   const id = documentId.value
   if (!id) {

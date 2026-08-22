@@ -58,6 +58,15 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/support',
+    name: 'CustomerSupport',
+    component: () => import('@/views/public/CustomerSupportView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Customer Support'
+    }
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('@/views/auth/LoginView.vue'),

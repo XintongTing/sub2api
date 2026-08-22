@@ -41,7 +41,9 @@ function getDefaultLocale(): LocaleCode {
 
   for (const lang of navigator.languages || [navigator.language]) {
     const locale = normalizeLocaleCode(lang)
-    if (locale) return locale
+    if (locale) {
+      return locale
+    }
   }
 
   return DEFAULT_LOCALE
@@ -99,10 +101,10 @@ export function getLocale(): LocaleCode {
 }
 
 export const availableLocales = [
-  { code: 'en', name: 'English', flag: 'EN' },
   { code: 'th', name: 'ไทย', flag: 'TH' },
-  { code: 'zh-CN', name: '简体中文', flag: 'CN' },
+  { code: 'en', name: 'English', flag: 'EN' },
   { code: 'zh-TW', name: '繁體中文', flag: 'TW' },
+  { code: 'zh-CN', name: '简体中文', flag: 'CN' },
 ] as const
 
 export default i18n

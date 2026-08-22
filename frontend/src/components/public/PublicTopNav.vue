@@ -94,7 +94,7 @@ import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const appStore = useAppStore()
 const authStore = useAuthStore()
 
@@ -110,7 +110,15 @@ const navItems = computed(() => [
   { path: '/dashboard', label: t('publicNav.console') },
   { path: '/models', label: t('publicNav.models') },
   { path: '/docs', label: t('publicNav.docs') },
+  { path: '/support', label: supportLabel.value },
 ])
+
+const supportLabel = computed(() => {
+  const current = String(locale.value || '').toLowerCase()
+  if (current.startsWith('zh')) return '客服'
+  if (current.startsWith('th')) return 'ช่วยเหลือ'
+  return 'Support'
+})
 
 function isActive(path: string): boolean {
   if (path === '/home') return route.path === '/' || route.path === '/home'
