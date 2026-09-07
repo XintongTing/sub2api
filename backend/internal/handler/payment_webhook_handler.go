@@ -79,6 +79,12 @@ func (h *PaymentWebhookHandler) PayPalWebhook(c *gin.Context) {
 	h.handleNotify(c, payment.TypePayPal)
 }
 
+// SunrateWebhook handles SUNRATE Cashier notifications.
+// POST /api/v1/payment/webhook/sunrate
+func (h *PaymentWebhookHandler) SunrateWebhook(c *gin.Context) {
+	h.handleNotify(c, payment.TypeSunrate)
+}
+
 // handleNotify is the shared logic for all provider webhook handlers.
 func (h *PaymentWebhookHandler) handleNotify(c *gin.Context, providerKey string) {
 	var rawBody string
@@ -206,6 +212,13 @@ func extractOutTradeNo(rawBody, providerKey string) string {
 				}
 			}
 		}
+	case payment.TypeSunrate:
+		var payload struct {
+			OrderNum string `json:"orderNum"`
+		}
+		if err := json.Unmarshal([]byte(rawBody), &payload); err == nil {
+			return strings.TrimSpace(payload.OrderNum)
+		}
 	}
 	// For other providers (Stripe, Alipay direct, WxPay direct), the registry
 	// typically has only one instance, so no instance lookup is needed.
@@ -252,6 +265,8 @@ func writeSuccessResponse(c *gin.Context, providerKey string) {
 		c.JSON(http.StatusOK, wxpaySuccessResponse{Code: wxpaySuccessCode, Message: wxpaySuccessMessage})
 	case payment.TypeStripe, payment.TypeAirwallex, payment.TypePayoneer, payment.TypePayPal:
 		c.String(http.StatusOK, "")
+	case payment.TypeSunrate:
+		c.String(http.StatusOK, "OK")
 	default:
 		c.String(http.StatusOK, "success")
 	}

@@ -288,13 +288,14 @@ import {
  * provider's built-in default behavior". */
 function defaultPaymentMode(providerKey: string): string {
   if (providerKey === 'easypay') return PAYMENT_MODE_QRCODE
+  if (providerKey === 'sunrate') return PAYMENT_MODE_REDIRECT
   return ''
 }
 
 /** Provider keys whose admin UI exposes a payment_mode selector.
  * Other providers always send payment_mode = ''. */
 function providerSupportsPaymentMode(providerKey: string): boolean {
-  return providerKey === 'easypay' || providerKey === 'alipay'
+  return providerKey === 'easypay' || providerKey === 'alipay' || providerKey === 'sunrate'
 }
 
 /** Allowed payment_mode values per provider. Used to coerce DB values
@@ -306,6 +307,7 @@ function isValidPaymentMode(providerKey: string, mode: string): boolean {
   if (providerKey === 'alipay') {
     return mode === '' || mode === PAYMENT_MODE_REDIRECT
   }
+  if (providerKey === 'sunrate') return mode === PAYMENT_MODE_REDIRECT
   return mode === ''
 }
 
@@ -373,6 +375,7 @@ const providerWebhookHintMap: Record<string, string> = {
   stripe: 'admin.settings.payment.stripeWebhookHint',
   airwallex: 'admin.settings.payment.airwallexWebhookHint',
   paypal: 'admin.settings.payment.paypalWebhookHint',
+  sunrate: 'admin.settings.payment.sunrateWebhookHint',
 }
 
 const providerWebhookUrl = computed(() => {
@@ -397,6 +400,7 @@ const paymentModeOptions = computed(() => {
       { value: PAYMENT_MODE_REDIRECT, label: t('admin.settings.payment.modeRedirect') },
     ]
   }
+  if (form.provider_key === 'sunrate') return [{ value: PAYMENT_MODE_REDIRECT, label: t('admin.settings.payment.modeRedirect') }]
   return [
     { value: PAYMENT_MODE_QRCODE, label: t('admin.settings.payment.modeQRCode') },
     { value: PAYMENT_MODE_POPUP, label: t('admin.settings.payment.modePopup') },
@@ -496,6 +500,9 @@ const limitableTypes = computed(() => {
   }
   if (form.provider_key === 'paypal') {
     return [{ value: 'paypal', label: 'PayPal' }]
+  }
+  if (form.provider_key === 'sunrate') {
+    return [{ value: 'sunrate', label: 'SUNRATE' }]
   }
   const selected = form.supported_types.filter(t => t !== 'easypay')
   return selected.map(v => {

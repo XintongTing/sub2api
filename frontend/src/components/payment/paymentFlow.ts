@@ -18,9 +18,10 @@ const VISIBLE_METHOD_ALIASES = {
   airwallex: 'airwallex',
   payoneer: 'payoneer',
   paypal: 'paypal',
+  sunrate: 'sunrate',
 } as const
 
-export type VisiblePaymentMethod = 'alipay' | 'wxpay' | 'stripe' | 'airwallex' | 'payoneer' | 'paypal'
+export type VisiblePaymentMethod = 'alipay' | 'wxpay' | 'stripe' | 'airwallex' | 'payoneer' | 'paypal' | 'sunrate'
 export type StripeVisibleMethod = 'alipay' | 'wechat_pay'
 export type PaymentLaunchKind =
   | 'qr_waiting'

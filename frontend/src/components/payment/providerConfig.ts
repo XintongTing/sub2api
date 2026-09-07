@@ -38,13 +38,14 @@ export const PROVIDER_SUPPORTED_TYPES: Record<string, string[]> = {
   airwallex: ['airwallex'],
   payoneer: ['payoneer'],
   paypal: ['paypal'],
+  sunrate: ['sunrate'],
 }
 
 /** Available payment modes for EasyPay providers. */
 export const EASYPAY_PAYMENT_MODES = ['qrcode', 'popup'] as const
 
 /** Fixed display order for user-facing payment methods */
-export const METHOD_ORDER = ['paypal', 'payoneer', 'alipay', 'alipay_direct', 'wxpay', 'wxpay_direct', 'stripe', 'airwallex'] as const
+export const METHOD_ORDER = ['sunrate', 'paypal', 'payoneer', 'alipay', 'alipay_direct', 'wxpay', 'wxpay_direct', 'stripe', 'airwallex'] as const
 
 /** Payment mode constants */
 export const PAYMENT_MODE_QRCODE = 'qrcode'
@@ -90,6 +91,7 @@ export const WEBHOOK_PATHS: Record<string, string> = {
   airwallex: '/api/v1/payment/webhook/airwallex',
   payoneer: '/api/v1/payment/webhook/payoneer',
   paypal: '/api/v1/payment/webhook/paypal',
+  sunrate: '/api/v1/payment/webhook/sunrate',
 }
 
 export const RETURN_PATH = '/payment/result'
@@ -101,6 +103,7 @@ export const PROVIDER_CALLBACK_PATHS: Record<string, CallbackPaths> = {
   wxpay: { notifyUrl: WEBHOOK_PATHS.wxpay },
   payoneer: { notifyUrl: WEBHOOK_PATHS.payoneer, returnUrl: RETURN_PATH },
   paypal: { notifyUrl: WEBHOOK_PATHS.paypal, returnUrl: RETURN_PATH },
+  sunrate: { notifyUrl: WEBHOOK_PATHS.sunrate, returnUrl: RETURN_PATH },
   // stripe: 不需要回调 URL 配置，Webhook 单独配置。
   // airwallex: 不需要回调 URL 配置，Webhook 在空中云汇后台配置。
 }
@@ -166,6 +169,17 @@ export const PROVIDER_CONFIG_FIELDS: Record<string, ConfigFieldDef[]> = {
     ] },
     { key: 'apiBase', label: '', sensitive: false, defaultValue: 'https://api-m.sandbox.paypal.com', hintKey: 'admin.settings.payment.field_paypalApiBaseHint' },
     { key: 'currency', label: '', sensitive: false, defaultValue: 'THB', hintKey: 'admin.settings.payment.field_paymentCurrencyHint', options: PAYMENT_CURRENCY_OPTIONS },
+  ],
+  sunrate: [
+    { key: 'merchantId', label: '', sensitive: false },
+    { key: 'signatureKey', label: '', sensitive: true },
+    { key: 'environment', label: '', sensitive: false, defaultValue: 'sandbox', options: [
+      { value: 'sandbox', label: 'Sandbox' },
+      { value: 'live', label: 'Live' },
+    ] },
+    { key: 'apiBase', label: '', sensitive: false, defaultValue: 'https://test-api.xunhuiacq.com' },
+    { key: 'currency', label: '', sensitive: false, defaultValue: 'THB', options: PAYMENT_CURRENCY_OPTIONS },
+    { key: 'filters', label: '', sensitive: false, optional: true, defaultValue: 'truemoney,rabbit_line_pay,kplus,promptpay' },
   ],
 }
 
