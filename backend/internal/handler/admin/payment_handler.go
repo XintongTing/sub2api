@@ -175,9 +175,9 @@ func (h *PaymentHandler) ProcessRefund(c *gin.Context) {
 	response.Success(c, result)
 }
 
-// --- Subscription Plans ---
+// --- Recharge Amounts ---
 
-// ListPlans returns all subscription plans.
+// ListPlans returns all recharge amounts.
 // GET /api/v1/admin/payment/plans
 func (h *PaymentHandler) ListPlans(c *gin.Context) {
 	plans, err := h.configService.ListPlans(c.Request.Context())

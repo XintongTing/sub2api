@@ -1,4 +1,16 @@
 export default {
+  publicNav: {
+    home: '首页',
+    console: '控制台',
+    models: '模型广场',
+    docs: '文档',
+    login: '登录',
+    admin: '管理后台',
+    lightMode: '切换浅色模式',
+    darkMode: '切换深色模式',
+    toggleNavigation: '打开导航菜单',
+  },
+
   // Home Page
   home: {
     viewOnGithub: '在 GitHub 上查看',
@@ -10,11 +22,17 @@ export default {
     login: '登录',
     getStarted: '立即开始',
     goToDashboard: '进入控制台',
+    defaultSiteSubtitle: 'AI 模型 API 聚合网关',
     // 新增：面向用户的价值主张
     heroSubtitle: '一个密钥，畅用多个 AI 模型',
-    heroDescription: '无需管理多个订阅账号，一站式接入 Claude、GPT、Gemini 等主流 AI 服务',
+    heroDescription: '一个 API Key 接入已启用模型，按实际 Token 消耗从充值余额扣费',
+    terminal: {
+      title: '终端',
+      routingComment: '# 正在转发到上游...',
+      responseContent: '你好！'
+    },
     tags: {
-      subscriptionToApi: '订阅转 API',
+      subscriptionToApi: 'API 聚合网关',
       stickySession: '会话保持',
       realtimeBilling: '按量计费'
     },
@@ -23,7 +41,7 @@ export default {
       title: '你是否也遇到这些问题？',
       items: {
         expensive: {
-          title: '订阅费用高',
+          title: '接入成本高',
           desc: '每个 AI 服务都要单独订阅，每月支出越来越多'
         },
         complex: {
@@ -187,8 +205,8 @@ export default {
 
   // Setup Wizard
   setup: {
-    title: 'Sub2API 安装向导',
-    description: '配置您的 Sub2API 实例',
+    title: 'OneAPI 安装向导',
+    description: '配置您的 OneAPI 实例',
     database: {
       title: '数据库配置',
       description: '连接到您的 PostgreSQL 数据库',
@@ -374,7 +392,14 @@ export default {
 
   // Navigation
   nav: {
-    dashboard: '仪表盘',
+    dashboard: '数据看板',
+    dataBoard: '数据看板',
+    chat: '聊天',
+    playground: '操练场',
+    console: '控制台',
+    personalCenter: '个人中心',
+    walletManagement: '钱包管理',
+    personalSettings: '个人设置',
     announcements: '公告',
     apiKeys: 'API 密钥',
     usage: '使用记录',
@@ -388,7 +413,7 @@ export default {
     users: '用户管理',
     groups: '分组管理',
     channels: '渠道管理',
-    availableChannels: '可用渠道',
+    availableChannels: '可用模型',
     subscriptions: '订阅管理',
     accounts: '账号管理',
     proxies: 'IP管理',
@@ -404,17 +429,17 @@ export default {
     logout: '退出登录',
     github: 'GitHub',
     mySubscriptions: '我的订阅',
-    buySubscription: '充值/订阅',
+    buySubscription: '钱包管理',
     docs: '文档',
     myOrders: '我的订单',
     orderManagement: '订单管理',
     paymentDashboard: '支付概览',
     paymentConfig: '支付配置',
-    paymentPlans: '订阅套餐',
+    paymentPlans: '充值金额',
     channelManagement: '渠道管理',
     channelPricing: '渠道定价',
     channelMonitor: '渠道监控',
-    channelStatus: '渠道状态',
+    channelStatus: '服务状态',
     riskControl: '风控中心',
   },
 
@@ -426,6 +451,10 @@ export default {
     signingIn: '登录中...',
     createAccount: '创建账户',
     signUpToStart: '注册以开始使用 {siteName}',
+    registrationAgreementPrefix: '我已阅读并同意',
+    registrationAgreementTitle: '《客户注册告知函（暨服务协议）》',
+    registrationAgreementRequired: '请先阅读并勾选同意客户注册告知函（暨服务协议）。',
+    acceptLatestAgreementFirst: '请先阅读并同意最新条款后再注册。',
     signUp: '注册',
     processing: '处理中...',
     continue: '继续',
@@ -639,7 +668,15 @@ export default {
 
   // Dashboard
   dashboard: {
-    title: '仪表盘',
+    title: '数据看板',
+    consoleOverview: '控制台概览',
+    overviewDescription: '查看账户余额、API Key、调用趋势和最近用量。统计接口异常时，页面会保留可用数据并提示重试。',
+    refreshData: '刷新数据',
+    refreshing: '刷新中...',
+    requestFailed: '请求失败',
+    requestTimeout: '{label} 超时，请稍后重试',
+    statsLabel: '数据看板统计',
+    statsUnavailable: '数据看板统计暂时不可用：{message}',
     welcomeMessage: '欢迎回来！这是您账户的概览。',
     balance: '余额',
     apiKeys: 'API 密钥',
@@ -829,8 +866,8 @@ export default {
     },
     // 配额和有效期
     quotaLimit: '额度限制',
-    quotaAmount: '额度金额 (USD)',
-    quotaAmountPlaceholder: '输入 USD 额度限制',
+    quotaAmount: '额度金额 (THB)',
+    quotaAmountPlaceholder: '输入 THB 额度限制',
     quotaAmountHint: '设置此密钥可消费的最大金额。0 = 无限制。',
     quotaUsed: '已用额度',
     reset: '重置',
@@ -842,9 +879,9 @@ export default {
     rateLimitColumn: '速率限制',
     rateLimitSection: '速率限制',
     resetUsage: '重置',
-    rateLimit5h: '5小时限额 (USD)',
-    rateLimit1d: '日限额 (USD)',
-    rateLimit7d: '7天限额 (USD)',
+    rateLimit5h: '5小时限额 (THB)',
+    rateLimit1d: '日限额 (THB)',
+    rateLimit7d: '7天限额 (THB)',
     rateLimitHint: '设置此密钥在指定时间窗口内的最大消费额。0 = 无限制。',
     rateLimitUsage: '速率限制用量',
     resetRateLimitUsage: '重置速率限制用量',
@@ -1029,15 +1066,15 @@ export default {
     relativeDaysAgo: '{n} 天前'
   },
 
-  // Channel Status (user-facing read-only view)
+  // Service Status (user-facing read-only view)
   channelStatus: {
-    title: '渠道状态',
-    description: '查看渠道可用性、延迟和近期状态',
-    searchPlaceholder: '搜索渠道...',
+    title: '服务状态',
+    description: '查看模型可用性、延迟和近期状态',
+    searchPlaceholder: '搜索模型...',
     allProviders: '全部供应商',
-    loadError: '加载渠道状态失败',
-    detailLoadError: '加载渠道详情失败',
-    detailTitle: '渠道详情',
+    loadError: '加载服务状态失败',
+    detailLoadError: '加载模型详情失败',
+    detailTitle: '模型状态详情',
     closeDetail: '关闭',
     windowTab: {
       '7d': '7 天',
@@ -1067,17 +1104,17 @@ export default {
       avgLatency7d: '7 天平均延迟 (ms)'
     },
     empty: {
-      title: '暂无可显示的渠道',
-      description: '管理员尚未配置可监控的渠道。'
+      title: '暂无可显示的模型状态',
+      description: '管理员尚未配置可监控的模型。'
     }
   },
 
-  // Available Channels (user-facing)
+  // Available Models (user-facing)
   availableChannels: {
-    title: '可用渠道',
-    description: '查看您可访问的渠道与其支持的模型、定价',
-    searchPlaceholder: '搜索渠道或模型...',
-    empty: '暂无可用渠道',
+    title: '可用模型',
+    description: '查看您可访问的模型、端点和定价',
+    searchPlaceholder: '搜索模型...',
+    empty: '暂无可用模型',
     noModels: '未配置模型',
     noPricing: '未配置定价',
     exclusive: '专属',
@@ -1085,7 +1122,7 @@ export default {
     exclusiveTooltip: '管理员授权给你的专属分组',
     publicTooltip: '对所有用户公开的分组',
     columns: {
-      name: '渠道名',
+      name: '模型服务',
       description: '描述',
       platform: '平台',
       groups: '我可访问的分组',
@@ -1428,6 +1465,11 @@ export default {
 
   // Admin
   admin: {
+    modelPricing: {
+      title: '模型价格设置',
+      description: '维护可售模型的泰铢售价、展示信息和调用开关',
+    },
+
     // Dashboard
     dashboard: {
       title: '管理控制台',
@@ -2120,9 +2162,9 @@ export default {
         subtitle: '为用户 {email} 配置各上游平台的日 / 周 / 月用量上限',
         columns: {
           platform: '平台',
-          daily: '日 (USD)',
-          weekly: '周 (USD)',
-          monthly: '月 (USD, 30天滚动)',
+          daily: '日 (THB)',
+          weekly: '周 (THB)',
+          monthly: '月 (THB, 30天滚动)',
           usage: '当前用量',
         },
         placeholder: '不限制',
@@ -2310,9 +2352,9 @@ export default {
         typeNotEditable: '分组创建后无法修改计费类型。',
         standard: '标准（余额）',
         subscription: '订阅（配额）',
-        dailyLimit: '每日限额（USD）',
-        weeklyLimit: '每周限额（USD）',
-        monthlyLimit: '每月限额（USD）',
+        dailyLimit: '每日限额（THB）',
+        weeklyLimit: '每周限额（THB）',
+        monthlyLimit: '每月限额（THB）',
         defaultValidityDays: '默认有效期（天）',
         validityHint: '分配给用户时订阅的有效天数',
         noLimit: '无限制'
@@ -2415,13 +2457,13 @@ export default {
       }
     },
 
-    // Available Channels (aggregated read-only view)
+    // Available Models (aggregated read-only view)
     availableChannels: {
-      title: '可用渠道',
-      description: '按渠道聚合查看关联分组与支持模型（已展开通配符）',
-      searchPlaceholder: '搜索渠道或模型...',
+      title: '可用模型',
+      description: '查看当前账号可使用的模型、端点与价格，不展示底层渠道信息。',
+      searchPlaceholder: '搜索模型...',
       columns: {
-        name: '渠道名',
+        name: '模型服务',
         status: '状态',
         billingSource: '计费模型来源',
         groups: '关联分组',
@@ -3251,7 +3293,7 @@ export default {
       resetQuota: '重置配额',
       quotaLimit: '配额限制',
       quotaLimitPlaceholder: '0 表示不限制',
-      quotaLimitHint: '设置日/周/总使用额度（美元），任一维度达到限额后账号暂停调度。Anthropic API Key 账号还可配置客户端亲和。修改限额不会重置已用额度。',
+      quotaLimitHint: '设置日/周/总使用额度（THB），任一维度达到限额后账号暂停调度。API Key 账号还可配置客户端亲和。修改限额不会重置已用额度。',
       quotaLimitToggle: '启用配额限制',
       quotaLimitToggleHint: '开启后，当账号用量达到设定额度时自动暂停调度',
       quotaDailyLimit: '日限额',
@@ -4519,7 +4561,7 @@ export default {
       generatedSuccessfully: '生成成功',
       codesCreated: '已创建 {count} 个兑换码',
       codeType: '类型',
-      amount: '金额 ($)',
+      amount: '金额 (THB)',
       value: '面值',
       count: '数量',
       generate: '生成',
@@ -4555,7 +4597,7 @@ export default {
         selectType: '选择类型',
         valueLabel: '面值',
         valuePlaceholder: '请输入面值',
-        balanceHint: '余额金额（美元）',
+        balanceHint: '余额金额（THB）',
         concurrencyHint: '并发数增量',
         countLabel: '数量',
         countPlaceholder: '请输入数量',
@@ -4688,7 +4730,7 @@ export default {
       code: '优惠码',
       autoGenerate: '留空自动生成',
       codePlaceholder: '输入优惠码或留空',
-      bonusAmount: '赠送金额 ($)',
+      bonusAmount: '赠送金额 (THB)',
       maxUses: '最大使用次数',
       zeroUnlimited: '0 = 无限制',
       expiresAt: '过期时间',
@@ -5586,11 +5628,11 @@ export default {
           defaultIntervalHint: '新建渠道监控时表单的默认值，可被单个渠道覆盖。范围 15 – 3600 秒。',
         },
         availableChannels: {
-          title: '可用渠道',
-          description: '向已登录用户展示他们能访问的渠道、模型和定价聚合视图。默认关闭。',
+          title: '可用模型',
+          description: '向已登录用户展示他们能访问的模型和定价聚合视图，不暴露底层渠道。默认关闭。',
           configureLink: '前往 渠道管理 > 渠道定价 配置模型价格',
-          enabled: '启用可用渠道',
-          enabledHint: '关闭后用户端侧边栏入口隐藏，接口返回空数组。',
+          enabled: '启用可用模型',
+          enabledHint: '关闭后用户端入口隐藏，接口返回空数组。',
         },
         riskControl: {
           title: '风控中心',
@@ -5704,7 +5746,7 @@ export default {
       },
       linuxdo: {
         title: 'LinuxDo Connect 登录',
-        description: '配置 LinuxDo Connect OAuth，用于 Sub2API 用户登录',
+        description: '配置 LinuxDo Connect OAuth，用于 OneAPI 用户登录',
         enable: '启用 LinuxDo 登录',
         enableHint: '在登录/注册页面显示 LinuxDo 登录入口',
         clientId: 'Client ID',
@@ -5723,7 +5765,7 @@ export default {
       },
       dingtalk: {
         title: '钉钉登录',
-        description: '配置钉钉 OAuth，用于 Sub2API 用户登录',
+        description: '配置钉钉 OAuth，用于 OneAPI 用户登录',
         enable: '启用钉钉登录-企业内部应用',
         enableHint: '在登录/注册页面显示钉钉登录入口',
         clientId: 'Client ID（AppKey）',
@@ -5836,9 +5878,9 @@ export default {
       },
       platformQuota: {
         platform:    '平台',
-        daily:       '日限额 (USD)',
-        weekly:      '周限额 (USD)',
-        monthly:     '月限额 (USD, 30天滚动)',
+        daily:       '日限额 (THB)',
+        weekly:      '周限额 (THB)',
+        monthly:     '月限额 (THB, 30天滚动)',
         placeholder: '不限',
       },
       claudeCode: {
@@ -5922,10 +5964,10 @@ export default {
           '禁用用户注册、公开页面和自助服务功能。仅管理员可以登录和管理平台。',
         siteName: '站点名称',
         siteNameHint: '显示在邮件和页面标题中',
-        siteNamePlaceholder: 'Sub2API',
+        siteNamePlaceholder: 'OneAPI',
         siteSubtitle: '站点副标题',
         siteSubtitleHint: '显示在登录和注册页面',
-        siteSubtitlePlaceholder: '订阅转 API 转换平台',
+        siteSubtitlePlaceholder: 'AI 模型 API 聚合网关',
         apiBaseUrl: 'API 端点地址',
         apiBaseUrlHint: '用于"使用密钥"和"导入到 CC Switch"功能，留空则使用当前站点地址',
         apiBaseUrlPlaceholder: 'https://api.example.com',
@@ -5974,11 +6016,11 @@ export default {
         hideCcsImportButtonHint: '启用后将在 API Keys 页面隐藏"导入 CCS"按钮'
       },
       purchase: {
-        title: '充值/订阅页面',
-        description: '在侧边栏展示“充值/订阅”入口，并在页面内通过 iframe 打开指定链接',
-        enabled: '显示充值/订阅入口',
+        title: '钱包充值页面',
+        description: '在侧边栏展示“钱包充值”入口，并在页面内通过 iframe 打开指定链接',
+        enabled: '显示钱包充值入口',
         enabledHint: '仅在标准模式（非简单模式）下展示',
-        url: '充值/订阅页面 URL',
+        url: '钱包充值页面 URL',
         urlPlaceholder: 'https://example.com/purchase',
         urlHint: '必须是完整的 http(s) 链接',
         iframeWarning:
@@ -6026,8 +6068,8 @@ export default {
         maxAmount: '最高金额',
         dailyLimit: '每日限额',
         balanceRechargeMultiplier: '余额充值倍率',
-        balanceRechargeMultiplierHint: '用户每支付 1 CNY 可获得多少 USD 余额',
-        balanceRechargePreview: '预览：1 CNY = {usd} USD',
+        balanceRechargeMultiplierHint: '用户每支付 1 THB 可获得多少 THB 余额',
+        balanceRechargePreview: '预览：1 THB = {usd} THB',
         rechargeFeeRate: '充值手续费率',
         rechargeFeeRateHint: '用户充值时额外收取的手续费百分比，0 表示不收取手续费',
         rechargeFeePreview: '预览：充值 100 元，手续费 {fee} 元',
@@ -6063,6 +6105,8 @@ export default {
         providerWxpay: '微信官方',
         providerStripe: 'Stripe',
         providerAirwallex: 'Airwallex',
+        providerPayoneer: 'Payoneer',
+        providerPayPal: 'PayPal',
         typeDisabled: '类型已禁用',
         enableTypesFirst: '请先在上方启用至少一种服务商',
         easypayRedirect: '跳转',
@@ -6090,14 +6134,20 @@ export default {
         wxpayAdvancedOptions: '微信支付高级可选项',
         field_secretKey: '密钥',
         field_clientId: 'Client ID',
+        field_clientSecret: 'Client Secret',
+        field_webhookId: 'Webhook ID',
         field_apiKey: 'API Key',
         field_publishableKey: '公开密钥',
         field_webhookSecret: 'Webhook 密钥',
         field_countryCode: '国家/地区代码',
         field_currency: '支付币种',
         field_accountId: 'Airwallex 账户 ID',
+        field_environment: '环境',
+        field_createPath: '创建订单路径',
+        field_queryPath: '查询订单路径',
         field_airwallexApiBaseHint: '必须和 API Key 所属环境一致：沙箱/测试密钥使用 https://api-demo.airwallex.com/api/v1，生产密钥使用 https://api.airwallex.com/api/v1。环境混用会返回 credentials_invalid / Access Denied。',
-        field_paymentCurrencyHint: '默认 CNY。Stripe 和 Airwallex 可按账户支持从下拉项选择 HKD、USD 等币种；微信、支付宝、易支付仍按 CNY。',
+        field_paypalApiBaseHint: '沙箱默认 https://api-m.sandbox.paypal.com，生产默认 https://api-m.paypal.com。仅在 PayPal 为商户提供不同端点时覆盖。',
+        field_paymentCurrencyHint: '泰国上线默认 THB。仅当支付服务商账户明确支持时，才从下拉项选择其他币种。',
         field_accountIdHint: '不涉及多账户、组织级密钥或连接账户收款时可以不填；单账户 Scoped API Key 会默认使用所选账户。',
         field_cid: '支付渠道 ID',
         field_cidAlipay: '支付宝渠道 ID',
@@ -6105,6 +6155,11 @@ export default {
         stripeWebhookHint: '请在 Stripe Dashboard 中将以下地址配置为 Webhook 端点：',
         stripeWebhookApiVersionHint: 'Webhook 端点的 API 版本请与当前集成的 Stripe SDK 对齐，建议选择 {version}；版本不一致可能导致回调事件解析失败。',
         airwallexWebhookHint: '请在 Airwallex 后台将以下地址配置为 Webhook 端点；事件至少选择 Payment Intent -> Succeeded（payment_intent.succeeded），建议同时选择 Payment Intent -> Cancelled（payment_intent.cancelled）；API version 选择账户默认或最新稳定版本。',
+        paypalWebhookHint: '请在 PayPal 后台将以下地址配置为 Webhook 端点，订阅 CHECKOUT.ORDER.APPROVED，并将 PayPal Webhook ID 填入此服务商配置。',
+        sunrateWebhookHint: '将以下地址提供给 SUNRATE 作为异步通知（backURL）。系统会验证签名后入账，并返回 OK。',
+        field_merchantId: '商户号（Merchant ID）',
+        field_signatureKey: '签名密钥（Signature Key）',
+        field_filters: '收银台支付方式过滤',
         airwallexGuideSummary: '创建 Airwallex Scoped API 密钥时，建议只在账户级权限中为 Payment Acceptance 勾选读取和写入。',
         airwallexGuideNote: '不需要勾选 Spend、Payouts、Transfers、Funds Splits、POS 终端等与在线收款无关的权限。Webhook 事件至少选择 payment_intent.succeeded，建议同时选择 payment_intent.cancelled；API version 选择账户默认或最新稳定版本。',
         limitsTitle: '限额配置',
@@ -6213,7 +6268,7 @@ export default {
         fromEmail: '发件人邮箱',
         fromEmailPlaceholder: "noreply{'@'}example.com",
         fromName: '发件人名称',
-        fromNamePlaceholder: 'Sub2API',
+        fromNamePlaceholder: 'OneAPI',
         useTls: '使用 TLS',
         useTlsHint: '为 SMTP 连接启用 TLS 加密'
       },
@@ -6771,15 +6826,15 @@ export default {
     retry: '重试'
   },
 
-  // Recharge / Subscription Page
+  // Wallet top-up page
   purchase: {
-    title: '充值/订阅',
-    description: '通过内嵌页面完成充值/订阅',
+    title: '钱包充值',
+    description: '通过内嵌页面完成充值余额操作',
     openInNewTab: '新窗口打开',
     notEnabledTitle: '该功能未开启',
-    notEnabledDesc: '管理员暂未开启充值/订阅入口，请联系管理员。',
-    notConfiguredTitle: '充值/订阅链接未配置',
-    notConfiguredDesc: '管理员已开启入口，但尚未配置充值/订阅链接，请联系管理员。'
+    notEnabledDesc: '管理员暂未开启钱包充值入口，请联系管理员。',
+    notConfiguredTitle: '钱包充值链接未配置',
+    notConfiguredDesc: '管理员已开启入口，但尚未配置钱包充值链接，请联系管理员。'
   },
 
   // Custom Page (iframe embed)
@@ -6859,16 +6914,16 @@ export default {
     // Admin tour steps
     admin: {
       welcome: {
-        title: '👋 欢迎使用 Sub2API',
+        title: '👋 欢迎使用 OneAPI',
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Sub2API 是一个强大的 AI 服务中转平台，让您轻松管理和分发 AI 服务。</p><p style="margin-bottom: 12px;"><b>🎯 核心功能：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>分组管理</b> - 创建不同的服务套餐（VIP、免费试用等）</li><li>🔗 <b>账号池</b> - 连接多个上游 AI 服务商账号</li><li>🔑 <b>密钥分发</b> - 为用户生成独立的 API Key</li><li>💰 <b>计费管理</b> - 灵活的费率和配额控制</li></ul><p style="color: #10b981; font-weight: 600;">接下来，我们将用 3 分钟带您完成首次配置 →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">OneAPI 是一个强大的 AI 服务中转平台，让您轻松管理和分发 AI 服务。</p><p style="margin-bottom: 12px;"><b>🎯 核心功能：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>分组管理</b> - 创建不同的服务套餐（VIP、免费试用等）</li><li>🔗 <b>账号池</b> - 连接多个上游 AI 服务商账号</li><li>🔑 <b>密钥分发</b> - 为用户生成独立的 API Key</li><li>💰 <b>计费管理</b> - 灵活的费率和配额控制</li></ul><p style="color: #10b981; font-weight: 600;">接下来，我们将用 3 分钟带您完成首次配置 →</p></div>',
         nextBtn: '开始配置 🚀',
         prevBtn: '跳过'
       },
       groupManage: {
         title: '📦 第一步：分组管理',
         description:
-          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>什么是分组？</b></p><p style="margin-bottom: 12px;">分组是 Sub2API 的核心概念，它就像一个"服务套餐"：</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 每个分组可以包含多个上游账号</li><li>💰 每个分组有独立的计费倍率</li><li>👥 可以设置为公开或专属分组</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 示例：</b>您可以创建"VIP专线"（高倍率）和"免费试用"（低倍率）两个分组</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 点击左侧的"分组管理"开始</p></div>'
+          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>什么是分组？</b></p><p style="margin-bottom: 12px;">分组是 OneAPI 的核心概念，它就像一个"服务套餐"：</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 每个分组可以包含多个上游账号</li><li>💰 每个分组有独立的计费倍率</li><li>👥 可以设置为公开或专属分组</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 示例：</b>您可以创建"VIP专线"（高倍率）和"免费试用"（低倍率）两个分组</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 点击左侧的"分组管理"开始</p></div>'
       },
       createGroup: {
         title: '➕ 创建新分组',
@@ -6890,7 +6945,7 @@ export default {
       groupMultiplier: {
         title: '💰 3. 费率倍数',
         description:
-          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;">设置该分组的计费倍率，控制用户的实际扣费。</p><div style="padding: 8px 12px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 13px; margin-bottom: 12px;"><b>⚙️ 计费规则：</b><ul style="margin: 8px 0 0 16px;"><li><b>1.0</b> - 原价计费（成本价）</li><li><b>1.5</b> - 用户消耗 $1，扣除 $1.5</li><li><b>2.0</b> - 用户消耗 $1，扣除 $2</li><li><b>0.8</b> - 补贴模式（亏本运营）</li></ul></div><p style="font-size: 13px; color: #6b7280;">建议测试分组设置为 1.0</p></div>',
+          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;">设置该分组的计费倍率，控制用户的实际扣费。</p><div style="padding: 8px 12px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 13px; margin-bottom: 12px;"><b>⚙️ 计费规则：</b><ul style="margin: 8px 0 0 16px;"><li><b>1.0</b> - 原价计费（成本价）</li><li><b>1.5</b> - 用户消耗 ?1，扣除 ?1.5</li><li><b>2.0</b> - 用户消耗 ?1，扣除 ?2</li><li><b>0.8</b> - 补贴模式（亏本运营）</li></ul></div><p style="font-size: 13px; color: #6b7280;">建议测试分组设置为 1.0</p></div>',
         nextBtn: '下一步'
       },
       groupExclusive: {
@@ -6980,9 +7035,9 @@ export default {
     // User tour steps
     user: {
       welcome: {
-        title: '👋 欢迎使用 Sub2API',
+        title: '👋 欢迎使用 OneAPI',
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">您好！欢迎来到 Sub2API AI 服务平台。</p><p style="margin-bottom: 12px;"><b>🎯 快速开始：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 创建 API 密钥</li><li>📋 复制密钥到您的应用</li><li>🚀 开始使用 AI 服务</li></ul><p style="color: #10b981; font-weight: 600;">只需 1 分钟，让我们开始吧 →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">您好！欢迎来到 OneAPI AI 服务平台。</p><p style="margin-bottom: 12px;"><b>🎯 快速开始：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 创建 API 密钥</li><li>📋 复制密钥到您的应用</li><li>🚀 开始使用 AI 服务</li></ul><p style="color: #10b981; font-weight: 600;">只需 1 分钟，让我们开始吧 →</p></div>',
         nextBtn: '开始 🚀',
         prevBtn: '跳过'
       },
@@ -7018,7 +7073,7 @@ export default {
 
   // Payment System
   payment: {
-    title: '充值/订阅',
+    title: '钱包充值',
     amountLabel: '充值金额',
     paymentAmount: '支付金额',
     creditedBalance: '到账余额',
@@ -7035,6 +7090,9 @@ export default {
       wxpay: '微信支付',
       stripe: 'Stripe',
       airwallex: 'Airwallex',
+      payoneer: 'Payoneer',
+      sunrate: 'SUNRATE',
+      paypal: 'PayPal',
       card: '银行卡',
       link: 'Link',
       alipay_direct: '支付宝（直连）',
@@ -7107,14 +7165,14 @@ export default {
     noActiveSubscription: '暂无有效订阅',
     tabTopUp: '充值',
     tabSubscribe: '订阅',
-    noPlans: '暂无可用订阅套餐',
+    noPlans: '暂无可用充值金额',
     notAvailable: '充值功能暂未开放',
     confirmSubscription: '确认订阅',
     confirmCancel: '确定要取消此订单吗？',
     amountTooLow: '最低金额为 {min}',
     amountTooHigh: '最高金额为 {max}',
     amountNoMethod: '该金额没有可用的支付方式',
-    rechargeRatePreview: '当前倍率：1 CNY = {usd} USD',
+    rechargeRatePreview: '当前倍率：1 THB = {usd} THB',
     refundReason: '退款原因',
     refundReasonPlaceholder: '请描述您的退款原因',
     stripeLoadFailed: '支付组件加载失败，请刷新页面重试',
@@ -7178,7 +7236,7 @@ export default {
     },
     subscribeNow: '立即开通',
     renewNow: '续费',
-    selectPlan: '选择套餐',
+    selectPlan: '选择充值金额',
     planFeatures: '功能特性',
     planCard: {
       rate: '倍率',
@@ -7201,7 +7259,7 @@ export default {
         overview: '概览',
         orders: '订单管理',
         channels: '支付渠道',
-        plans: '订阅套餐',
+        plans: '充值金额',
       },
       todayRevenue: '今日收入',
       totalRevenue: '总收入',
@@ -7245,7 +7303,7 @@ export default {
       deductBalanceHint: '从用户余额中扣回充值金额',
       userBalance: '用户余额',
       orderAmount: '订单金额',
-      insufficientBalance: '余额不足，将扣至 $0',
+      insufficientBalance: '余额不足，将扣至 ?0',
       noDeduction: '将不扣除用户余额',
       forceRefund: '强制退款（忽略余额检查）',
       orderCancelled: '订单已取消',
@@ -7265,12 +7323,12 @@ export default {
       editChannel: '编辑渠道',
       deleteChannel: '删除渠道',
       deleteChannelConfirm: '确定要删除此渠道吗？',
-      planName: '套餐名称',
-      planDescription: '套餐描述',
-      createPlan: '创建套餐',
-      editPlan: '编辑套餐',
-      deletePlan: '删除套餐',
-      deletePlanConfirm: '确定要删除此套餐吗？',
+      planName: '充值金额名称',
+      planDescription: '充值说明',
+      createPlan: '创建充值金额',
+      editPlan: '编辑充值金额',
+      deletePlan: '删除充值金额',
+      deletePlanConfirm: '确定要删除此充值金额吗？',
       originalPrice: '原价',
       price: '价格',
       validityDays: '有效期（天）',
@@ -7283,7 +7341,7 @@ export default {
       groupId: '分组 ID',
       features: '功能特性',
       featuresHint: '每行一个特性',
-      featuresPlaceholder: '输入套餐特性...',
+      featuresPlaceholder: '输入充值说明...',
       providerManagement: '服务商管理',
       providerManagementDesc: '管理支付服务商实例',
       createProvider: '创建服务商',
@@ -7304,9 +7362,9 @@ export default {
       daySuffix: '天',
       paymentConfigTitle: '支付配置',
       paymentConfigDesc: '管理支付服务商与相关设置',
-      plansPageTitle: '订阅套餐管理',
-      plansPageDesc: '管理订阅套餐配置',
-      tabPlanConfig: '套餐配置',
+      plansPageTitle: '充值金额设置',
+      plansPageDesc: '管理可售充值档位',
+      tabPlanConfig: '充值金额配置',
       tabUserSubs: '用户订阅',
       selectGroup: '请选择分组',
       groupRequired: '请选择订阅分组',

@@ -1,30 +1,49 @@
 import { createI18n } from 'vue-i18n'
 
-type LocaleCode = 'en' | 'zh'
+export type LocaleCode = 'en' | 'zh-CN' | 'zh-TW' | 'th'
 
 type LocaleMessages = Record<string, any>
 
 const LOCALE_KEY = 'sub2api_locale'
-const DEFAULT_LOCALE: LocaleCode = 'en'
+const DEFAULT_LOCALE: LocaleCode = 'th'
+const FALLBACK_LOCALE: LocaleCode = 'zh-CN'
 
 const localeLoaders: Record<LocaleCode, () => Promise<{ default: LocaleMessages }>> = {
   en: () => import('./locales/en'),
-  zh: () => import('./locales/zh')
+  'zh-CN': () => import('./locales/zh-CN'),
+  'zh-TW': () => import('./locales/zh-TW'),
+  th: () => import('./locales/th'),
 }
 
 function isLocaleCode(value: string): value is LocaleCode {
-  return value === 'en' || value === 'zh'
+  return value === 'en' || value === 'zh-CN' || value === 'zh-TW' || value === 'th'
+}
+
+export function normalizeLocaleCode(value?: string | null): LocaleCode | '' {
+  const normalized = String(value || '').trim().replace('_', '-')
+  const lower = normalized.toLowerCase()
+
+  if (lower === 'zh') return 'zh-CN'
+  if (lower === 'zh-cn' || lower === 'zh-hans') return 'zh-CN'
+  if (lower === 'zh-tw' || lower === 'zh-hk' || lower === 'zh-mo' || lower === 'zh-hant') return 'zh-TW'
+  if (lower === 'th' || lower.startsWith('th-')) return 'th'
+  if (lower === 'en' || lower.startsWith('en-')) return 'en'
+
+  return ''
 }
 
 function getDefaultLocale(): LocaleCode {
   const saved = localStorage.getItem(LOCALE_KEY)
-  if (saved && isLocaleCode(saved)) {
-    return saved
+  const savedLocale = normalizeLocaleCode(saved)
+  if (savedLocale) {
+    return savedLocale
   }
 
-  const browserLang = navigator.language.toLowerCase()
-  if (browserLang.startsWith('zh')) {
-    return 'zh'
+  for (const lang of navigator.languages || [navigator.language]) {
+    const locale = normalizeLocaleCode(lang)
+    if (locale) {
+      return locale
+    }
   }
 
   return DEFAULT_LOCALE
@@ -33,11 +52,9 @@ function getDefaultLocale(): LocaleCode {
 export const i18n = createI18n({
   legacy: false,
   locale: getDefaultLocale(),
-  fallbackLocale: DEFAULT_LOCALE,
+  fallbackLocale: FALLBACK_LOCALE,
   messages: {},
-  // 禁用 HTML 消息警告 - 引导步骤使用富文本内容（driver.js 支持 HTML）
-  // 这些内容是内部定义的，不存在 XSS 风险
-  warnHtmlMessage: false
+  warnHtmlMessage: false,
 })
 
 const loadedLocales = new Set<LocaleCode>()
@@ -60,16 +77,16 @@ export async function initI18n(): Promise<void> {
 }
 
 export async function setLocale(locale: string): Promise<void> {
-  if (!isLocaleCode(locale)) {
+  const normalized = normalizeLocaleCode(locale)
+  if (!normalized || !isLocaleCode(normalized)) {
     return
   }
 
-  await loadLocaleMessages(locale)
-  i18n.global.locale.value = locale
-  localStorage.setItem(LOCALE_KEY, locale)
-  document.documentElement.setAttribute('lang', locale)
+  await loadLocaleMessages(normalized)
+  i18n.global.locale.value = normalized
+  localStorage.setItem(LOCALE_KEY, normalized)
+  document.documentElement.setAttribute('lang', normalized)
 
-  // 同步更新浏览器页签标题，使其跟随语言切换
   const { resolveDocumentTitle } = await import('@/router/title')
   const { default: router } = await import('@/router')
   const { useAppStore } = await import('@/stores/app')
@@ -84,8 +101,10 @@ export function getLocale(): LocaleCode {
 }
 
 export const availableLocales = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' }
+  { code: 'th', name: 'ไทย', flag: 'TH' },
+  { code: 'en', name: 'English', flag: 'EN' },
+  { code: 'zh-TW', name: '繁體中文', flag: 'TW' },
+  { code: 'zh-CN', name: '简体中文', flag: 'CN' },
 ] as const
 
 export default i18n

@@ -63,6 +63,9 @@ func RegisterPaymentRoutes(
 		webhook.POST("/wxpay", webhookHandler.WxpayNotify)
 		webhook.POST("/stripe", webhookHandler.StripeWebhook)
 		webhook.POST("/airwallex", webhookHandler.AirwallexWebhook)
+		webhook.POST("/payoneer", webhookHandler.PayoneerWebhook)
+		webhook.POST("/paypal", webhookHandler.PayPalWebhook)
+		webhook.POST("/sunrate", webhookHandler.SunrateWebhook)
 	}
 
 	// --- Admin payment endpoints (admin auth) ---
@@ -87,7 +90,7 @@ func RegisterPaymentRoutes(
 			adminOrders.POST("/:id/refund", adminPaymentHandler.ProcessRefund)
 		}
 
-		// Subscription Plans
+		// Recharge Amounts
 		plans := adminGroup.Group("/plans")
 		{
 			plans.GET("", adminPaymentHandler.ListPlans)

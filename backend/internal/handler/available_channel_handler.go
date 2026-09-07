@@ -2,6 +2,7 @@ package handler
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/Wei-Shaw/sub2api/internal/pkg/response"
 	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
@@ -92,6 +93,22 @@ type userSupportedModel struct {
 	Pricing  *userSupportedModelPricing `json:"pricing"`
 }
 
+type publicModelPricing struct {
+	Name            string   `json:"name"`
+	Provider        string   `json:"provider"`
+	BillingMode     string   `json:"billing_mode"`
+	Currency        string   `json:"currency"`
+	InputPrice      *float64 `json:"input_price"`
+	OutputPrice     *float64 `json:"output_price"`
+	CacheReadPrice  *float64 `json:"cache_read_price"`
+	CacheWritePrice *float64 `json:"cache_write_price"`
+	PerRequestPrice *float64 `json:"per_request_price"`
+	Unit            string   `json:"unit"`
+	EndpointTypes   []string `json:"endpoint_types"`
+	Tags            []string `json:"tags"`
+	Description     string   `json:"description"`
+}
+
 // userChannelPlatformSection 单渠道内某个平台的子视图：用户可见的分组 + 该平台
 // 支持的模型。按 platform 聚合后让前端可以把渠道名作为 row-group 一次渲染，
 // 后面的平台行按 sections 顺序铺开。
@@ -166,6 +183,102 @@ func (h *AvailableChannelHandler) List(c *gin.Context) {
 	response.Success(c, out)
 }
 
+// ListPublicModels exposes a sanitized, read-only model catalog for the public
+// model marketplace. It never returns channel IDs, upstream credentials, base
+// URLs, group authorization rules, or any other internal routing data.
+func (h *AvailableChannelHandler) ListPublicModels(c *gin.Context) {
+	channels, err := h.channelService.ListAvailable(c.Request.Context())
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	byName := make(map[string]publicModelPricing)
+	hiddenModels := make(map[string]struct{})
+	addModel := func(rawName, platform, channelName string, pricing *service.ChannelModelPricing) {
+		name := service.CanonicalHuosanyunModelName(rawName)
+		if name == "" || strings.Contains(name, "*") || service.IsExcludedHuosanyunModel(name) {
+			return
+		}
+		key := strings.ToLower(name)
+		if pricing != nil && !pricing.IsPublicVisible() {
+			hiddenModels[key] = struct{}{}
+			delete(byName, key)
+			return
+		}
+		if _, hidden := hiddenModels[key]; hidden {
+			return
+		}
+		item, exists := byName[key]
+		if !exists {
+			item = publicModelPricing{
+				Name:          name,
+				Provider:      publicModelProvider(name, platform, channelName),
+				BillingMode:   string(service.BillingModeToken),
+				Currency:      "THB",
+				Unit:          "1M Tokens",
+				EndpointTypes: publicModelEndpointTypes(name),
+				Tags:          publicModelTags(name),
+				Description:   publicModelDescription(name),
+			}
+		}
+		mergePublicPricing(&item, pricing)
+		byName[key] = item
+	}
+
+	for _, ch := range channels {
+		if ch.Status != service.StatusActive {
+			continue
+		}
+		for _, model := range ch.SupportedModels {
+			if !model.PublicVisible {
+				name := service.CanonicalHuosanyunModelName(model.Name)
+				if name != "" {
+					key := strings.ToLower(name)
+					hiddenModels[key] = struct{}{}
+					delete(byName, key)
+				}
+				continue
+			}
+			addModel(model.Name, model.Platform, ch.Name, model.Pricing)
+		}
+	}
+
+	// Catalog entries are only a non-secret fallback for models that do not exist
+	// in channel pricing yet. Do not fill blank channel prices from static data;
+	// an operator may intentionally leave a manual price empty.
+	for _, pricing := range service.HuosanyunCatalogPricing() {
+		if len(pricing.Models) == 0 {
+			continue
+		}
+		name := service.CanonicalHuosanyunModelName(pricing.Models[0])
+		if name == "" || service.IsExcludedHuosanyunModel(name) {
+			continue
+		}
+		key := strings.ToLower(name)
+		if _, hidden := hiddenModels[key]; hidden {
+			continue
+		}
+		if _, exists := byName[key]; exists {
+			continue
+		}
+		pricingCopy := pricing.Clone()
+		addModel(name, pricing.Platform, "Huosanyun", &pricingCopy)
+	}
+
+	out := make([]publicModelPricing, 0, len(byName))
+	for _, item := range byName {
+		out = append(out, item)
+	}
+	sort.SliceStable(out, func(i, j int) bool {
+		if out[i].Provider == out[j].Provider {
+			return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name)
+		}
+		return out[i].Provider < out[j].Provider
+	})
+
+	response.Success(c, out)
+}
 // buildPlatformSections 把一个渠道按 visibleGroups 的平台集合拆成有序的 section 列表：
 // 每个 section 对应一个平台，只包含该平台的 groups 和 supported_models。
 // 输出按 platform 字母序稳定排序，便于前端等效比较与回归测试。
@@ -232,15 +345,28 @@ func toUserSupportedModels(
 	allowedPlatforms map[string]struct{},
 ) []userSupportedModel {
 	out := make([]userSupportedModel, 0, len(src))
+	seen := make(map[string]struct{}, len(src))
 	for i := range src {
 		m := src[i]
+		if !m.PublicVisible || !m.APIEnabled {
+			continue
+		}
 		if allowedPlatforms != nil {
 			if _, ok := allowedPlatforms[m.Platform]; !ok {
 				continue
 			}
 		}
+		name := service.CanonicalHuosanyunModelName(m.Name)
+		if name == "" || service.IsExcludedHuosanyunModel(name) || service.IsExcludedHuosanyunModel(m.Name) {
+			continue
+		}
+		key := strings.ToLower(m.Platform + ":" + name)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
 		out = append(out, userSupportedModel{
-			Name:     m.Name,
+			Name:     name,
 			Platform: m.Platform,
 			Pricing:  toUserPricing(m.Pricing),
 		})
@@ -280,4 +406,202 @@ func toUserPricing(p *service.ChannelModelPricing) *userSupportedModelPricing {
 		PerRequestPrice:  p.PerRequestPrice,
 		Intervals:        intervals,
 	}
+}
+
+func mergePublicPricing(dst *publicModelPricing, p *service.ChannelModelPricing) {
+	if p == nil {
+		return
+	}
+	if strings.TrimSpace(p.Provider) != "" {
+		dst.Provider = strings.TrimSpace(p.Provider)
+	}
+	if endpointTypes := normalizePublicStringList(p.EndpointTypes); len(endpointTypes) > 0 {
+		dst.EndpointTypes = endpointTypes
+	}
+	if strings.TrimSpace(p.Description) != "" {
+		dst.Description = strings.TrimSpace(p.Description)
+	}
+	if tags := normalizePublicStringList(p.Tags); len(tags) > 0 {
+		dst.Tags = tags
+	}
+	mode := string(p.BillingMode)
+	if mode == "" {
+		mode = string(service.BillingModeToken)
+	}
+	if dst.BillingMode == "" || dst.BillingMode == string(service.BillingModeToken) {
+		dst.BillingMode = mode
+	}
+	if mode == string(service.BillingModePerRequest) || mode == string(service.BillingModeImage) || p.PerRequestPrice != nil {
+		dst.Unit = "request"
+	} else {
+		dst.Unit = "1M Tokens"
+	}
+	if dst.InputPrice == nil && p.InputPrice != nil {
+		dst.InputPrice = p.InputPrice
+	}
+	if dst.OutputPrice == nil && p.OutputPrice != nil {
+		dst.OutputPrice = p.OutputPrice
+	}
+	if dst.CacheReadPrice == nil && p.CacheReadPrice != nil {
+		dst.CacheReadPrice = p.CacheReadPrice
+	}
+	if dst.CacheWritePrice == nil && p.CacheWritePrice != nil {
+		dst.CacheWritePrice = p.CacheWritePrice
+	}
+	if dst.PerRequestPrice == nil && p.PerRequestPrice != nil {
+		dst.PerRequestPrice = p.PerRequestPrice
+	}
+	for _, interval := range p.Intervals {
+		if dst.InputPrice == nil && interval.InputPrice != nil {
+			dst.InputPrice = interval.InputPrice
+		}
+		if dst.OutputPrice == nil && interval.OutputPrice != nil {
+			dst.OutputPrice = interval.OutputPrice
+		}
+		if dst.CacheReadPrice == nil && interval.CacheReadPrice != nil {
+			dst.CacheReadPrice = interval.CacheReadPrice
+		}
+		if dst.CacheWritePrice == nil && interval.CacheWritePrice != nil {
+			dst.CacheWritePrice = interval.CacheWritePrice
+		}
+		if dst.PerRequestPrice == nil && interval.PerRequestPrice != nil {
+			dst.PerRequestPrice = interval.PerRequestPrice
+		}
+	}
+}
+
+
+func normalizePublicStringList(values []string) []string {
+	if len(values) == 0 {
+		return nil
+	}
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		key := strings.ToLower(value)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, value)
+	}
+	return out
+}
+
+func publicModelProvider(modelName, platform, channelName string) string {
+	name := strings.ToLower(modelName)
+	switch {
+	case strings.Contains(name, "deepseek"):
+		return "DeepSeek"
+	case strings.Contains(name, "qwen"):
+		return "Qwen"
+	case strings.Contains(name, "glm"):
+		return "Zhipu/GLM"
+	case strings.Contains(name, "kimi") || strings.Contains(name, "moonshot"):
+		return "Kimi/Moonshot"
+	case strings.Contains(name, "minimax"):
+		return "MiniMax"
+	case strings.Contains(name, "kling"):
+		return "Kling"
+	case strings.Contains(name, "doubao"):
+		return "Doubao/Seedance"
+	case strings.Contains(name, "gpt") || strings.Contains(name, "openai"):
+		return "OpenAI"
+	}
+	if platform != "" {
+		return titleASCII(platform)
+	}
+	if channelName != "" {
+		return channelName
+	}
+	return "Other"
+}
+
+func publicModelTags(modelName string) []string {
+	name := strings.ToLower(modelName)
+	tags := []string{"Token billing"}
+	if !strings.Contains(name, "seedance") && !strings.Contains(name, "kling") {
+		tags = append(tags, "OpenAI-compatible")
+	}
+	switch {
+	case strings.Contains(name, "deepseek"):
+		tags = append(tags, "Reasoning", "Coding")
+	case strings.Contains(name, "qwen"):
+		tags = append(tags, "Fast response", "General chat")
+	case strings.Contains(name, "glm"):
+		tags = append(tags, "Text generation", "Tool use")
+	case strings.Contains(name, "kimi"):
+		tags = append(tags, "Long context", "Office analysis")
+	case strings.Contains(name, "kling"):
+		tags = append(tags, "Video generation", "Per request")
+	case strings.Contains(name, "doubao") || strings.Contains(name, "seedance"):
+		tags = append(tags, "Video endpoint", "Content generation")
+	case strings.Contains(name, "minimax"):
+		tags = append(tags, "Text generation", "Long-form writing")
+	default:
+		tags = append(tags, "General model")
+	}
+	return uniqueStrings(tags)
+}
+
+func publicModelEndpointTypes(modelName string) []string {
+	name := strings.ToLower(modelName)
+	switch {
+	case strings.Contains(name, "kling"):
+		return []string{"video"}
+	case strings.Contains(name, "seedance"):
+		return []string{"video"}
+	default:
+		return []string{"openai:/v1/chat/completions"}
+	}
+}
+
+func publicModelDescription(modelName string) string {
+	name := strings.ToLower(modelName)
+	switch {
+	case strings.Contains(name, "deepseek"):
+		return "DeepSeek model for general chat, complex reasoning, code generation, and enterprise text processing."
+	case strings.Contains(name, "qwen"):
+		return "Qwen model for daily chat, content creation, knowledge Q&A, and low-latency business calls."
+	case strings.Contains(name, "glm"):
+		return "GLM model for text generation, tool use, office automation, and structured tasks."
+	case strings.Contains(name, "kimi"):
+		return "Kimi model for long-context understanding, retrieval-augmented workflows, office analysis, and agent tasks."
+	case strings.Contains(name, "minimax"):
+		return "MiniMax model for general chat, long-form writing, creative content generation, and business integration."
+	case strings.Contains(name, "kling"):
+		return "Kling video generation model for text-to-video, image-to-video, and creative production."
+	case strings.Contains(name, "doubao"):
+		return "Doubao model for content generation, multimodal understanding, and high-concurrency business scenarios."
+	default:
+		return "Model available through this gateway. Actual calls depend on API key permissions, account balance, and backend pricing."
+	}
+}
+
+func titleASCII(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return "Other"
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+func uniqueStrings(src []string) []string {
+	seen := make(map[string]struct{}, len(src))
+	out := make([]string, 0, len(src))
+	for _, value := range src {
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		out = append(out, value)
+	}
+	return out
 }

@@ -138,6 +138,34 @@ func TestCalculateCreateOrderPayAmountRejectsFractionalZeroDecimal(t *testing.T)
 	}
 }
 
+func TestValidateOrderInputRequiresFixedBalanceRechargeAmount(t *testing.T) {
+	t.Parallel()
+
+	svc := &PaymentService{}
+	cfg := &PaymentConfig{}
+
+	if _, err := svc.validateOrderInput(context.Background(), CreateOrderRequest{
+		OrderType: payment.OrderTypeBalance,
+		Amount:    100,
+	}, cfg); err != nil {
+		t.Fatalf("expected fixed THB amount to pass, got %v", err)
+	}
+
+	_, err := svc.validateOrderInput(context.Background(), CreateOrderRequest{
+		OrderType: payment.OrderTypeBalance,
+		Amount:    50,
+	}, cfg)
+	if err == nil {
+		t.Fatal("expected non-fixed THB amount to fail")
+	}
+	if appErr := infraerrors.FromError(err); appErr.Reason != "INVALID_AMOUNT" {
+		t.Fatalf("reason = %q, want INVALID_AMOUNT", appErr.Reason)
+	}
+	if !strings.Contains(err.Error(), "fixed THB top-up amounts") {
+		t.Fatalf("error = %q, want fixed amount guidance", err.Error())
+	}
+}
+
 func TestBuildPaymentSubjectAppliesAffixToSubscriptionPlanProductName(t *testing.T) {
 	t.Parallel()
 
@@ -168,8 +196,8 @@ func TestBuildPaymentSubjectAppliesAffixToSubscriptionPlanDefaultName(t *testing
 	plan := &dbent.SubscriptionPlan{Name: "Team Monthly"}
 
 	got := svc.buildPaymentSubject(plan, 0, cfg, nil)
-	if got != "PRE Sub2API Subscription Team Monthly SUF" {
-		t.Fatalf("buildPaymentSubject() = %q, want %q", got, "PRE Sub2API Subscription Team Monthly SUF")
+	if got != "PRE OneAPI Subscription Team Monthly SUF" {
+		t.Fatalf("buildPaymentSubject() = %q, want %q", got, "PRE OneAPI Subscription Team Monthly SUF")
 	}
 }
 

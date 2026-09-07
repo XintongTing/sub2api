@@ -1,5 +1,5 @@
 /**
- * Vue Router configuration for Sub2API frontend
+ * Vue Router configuration for the frontend application
  * Defines all application routes with lazy loading and navigation guards
  */
 
@@ -37,6 +37,33 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: false,
       title: 'Home'
+    }
+  },
+  {
+    path: '/models',
+    name: 'ModelsMarketplace',
+    component: () => import('@/views/public/ModelsMarketplaceView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Models'
+    }
+  },
+  {
+    path: '/docs',
+    name: 'DeveloperDocs',
+    component: () => import('@/views/public/DeveloperDocsView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Docs'
+    }
+  },
+  {
+    path: '/support',
+    name: 'CustomerSupport',
+    component: () => import('@/views/public/CustomerSupportView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Customer Support'
     }
   },
   {
@@ -188,9 +215,19 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
-      title: 'Dashboard',
-      titleKey: 'dashboard.title',
+      title: '数据看板',
       descriptionKey: 'dashboard.welcomeMessage'
+    }
+  },
+  {
+    path: '/playground',
+    name: 'Playground',
+    component: () => import('@/views/user/PlaygroundView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false,
+      title: '操练场',
+      description: '粘贴 API Key，选择模型并发起一次真实网关调用。'
     }
   },
   {
@@ -243,15 +280,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/available-channels',
-    name: 'UserAvailableChannels',
-    component: () => import('@/views/user/AvailableChannelsView.vue'),
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: false,
-      title: 'Available Channels',
-      titleKey: 'availableChannels.title',
-      descriptionKey: 'availableChannels.description'
-    }
+    redirect: '/models'
   },
   {
     path: '/profile',
@@ -267,15 +296,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/subscriptions',
-    name: 'Subscriptions',
-    component: () => import('@/views/user/SubscriptionsView.vue'),
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: false,
-      title: 'My Subscriptions',
-      titleKey: 'userSubscriptions.title',
-      descriptionKey: 'userSubscriptions.description'
-    }
+    redirect: '/purchase'
   },
   {
     path: '/purchase',
@@ -284,7 +305,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
-      title: 'Purchase Subscription',
+      title: 'Wallet Top-up',
       titleKey: 'nav.buySubscription',
       descriptionKey: 'purchase.description',
       requiresPayment: true
@@ -427,8 +448,20 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/model-pricing',
+    name: 'AdminModelPricing',
+    component: () => import('@/views/admin/ModelPricingSettingsView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Model Price Settings',
+      titleKey: 'admin.modelPricing.title',
+      descriptionKey: 'admin.modelPricing.description'
+    }
+  },
+  {
     path: '/admin/channels',
-    redirect: '/admin/channels/pricing'
+    redirect: '/admin/model-pricing'
   },
   {
     path: '/admin/channels/pricing',
@@ -456,14 +489,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/monitor',
-    name: 'ChannelStatus',
-    component: () => import('@/views/user/ChannelStatusView.vue'),
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: false,
-      title: 'Channel Status',
-      titleKey: 'nav.channelStatus'
-    }
+    redirect: '/dashboard'
   },
   {
     path: '/admin/subscriptions',
@@ -648,7 +674,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
-      title: 'Subscription Plans',
+      title: 'Recharge Amount Settings',
       titleKey: 'nav.paymentPlans',
       requiresPayment: true
     }
@@ -740,7 +766,7 @@ router.beforeEach(async (to, _from, next) => {
     const menuItem = publicItems.find((item) => item.id === id)
       ?? (authStore.isAdmin ? adminSettingsStore.customMenuItems.find((item) => item.id === id) : undefined)
     if (menuItem?.label) {
-      const siteName = appStore.siteName || 'Sub2API'
+      const siteName = appStore.siteName || 'OneAPI'
       document.title = `${menuItem.label} - ${siteName}`
     } else {
       document.title = resolveDocumentTitle(to.meta.title, appStore.siteName, to.meta.titleKey as string)

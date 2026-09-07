@@ -32,7 +32,15 @@ export interface ChannelModelPricing {
   cache_read_price: number | null
   image_output_price: number | null
   per_request_price: number | null
+  public_visible?: boolean
+  api_enabled?: boolean
+  provider?: string
+  endpoint_types?: string[]
+  description?: string
+  tags?: string[]
   intervals: PricingInterval[]
+  created_at?: string
+  updated_at?: string
 }
 
 export interface AccountStatsPricingRule {

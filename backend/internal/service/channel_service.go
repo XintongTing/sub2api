@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sort"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -426,6 +427,53 @@ func (s *ChannelService) GetChannelForGroup(ctx context.Context, groupID int64) 
 	return ch.Clone(), nil
 }
 
+// ListSupportedModelNames returns concrete, user-callable model IDs from the
+// active channel catalog. This is the local model library used by /v1/models
+// and the public marketplace, so newly synced upstream model IDs can show up
+// without relying on account-level model_mapping aliases.
+func (s *ChannelService) ListSupportedModelNames(ctx context.Context, groupID *int64, platform string) ([]string, error) {
+	if s == nil {
+		return nil, nil
+	}
+	cache, err := s.loadCache(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	seen := make(map[string]string)
+	addChannel := func(ch *Channel, effectivePlatform string) {
+		if ch == nil || !ch.IsActive() {
+			return
+		}
+		for _, name := range ch.SupportedModelNames(effectivePlatform) {
+			key := strings.ToLower(name)
+			if _, exists := seen[key]; !exists {
+				seen[key] = name
+			}
+		}
+	}
+
+	if groupID != nil {
+		ch := cache.channelByGroupID[*groupID]
+		effectivePlatform := strings.TrimSpace(platform)
+		if effectivePlatform == "" {
+			effectivePlatform = cache.groupPlatform[*groupID]
+		}
+		addChannel(ch, effectivePlatform)
+	} else {
+		for _, ch := range cache.byID {
+			addChannel(ch, strings.TrimSpace(platform))
+		}
+	}
+
+	out := make([]string, 0, len(seen))
+	for _, name := range seen {
+		out = append(out, name)
+	}
+	sort.Strings(out)
+	return out, nil
+}
+
 // GetGroupPlatform 获取分组的平台标识（从缓存）
 func (s *ChannelService) GetGroupPlatform(ctx context.Context, groupID int64) string {
 	cache, err := s.loadCache(ctx)
@@ -546,15 +594,15 @@ func resolveMapping(lk *channelLookup, groupID int64, model string) ChannelMappi
 // checkRestricted 基于已查找的渠道信息检查模型是否被限制。
 // 只在本平台的定价列表中查找。
 func checkRestricted(lk *channelLookup, groupID int64, model string) bool {
+	modelLower := strings.ToLower(model)
+	pricing := lookupPricingAcrossPlatforms(lk.cache, groupID, lk.platform, modelLower)
+	if pricing != nil && !pricing.IsAPIEnabled() {
+		return true
+	}
 	if !lk.channel.RestrictModels {
 		return false
 	}
-	modelLower := strings.ToLower(model)
-	// 使用与查找定价相同的跨平台逻辑
-	if lookupPricingAcrossPlatforms(lk.cache, groupID, lk.platform, modelLower) != nil {
-		return false
-	}
-	return true
+	return pricing == nil
 }
 
 // ReplaceModelInBody 替换请求体 JSON 中的 model 字段。

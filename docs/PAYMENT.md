@@ -1,6 +1,6 @@
 # Payment System Configuration Guide
 
-Sub2API has a built-in payment system that enables user self-service top-up without deploying a separate payment service.
+OneAPI has a built-in payment system that enables user self-service top-up without deploying a separate payment service.
 
 ---
 
@@ -25,6 +25,8 @@ Sub2API has a built-in payment system that enables user self-service top-up with
 | **Alipay (Direct)** | Desktop QR code, mobile Alipay redirect | Direct integration with Alipay Open Platform, returning desktop QR codes and mobile WAP/app launch links |
 | **WeChat Pay (Direct)** | Native QR, H5, MP/JSAPI Pay | Direct integration with WeChat Pay APIv3 with environment-aware routing |
 | **Stripe** | Card, Alipay, WeChat Pay, Link, etc. | International payments, multi-currency support |
+| **Payoneer** | Payoneer Checkout | International hosted checkout via Payoneer |
+| **PayPal** | PayPal Checkout | International hosted checkout via PayPal Orders API |
 
 > Alipay/WeChat Pay direct and EasyPay can both exist as backend provider instances, but the frontend always exposes only two visible buttons: `Alipay` and `WeChat Pay`. Admins choose exactly one source for each visible method: direct or EasyPay. Direct channels connect to payment APIs directly with lower fees; EasyPay aggregates through third-party platforms with easier setup.
 
@@ -154,6 +156,34 @@ International payment platform supporting multiple payment methods and currencie
 | **Publishable Key** | Stripe publishable key (`pk_live_...` or `pk_test_...`) | Yes |
 | **Webhook Secret** | Stripe Webhook signing secret (`whsec_...`) | Yes |
 
+### PayPal
+
+International hosted checkout using PayPal Orders v2.
+
+| Parameter | Description | Required |
+|-----------|-------------|----------|
+| **Client ID** | PayPal REST app client ID | Yes |
+| **Client Secret** | PayPal REST app client secret | Yes |
+| **Webhook ID** | PayPal Webhook ID for the configured endpoint | Yes |
+| **Environment** | Sandbox or Live | Yes |
+| **API Base URL** | Defaults to PayPal's sandbox/live API endpoint | No |
+| **Payment Currency** | Currency used for PayPal orders | Yes |
+
+### Payoneer
+
+International hosted checkout using Payoneer.
+
+| Parameter | Description | Required |
+|-----------|-------------|----------|
+| **Client ID** | Payoneer API client ID | Yes |
+| **Client Secret** | Payoneer API client secret | Yes |
+| **Webhook Secret** | Secret used to verify Payoneer webhook signatures | Yes |
+| **Environment** | Sandbox or Live | Yes |
+| **API Base URL** | Defaults to Payoneer's sandbox/live API endpoint | No |
+| **Payment Currency** | Currency used for Payoneer payments | Yes |
+| **Create Order Path** | Override only for custom Payoneer API paths | No |
+| **Query Order Path** | Override only for custom Payoneer API paths | No |
+
 ---
 
 ## Provider Instance Management
@@ -195,6 +225,8 @@ When adding a provider, the system auto-generates callback URLs from your site d
 | **Alipay (Direct)** | `https://your-domain.com/api/v1/payment/webhook/alipay` |
 | **WeChat Pay (Direct)** | `https://your-domain.com/api/v1/payment/webhook/wxpay` |
 | **Stripe** | `https://your-domain.com/api/v1/payment/webhook/stripe` |
+| **Payoneer** | `https://your-domain.com/api/v1/payment/webhook/payoneer` |
+| **PayPal** | `https://your-domain.com/api/v1/payment/webhook/paypal` |
 
 > Replace `your-domain.com` with your actual domain. For EasyPay / Alipay / WeChat Pay, the callback URL is auto-filled when adding the provider — no manual configuration needed.
 
@@ -205,6 +237,13 @@ When adding a provider, the system auto-generates callback URLs from your site d
 3. Add an endpoint with the callback URL
 4. Subscribe to events: `payment_intent.succeeded`, `payment_intent.payment_failed`
 5. Copy the generated Webhook Secret (`whsec_...`) to your provider configuration
+
+### PayPal Webhook Setup
+
+1. Log in to [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/)
+2. Open your REST app and add the webhook endpoint
+3. Subscribe to `CHECKOUT.ORDER.APPROVED`
+4. Copy the generated Webhook ID to your provider configuration
 
 ### Important Notes
 
@@ -270,17 +309,17 @@ If you previously used [Sub2ApiPay](https://github.com/touwaeriol/sub2apipay) as
 
 | Aspect | Sub2ApiPay | Built-in Payment |
 |--------|-----------|-----------------|
-| Deployment | Separate service (Next.js + PostgreSQL) | Built into Sub2API, no extra deployment |
+| Deployment | Separate service (Next.js + PostgreSQL) | Built into OneAPI, no extra deployment |
 | Payment Methods | EasyPay, Alipay, WeChat, Stripe | Same |
-| Configuration | Environment variables + separate admin UI | Unified in Sub2API admin dashboard |
+| Configuration | Environment variables + separate admin UI | Unified in OneAPI admin dashboard |
 | Top-up Integration | Via Admin API callback | Internal processing, more reliable |
-| Subscription Plans | Supported | Not yet (planned) |
-| Order Management | Separate admin interface | Integrated in Sub2API admin dashboard |
+| Recharge Amounts | Supported | Not yet (planned) |
+| Order Management | Separate admin interface | Integrated in OneAPI admin dashboard |
 
 ### Migration Steps
 
-1. Enable payment in Sub2API admin dashboard and configure providers (use the same payment credentials)
-2. Update webhook callback URLs to Sub2API's callback endpoints
+1. Enable payment in OneAPI admin dashboard and configure providers (use the same payment credentials)
+2. Update webhook callback URLs to OneAPI's callback endpoints
 3. Verify that new orders are processed correctly via built-in payment
 4. Decommission the Sub2ApiPay service
 

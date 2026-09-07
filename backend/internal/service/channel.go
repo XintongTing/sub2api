@@ -84,6 +84,12 @@ type ChannelModelPricing struct {
 	CacheReadPrice   *float64          // 缓存读取价格
 	ImageOutputPrice *float64          // 图片输出价格（向后兼容）
 	PerRequestPrice  *float64          // 默认按次计费价格（USD）
+	PublicVisible    *bool             // public marketplace visibility; nil means true
+	APIEnabled       *bool             // API call availability; nil means true
+	Provider         string            // optional public provider label override
+	EndpointTypes    []string          // optional public endpoint labels override
+	Description      string            // optional public marketplace description override
+	Tags             []string          // optional public marketplace tags override
 	Intervals        []PricingInterval // 区间定价列表
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
@@ -169,6 +175,14 @@ func (p *ChannelModelPricing) GetTierByLabel(label string) *PricingInterval {
 	return nil
 }
 
+func (p *ChannelModelPricing) IsPublicVisible() bool {
+	return p == nil || p.PublicVisible == nil || *p.PublicVisible
+}
+
+func (p *ChannelModelPricing) IsAPIEnabled() bool {
+	return p == nil || p.APIEnabled == nil || *p.APIEnabled
+}
+
 // Clone 返回 ChannelModelPricing 的拷贝（切片独立，指针字段共享，调用方只读安全）
 func (p ChannelModelPricing) Clone() ChannelModelPricing {
 	cp := p
@@ -179,6 +193,14 @@ func (p ChannelModelPricing) Clone() ChannelModelPricing {
 	if p.Intervals != nil {
 		cp.Intervals = make([]PricingInterval, len(p.Intervals))
 		copy(cp.Intervals, p.Intervals)
+	}
+	if p.EndpointTypes != nil {
+		cp.EndpointTypes = make([]string, len(p.EndpointTypes))
+		copy(cp.EndpointTypes, p.EndpointTypes)
+	}
+	if p.Tags != nil {
+		cp.Tags = make([]string, len(p.Tags))
+		copy(cp.Tags, p.Tags)
 	}
 	return cp
 }
@@ -383,9 +405,42 @@ type ChannelUsageFields struct {
 
 // SupportedModel 渠道的一个支持模型条目（无通配符、可直接展示给用户）
 type SupportedModel struct {
-	Name     string               // 用户侧模型名
-	Platform string               // 所属平台
-	Pricing  *ChannelModelPricing // 定价详情（nil 表示未配置定价）
+	Name          string               // user-facing model name
+	Platform      string               // provider platform
+	Pricing       *ChannelModelPricing // pricing details; nil means no explicit channel price
+	PublicVisible bool                 // visible in public/user model views
+	APIEnabled    bool                 // callable through API gateway
+}
+
+// SupportedModelNames returns concrete model IDs exposed by this channel.
+// It keeps the configured original case for display/copy/call semantics while
+// de-duplicating case-insensitively.
+func (c *Channel) SupportedModelNames(platform string) []string {
+	if c == nil {
+		return nil
+	}
+	seen := make(map[string]struct{})
+	names := make([]string, 0)
+	for _, model := range c.SupportedModels() {
+		if platform != "" && model.Platform != platform {
+			continue
+		}
+		if !model.PublicVisible || !model.APIEnabled {
+			continue
+		}
+		name := strings.TrimSpace(model.Name)
+		if name == "" {
+			continue
+		}
+		key := strings.ToLower(name)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }
 
 // wildcardSuffix 是模型模式中的通配符后缀标记（仅支持尾部匹配）。
@@ -528,9 +583,11 @@ func (c *Channel) SupportedModels() []SupportedModel {
 		}
 		seen[key] = struct{}{}
 		result = append(result, SupportedModel{
-			Name:     displayName,
-			Platform: platform,
-			Pricing:  pricing,
+			Name:          displayName,
+			Platform:      platform,
+			Pricing:       pricing,
+			PublicVisible: pricing == nil || pricing.IsPublicVisible(),
+			APIEnabled:    pricing == nil || pricing.IsAPIEnabled(),
 		})
 	}
 

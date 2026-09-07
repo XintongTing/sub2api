@@ -81,10 +81,9 @@ export default defineConfig(({ mode }) => {
               return 'vendor-vue'
             }
 
-            // UI 工具库（较大，单独分离）
-            if (id.includes('/@vueuse/') || id.includes('/xlsx/')) {
-              return 'vendor-ui'
-            }
+            // Keep the export-only spreadsheet library out of the initial UI bundle.
+            if (id.includes('/xlsx/')) return 'vendor-xlsx'
+            if (id.includes('/@vueuse/')) return 'vendor-vueuse'
 
             // 图表库
             if (id.includes('/chart.js/') || id.includes('/vue-chartjs/')) {

@@ -55,20 +55,31 @@ export function formatNumber(num: number | null | undefined): string {
 /**
  * 格式化货币金额
  * @param amount 金额
- * @param currency 货币代码，默认 USD
- * @returns 格式化后的字符串，如 "$1.25"
+ * @param currency Currency code, defaults to THB
+ * @returns 格式化后的字符串，如 "฿1.25"
  */
-export function formatCurrency(amount: number | null | undefined, currency: string = 'USD'): string {
-  if (amount === null || amount === undefined) return '$0.00'
+export function formatCurrency(amount: number | null | undefined, currency: string = 'THB'): string {
+  const normalizedCurrency = (currency || 'THB').toUpperCase()
+  if (amount === null || amount === undefined) {
+    return normalizedCurrency === 'THB' ? '฿0.00' : '0.00'
+  }
 
   const locale = getLocale()
 
   // For very small amounts, show more decimals
   const fractionDigits = amount > 0 && amount < 0.01 ? 6 : 2
 
+  if (normalizedCurrency === 'THB') {
+    const formatted = new Intl.NumberFormat(locale, {
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits
+    }).format(amount)
+    return `฿${formatted}`
+  }
+
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: currency,
+    currency: normalizedCurrency,
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits
   }).format(amount)

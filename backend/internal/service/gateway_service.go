@@ -10011,8 +10011,22 @@ func (s *GatewayService) GetAvailableModels(ctx context.Context, groupID *int64,
 		}
 	}
 
+	if s.channelService != nil {
+		channelModels, channelErr := s.channelService.ListSupportedModelNames(ctx, groupID, platform)
+		if channelErr != nil {
+			slog.Warn("failed to load channel model catalog for /v1/models", "error", channelErr)
+		}
+		for _, model := range channelModels {
+			model = strings.TrimSpace(model)
+			if model == "" {
+				continue
+			}
+			modelSet[model] = struct{}{}
+		}
+	}
+
 	// If no account has model_mapping, return nil (use default)
-	if !hasAnyMapping {
+	if !hasAnyMapping && len(modelSet) == 0 {
 		if s.modelsListCache != nil {
 			s.modelsListCache.Set(cacheKey, []string(nil), s.modelsListCacheTTL)
 			modelsListCacheStoreTotal.Add(1)
@@ -10020,10 +10034,22 @@ func (s *GatewayService) GetAvailableModels(ctx context.Context, groupID *int64,
 		return nil
 	}
 
-	// Convert to slice
+	// Convert to a canonical, de-duplicated slice. Huosanyun legacy aliases are
+	// kept for request compatibility in channel mapping, but /v1/models should
+	// expose upstream model IDs and hide the customer-excluded defaults.
+	canonicalSeen := make(map[string]struct{}, len(modelSet))
 	models := make([]string, 0, len(modelSet))
 	for model := range modelSet {
-		models = append(models, model)
+		canonical := CanonicalHuosanyunModelName(model)
+		if canonical == "" || IsExcludedHuosanyunModel(model) || IsExcludedHuosanyunModel(canonical) {
+			continue
+		}
+		key := strings.ToLower(canonical)
+		if _, ok := canonicalSeen[key]; ok {
+			continue
+		}
+		canonicalSeen[key] = struct{}{}
+		models = append(models, canonical)
 	}
 	sort.Strings(models)
 

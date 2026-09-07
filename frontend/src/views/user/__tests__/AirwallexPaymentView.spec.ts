@@ -48,8 +48,8 @@ function airwallexSnapshot(overrides: Partial<PaymentRecoverySnapshot> = {}): Pa
     outTradeNo: 'sub2_awx_101',
     clientSecret: 'awx_client_secret',
     intentId: 'int_awx_101',
-    currency: 'CNY',
-    countryCode: 'CN',
+    currency: 'THB',
+    countryCode: 'TH',
     paymentEnv: 'demo',
     payAmount: 88,
     orderType: 'balance',
@@ -107,8 +107,8 @@ describe('AirwallexPaymentView', () => {
     expect(redirectToCheckout).toHaveBeenCalledWith(expect.objectContaining({
       intent_id: 'int_awx_101',
       client_secret: 'awx_client_secret',
-      currency: 'CNY',
-      country_code: 'CN',
+      currency: 'THB',
+      country_code: 'TH',
     }))
 
     const checkoutOptions = redirectToCheckout.mock.calls[0][0]
