@@ -61,7 +61,7 @@
 
             <div class="mt-10 grid max-w-xl grid-cols-3 gap-5 border-t border-primary-200 pt-8 dark:border-dark-800">
               <div>
-                <div class="text-3xl font-bold text-primary-700 dark:text-primary-300">{{ models.length }}</div>
+                <div class="text-3xl font-bold text-primary-700 dark:text-primary-300">38</div>
                 <div class="mt-1 text-sm text-slate-500 dark:text-dark-300">{{ copy.statsModels }}</div>
               </div>
               <div>
@@ -219,7 +219,7 @@ const siteName = computed(() => appStore.siteName || 'OneAPI')
 const homeContent = computed(() => appStore.cachedPublicSettings?.home_content || '')
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const userIdentity = computed(() => authStore.user?.email || authStore.user?.username || 'OneAPI User')
-const models = dedupePublicModels(publicModels).filter(model => model.endpointTypes.includes('openai:/v1/chat/completions')).slice(0, 5)
+const models = dedupePublicModels(publicModels).filter(model => model.endpointTypes.includes('openai:/v1/chat/completions'))
 const currentLocale = computed(() => String(locale.value || 'zh-CN'))
 
 const apiBaseUrl = computed(() => {
@@ -242,7 +242,7 @@ const localized = {
     models: '模型广场',
     docs: '开发文档',
     signedInAs: '当前已登录',
-    statsModels: '主推模型',
+    statsModels: '全部模型',
     statsGateway: '统一网关',
     statsRealtime: '实时',
     statsBilling: '用量扣费',
@@ -252,7 +252,7 @@ const localized = {
     protocol: '协议',
     billing: '计费',
     usageBased: '按用量扣费',
-    featuredModels: '主推模型',
+    featuredModels: '全部模型',
     modelMarketplace: '模型广场',
     tokenBilling: '按量计费',
     requestBilling: '按次计费',
@@ -283,7 +283,7 @@ const localized = {
     models: 'Models',
     docs: 'Docs',
     signedInAs: 'Signed in as',
-    statsModels: 'Featured models',
+    statsModels: 'All models',
     statsGateway: 'Unified gateway',
     statsRealtime: 'Real-time',
     statsBilling: 'billing',
@@ -293,7 +293,7 @@ const localized = {
     protocol: 'Protocol',
     billing: 'Billing',
     usageBased: 'Usage based',
-    featuredModels: 'Featured models',
+    featuredModels: 'All models',
     modelMarketplace: 'Model Marketplace',
     tokenBilling: 'Token billing',
     requestBilling: 'Per request',
@@ -324,7 +324,7 @@ const localized = {
     models: 'โมเดล',
     docs: 'เอกสาร',
     signedInAs: 'เข้าสู่ระบบเป็น',
-    statsModels: 'โมเดลแนะนำ',
+    statsModels: 'โมเดลทั้งหมด',
     statsGateway: 'เกตเวย์เดียว',
     statsRealtime: 'เรียลไทม์',
     statsBilling: 'คิดค่าบริการ',
@@ -334,7 +334,7 @@ const localized = {
     protocol: 'โปรโตคอล',
     billing: 'การคิดเงิน',
     usageBased: 'คิดตามการใช้งาน',
-    featuredModels: 'โมเดลแนะนำ',
+    featuredModels: 'โมเดลทั้งหมด',
     modelMarketplace: 'ตลาดโมเดล',
     tokenBilling: 'คิดเงินตาม Token',
     requestBilling: 'คิดต่อครั้ง',

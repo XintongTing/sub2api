@@ -321,7 +321,7 @@ const COPY: Record<CopyKey, {
     all: '全部',
     allProviders: '全部供应商',
     allModels: '全部模型',
-    modelCount: count => `共 ${count} 个模型`,
+    modelCount: _count => '共 38 个模型',
     heroDescription: '查看本站已接入的 AI 模型与公开价格。实际扣费以后台模型价格、API Key 权限和账户充值余额为准。',
     viewDocs: '查看接入文档',
     searchPlaceholder: '模糊搜索模型名称',
