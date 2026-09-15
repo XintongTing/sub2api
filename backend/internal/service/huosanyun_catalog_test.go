@@ -20,7 +20,7 @@ func TestDefaultHuosanyunCatalogContainsAllowedRealIDsAndRejectsLegacyAliases(t 
 			t.Fatalf("expected catalog to contain %s", model)
 		}
 	}
-	for _, model := range []string{"deepseek-v3.2", "deepseek-v3", "kling-v2-1"} {
+	for _, model := range []string{"deepseek-v3.2", "deepseek-v3"} {
 		if _, ok := seen[model]; ok {
 			t.Fatalf("catalog must not contain excluded model %s", model)
 		}
@@ -94,7 +94,7 @@ func TestMergeHuosanyunCatalogPreservesCustomPricingWithoutOverwrite(t *testing.
 func TestMergeHuosanyunCatalogOverwriteRemovesExcludedModels(t *testing.T) {
 	existing := []ChannelModelPricing{
 		{Platform: PlatformOpenAI, Models: []string{"deepseek-v3.2"}, BillingMode: BillingModeToken},
-		{Platform: PlatformOpenAI, Models: []string{"kling-v2-1"}, BillingMode: BillingModePerRequest},
+		{Platform: PlatformOpenAI, Models: []string{"deepseek-v3"}, BillingMode: BillingModePerRequest},
 	}
 	merged := MergeHuosanyunCatalog(existing, true)
 	for _, pricing := range merged {

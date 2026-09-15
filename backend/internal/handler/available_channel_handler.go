@@ -244,28 +244,6 @@ func (h *AvailableChannelHandler) ListPublicModels(c *gin.Context) {
 		}
 	}
 
-	// Catalog entries are only a non-secret fallback for models that do not exist
-	// in channel pricing yet. Do not fill blank channel prices from static data;
-	// an operator may intentionally leave a manual price empty.
-	for _, pricing := range service.HuosanyunCatalogPricing() {
-		if len(pricing.Models) == 0 {
-			continue
-		}
-		name := service.CanonicalHuosanyunModelName(pricing.Models[0])
-		if name == "" || service.IsExcludedHuosanyunModel(name) {
-			continue
-		}
-		key := strings.ToLower(name)
-		if _, hidden := hiddenModels[key]; hidden {
-			continue
-		}
-		if _, exists := byName[key]; exists {
-			continue
-		}
-		pricingCopy := pricing.Clone()
-		addModel(name, pricing.Platform, "Huosanyun", &pricingCopy)
-	}
-
 	out := make([]publicModelPricing, 0, len(byName))
 	for _, item := range byName {
 		out = append(out, item)

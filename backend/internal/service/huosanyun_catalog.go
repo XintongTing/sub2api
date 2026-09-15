@@ -45,7 +45,7 @@ func IsExcludedHuosanyunModel(model string) bool {
 	case "deepseek-v3.2", "deepseek-v3", "deepseek-pro", "qwen3-turbo", "glm4-air", "glm4-plus":
 		return true
 	default:
-		return strings.HasPrefix(name, "kling")
+		return false
 	}
 }
 
