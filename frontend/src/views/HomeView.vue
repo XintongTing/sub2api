@@ -61,7 +61,7 @@
 
             <div class="mt-10 grid max-w-xl grid-cols-3 gap-5 border-t border-primary-200 pt-8 dark:border-dark-800">
               <div>
-                <div class="text-3xl font-bold text-primary-700 dark:text-primary-300">38</div>
+                <div class="text-3xl font-bold text-primary-700 dark:text-primary-300">{{ modelCount }}</div>
                 <div class="mt-1 text-sm text-slate-500 dark:text-dark-300">{{ copy.statsModels }}</div>
               </div>
               <div>
@@ -162,7 +162,6 @@
           <p class="font-bold text-white">Ekkamai Technology (Hong Kong) Company Limited</p>
           <address class="mt-3 max-w-xl text-sm not-italic leading-6 text-slate-400">
             <span class="block">Room 701, Unit 127, 7/F, Tower B, New Mandarin Plaza, 14 Science Museum Road, Tsim Sha Tsui, Kowloon</span>
-            <span class="mt-1 block">Phone: 66841850843</span>
           </address>
           <a :href="contactHref" class="mt-4 inline-flex text-sm font-semibold text-cyan-300 hover:text-cyan-200">{{ contactText }}</a>
         </div>
@@ -197,17 +196,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore, useAuthStore } from '@/stores'
 import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import Icon from '@/components/icons/Icon.vue'
 import {
+  canonicalPublicModelName,
   dedupePublicModels,
+  isPublicModelExcluded,
   localizePublicModelDescription,
   publicModels,
   type PublicModelInfo,
 } from '@/constants/publicModels'
+import { listPublicModels } from '@/api/publicModels'
 
 const CONTACT_EMAIL = 'service@tokenapifuel.com'
 
@@ -219,7 +221,9 @@ const siteName = computed(() => appStore.siteName || 'OneAPI')
 const homeContent = computed(() => appStore.cachedPublicSettings?.home_content || '')
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const userIdentity = computed(() => authStore.user?.email || authStore.user?.username || 'OneAPI User')
-const models = dedupePublicModels(publicModels).filter(model => model.endpointTypes.includes('openai:/v1/chat/completions'))
+const availableModels = dedupePublicModels(publicModels)
+const models = availableModels.filter(model => model.endpointTypes.includes('openai:/v1/chat/completions'))
+const modelCount = ref(availableModels.length)
 const currentLocale = computed(() => String(locale.value || 'zh-CN'))
 
 const apiBaseUrl = computed(() => {
@@ -381,4 +385,18 @@ function modelBillingLabel(model: PublicModelInfo): string {
 
 const contactText = computed(() => appStore.contactInfo || CONTACT_EMAIL)
 const contactHref = computed(() => `mailto:${CONTACT_EMAIL}`)
+
+onMounted(async () => {
+  try {
+    const remoteModels = await listPublicModels()
+    const uniqueModels = new Set<string>()
+    for (const model of remoteModels) {
+      const name = canonicalPublicModelName(model.name)
+      if (name && !isPublicModelExcluded(name)) uniqueModels.add(name.toLowerCase())
+    }
+    if (uniqueModels.size > 0) modelCount.value = uniqueModels.size
+  } catch {
+    // Keep the bundled catalog count when the public model API is unavailable.
+  }
+})
 </script>
