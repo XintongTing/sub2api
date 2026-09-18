@@ -330,7 +330,7 @@ export function canonicalPublicModelName(name: string): string {
   return trimmed
 }
 
-export function isPublicModelExcluded(name: string): boolean {
+export function isPublicModelExcluded(_name: string): boolean {
   return false
 }
 
