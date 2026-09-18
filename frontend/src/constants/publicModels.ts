@@ -299,8 +299,7 @@ export function isPublicModelExcluded(name: string): boolean {
     normalized === 'deepseek-pro' ||
     normalized === 'qwen3-turbo' ||
     normalized === 'glm4-air' ||
-    normalized === 'glm4-plus' ||
-    normalized.startsWith('kling')
+    normalized === 'glm4-plus'
   )
 }
 
