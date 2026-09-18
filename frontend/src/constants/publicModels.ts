@@ -69,7 +69,7 @@ function descriptionFor(kind: keyof typeof descriptions): string {
   return descriptions[kind].en || ''
 }
 
-export const publicModels: PublicModelInfo[] = [
+const seededPublicModels: PublicModelInfo[] = [
   {
     id: 'deepseek-v4-flash',
     name: 'deepseek-v4-flash',
@@ -276,6 +276,45 @@ export const publicModels: PublicModelInfo[] = [
   },
 ]
 
+// The public catalog is intentionally independent from upstream availability.
+// A model remains listed even when its live-call check is unavailable.
+const publicModelNames = [
+  'qwen3-embedding-8b', 'qwen3.5-397b-a17b', 'qwen3.5-plus', 'qwen3.6-plus',
+  'qwen3.7-max', 'qwen3.8-max', 'glm-5', 'glm-5.1', 'glm-5.2', 'glm-5.3',
+  'glm-5.3-flash', 'doubao-seed-2-1-pro-260628', 'doubao-seed-2.0-code',
+  'doubao-seed-2.0-pro', 'doubao-seedream-5-0-260128', 'doubao-seedream-5-0-pro-260628',
+  'bge-reranker-v2-m3', 'happyhorse-1.0', 'happyhorse-1.1', 'hy3', 'kling-3.0',
+  'kling-3.0-omni', 'kling-3.0-turbo', 'wan3.0-video', 'wan3.0-video-prime',
+  'deepseek-v4-flash', 'deepseek-v4-flash-0731', 'deepseek-v4-flash-vision-exp',
+  'deepseek-v4-pro', 'deepseek-v4-pro-0813', 'MiniMax-H3', 'minimax-m2.7',
+  'minimax-m2.7-highspeed', 'minimax-m3', 'kimi-k2.6', 'kimi-k2.7-code',
+  'kimi-k2.7-code-highspeed', 'kimi-k3',
+] as const
+
+function generatedPublicModel(name: string): PublicModelInfo {
+  const seeded = seededPublicModels.find(model => model.name.toLowerCase() === name.toLowerCase())
+  if (seeded) return { ...seeded, id: name, name, displayName: name, upstreamModel: name }
+  const lower = name.toLowerCase()
+  const provider = lower.startsWith('qwen') ? 'Qwen'
+    : lower.startsWith('glm') ? 'Zhipu/GLM'
+      : lower.startsWith('doubao') ? 'Doubao'
+        : lower.startsWith('deepseek') ? 'DeepSeek'
+          : lower.startsWith('kimi') ? 'Kimi/Moonshot'
+            : lower.startsWith('mini') ? 'MiniMax'
+              : 'Data宝'
+  const type = lower.includes('video') || lower.includes('kling') || lower.includes('happyhorse') || lower.includes('seedream') ? 'Video' : 'Chat'
+  return {
+    id: name, name, displayName: name, provider, upstreamModel: name, type,
+    billing: 'Token billing', billingMode: 'token', currency: 'THB',
+    inputPrice: null, outputPrice: null, unit: '1M Tokens',
+    endpointTypes: ['openai:/v1/chat/completions'], description: descriptionFor('qwen'),
+    tags: ['OpenAI-compatible', 'Token billing'],
+  }
+}
+
+export const publicModels: PublicModelInfo[] = publicModelNames.map(generatedPublicModel)
+export const publicModelNameSet = new Set(publicModelNames.map(name => name.toLowerCase()))
+
 
 export function normalizePublicModelLocale(locale: string): PublicModelLocale {
   const value = locale.toLowerCase()
@@ -292,15 +331,7 @@ export function canonicalPublicModelName(name: string): string {
 }
 
 export function isPublicModelExcluded(name: string): boolean {
-  const normalized = String(name || '').trim().toLowerCase()
-  return (
-    normalized === 'deepseek-v3.2' ||
-    normalized === 'deepseek-v3' ||
-    normalized === 'deepseek-pro' ||
-    normalized === 'qwen3-turbo' ||
-    normalized === 'glm4-air' ||
-    normalized === 'glm4-plus'
-  )
+  return false
 }
 
 export function dedupePublicModels(models: PublicModelInfo[]): PublicModelInfo[] {

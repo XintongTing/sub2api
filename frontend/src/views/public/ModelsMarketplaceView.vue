@@ -572,7 +572,13 @@ onMounted(async () => {
   try {
     const remote = await listPublicModels()
     if (remote.length > 0) {
-      models.value = dedupePublicModels(remote.map(mapRemoteModel))
+      const remoteModels = remote.map(mapRemoteModel)
+      const remoteByName = new Map(remoteModels.map(model => [model.name.toLowerCase(), model]))
+      // Keep every model in the published catalog; remote data only enriches it.
+      models.value = dedupePublicModels(publicModels.map(model => {
+        const remoteModel = remoteByName.get(model.name.toLowerCase())
+        return remoteModel ? { ...model, ...remoteModel, id: model.name, name: model.name, displayName: model.name, upstreamModel: model.name } : model
+      }))
     }
   } catch (error) {
     loadError.value = error instanceof Error ? error.message : text.value.publicModelApiUnavailable

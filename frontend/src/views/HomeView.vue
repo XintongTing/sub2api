@@ -389,12 +389,12 @@ const contactHref = computed(() => `mailto:${CONTACT_EMAIL}`)
 onMounted(async () => {
   try {
     const remoteModels = await listPublicModels()
-    const uniqueModels = new Set<string>()
+    const uniqueModels = new Set<string>(availableModels.map(model => model.name.toLowerCase()))
     for (const model of remoteModels) {
       const name = canonicalPublicModelName(model.name)
       if (name && !isPublicModelExcluded(name)) uniqueModels.add(name.toLowerCase())
     }
-    if (uniqueModels.size > 0) modelCount.value = uniqueModels.size
+    modelCount.value = Math.max(availableModels.length, uniqueModels.size)
   } catch {
     // Keep the bundled catalog count when the public model API is unavailable.
   }
