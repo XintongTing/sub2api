@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <!-- Admin: Full version badge with dropdown -->
-    <template v-if="isAdmin">
+    <template v-if="false && isAdmin">
       <button
         @click="toggleDropdown"
         class="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs transition-colors"

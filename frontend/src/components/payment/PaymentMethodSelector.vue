@@ -3,10 +3,10 @@
     <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
       {{ t('payment.paymentMethod') }}
     </label>
-    <div class="grid grid-cols-2 gap-3 sm:flex">
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
       <button
-        v-for="method in sortedMethods"
-        :key="method.type"
+        v-for="method in displayMethods"
+        :key="`${method.type}-${method.label || method.type}`"
         type="button"
         :disabled="!method.available"
         :class="[
@@ -20,9 +20,9 @@
         @click="method.available && emit('select', method.type)"
       >
         <span class="flex items-center gap-2">
-          <img :src="methodIcon(method.type)" :alt="t(`payment.methods.${method.type}`)" class="h-7 w-7 object-contain" />
+          <img :src="method.icon || methodIcon(method.type)" :alt="method.label || t(`payment.methods.${method.type}`)" class="h-7 w-7 object-contain" />
           <span class="flex flex-col items-start leading-none">
-            <span class="text-base font-semibold">{{ t(`payment.methods.${method.type}`) }}</span>
+            <span class="text-base font-semibold">{{ method.label || t(`payment.methods.${method.type}`) }}</span>
             <span
               v-if="method.fee_rate > 0"
               class="text-[10px] tracking-wide text-gray-500 dark:text-dark-400"
@@ -44,11 +44,17 @@ import alipayIcon from '@/assets/icons/alipay.svg'
 import wxpayIcon from '@/assets/icons/wxpay.svg'
 import stripeIcon from '@/assets/icons/stripe.svg'
 import airwallexIcon from '@/assets/icons/airwallex.svg'
+import promptpayIcon from '@/assets/icons/promptpay.jpg'
+import kplusIcon from '@/assets/icons/kplus.jpg'
+import truemoneyIcon from '@/assets/icons/truemoney.jpg'
+import linepayIcon from '@/assets/icons/linepay.jpg'
 
 export interface PaymentMethodOption {
   type: string
   fee_rate: number
   available: boolean
+  label?: string
+  icon?: string
 }
 
 const props = defineProps<{
@@ -69,6 +75,13 @@ const METHOD_ICONS: Record<string, string> = {
   airwallex: airwallexIcon,
 }
 
+const SUNRATE_METHODS = [
+  { type: 'sunrate', label: 'PromptPay', icon: promptpayIcon },
+  { type: 'sunrate', label: 'K PLUS', icon: kplusIcon },
+  { type: 'sunrate', label: 'TrueMoney', icon: truemoneyIcon },
+  { type: 'sunrate', label: 'LINE Pay', icon: linepayIcon },
+]
+
 const sortedMethods = computed(() => {
   const order: readonly string[] = METHOD_ORDER
   return [...props.methods].sort((a, b) => {
@@ -77,6 +90,12 @@ const sortedMethods = computed(() => {
     return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
   })
 })
+
+const displayMethods = computed(() => sortedMethods.value.flatMap(method =>
+  method.type === 'sunrate'
+    ? SUNRATE_METHODS.map(local => ({ ...method, ...local }))
+    : [method],
+))
 
 function methodIcon(type: string): string {
   if (type.includes('alipay')) return METHOD_ICONS.alipay

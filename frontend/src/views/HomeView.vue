@@ -204,7 +204,6 @@ import Icon from '@/components/icons/Icon.vue'
 import {
   canonicalPublicModelName,
   dedupePublicModels,
-  isPublicModelExcluded,
   localizePublicModelDescription,
   publicModels,
   type PublicModelInfo,
@@ -388,13 +387,9 @@ const contactHref = computed(() => `mailto:${CONTACT_EMAIL}`)
 
 onMounted(async () => {
   try {
-    const remoteModels = await listPublicModels()
-    const uniqueModels = new Set<string>(availableModels.map(model => model.name.toLowerCase()))
-    for (const model of remoteModels) {
-      const name = canonicalPublicModelName(model.name)
-      if (name && !isPublicModelExcluded(name)) uniqueModels.add(name.toLowerCase())
-    }
-    modelCount.value = Math.max(availableModels.length, uniqueModels.size)
+    await listPublicModels()
+    // The published catalog is the single source of truth for this number.
+    modelCount.value = availableModels.length
   } catch {
     // Keep the bundled catalog count when the public model API is unavailable.
   }

@@ -24,7 +24,7 @@
       <div class="grid gap-4 md:grid-cols-4">
         <div class="card p-4">
           <p class="text-sm text-slate-500 dark:text-dark-300">可售模型</p>
-          <p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">{{ rows.length }}</p>
+          <p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">{{ publicModels.length }}</p>
         </div>
         <div class="card p-4">
           <p class="text-sm text-slate-500 dark:text-dark-300">已启用渠道</p>
@@ -196,7 +196,7 @@ import AppLayout from '@/components/layout/AppLayout.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import channelsAPI, { type Channel, type ChannelModelPricing } from '@/api/admin/channels'
 import { CHANNEL_STATUS_ACTIVE, BILLING_MODE_TOKEN, BILLING_MODE_PER_REQUEST, BILLING_MODE_IMAGE, type BillingMode } from '@/constants/channel'
-import { canonicalPublicModelName, dedupePublicModels, isPublicModelExcluded, publicModels, type PublicModelInfo } from '@/constants/publicModels'
+import { canonicalPublicModelName, dedupePublicModels, isPublicModelExcluded, publicModelNameSet, publicModels, type PublicModelInfo } from '@/constants/publicModels'
 
 const PER_MILLION = 1_000_000
 
@@ -450,6 +450,7 @@ function rebuildRows(): void {
         const row = rowFromPricing(channel, entry, entryIndex, raw)
         if (!row) continue
         const key = row.model.toLowerCase()
+        if (!publicModelNameSet.has(key)) continue
         if (!byModel.has(key)) {
           byModel.set(key, row)
         }
