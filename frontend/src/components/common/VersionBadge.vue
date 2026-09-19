@@ -406,7 +406,7 @@ const loading = computed(() => appStore.versionLoading)
 const currentVersion = computed(() => appStore.currentVersion || props.version || '')
 const latestVersion = computed(() => appStore.latestVersion)
 const hasUpdate = computed(() => appStore.hasUpdate)
-const releaseInfo = computed(() => appStore.releaseInfo)
+const releaseInfo = computed(() => appStore.releaseInfo || { name: '', body: '', published_at: '', html_url: '#' })
 const buildType = computed(() => appStore.buildType)
 
 // Update process states (local to this component)

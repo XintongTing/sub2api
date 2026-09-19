@@ -202,7 +202,6 @@ import { useAppStore, useAuthStore } from '@/stores'
 import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import Icon from '@/components/icons/Icon.vue'
 import {
-  canonicalPublicModelName,
   dedupePublicModels,
   localizePublicModelDescription,
   publicModels,
