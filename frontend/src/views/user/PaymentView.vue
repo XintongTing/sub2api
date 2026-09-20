@@ -211,7 +211,7 @@
             <img v-if="checkout.help_image_url" :src="checkout.help_image_url" alt=""
               class="h-40 max-w-full cursor-pointer rounded-lg object-contain transition-opacity hover:opacity-80"
               @click="previewImage = checkout.help_image_url" />
-            <p v-if="checkout.help_text" class="text-center text-sm text-gray-500 dark:text-gray-400">{{ checkout.help_text }}</p>
+            <p v-if="paymentHelpText" class="text-center text-sm text-gray-500 dark:text-gray-400">{{ paymentHelpText }}</p>
           </div>
         </div>
       </template>
@@ -480,6 +480,13 @@ const checkout = ref<CheckoutInfoResponse>({
   methods: {}, global_min: 0, global_max: 0,
   plans: [], balance_disabled: false, balance_recharge_multiplier: 1, recharge_fee_rate: 0, help_text: '', help_image_url: '', stripe_publishable_key: '',
 })
+
+const DEFAULT_RECHARGE_HELP_TEXT = '请选择页面显示的支付方式完成充值。支付成功后余额通常会自动到账；如遇支付失败或到账延迟，请保留订单号并联系客服处理。'
+const paymentHelpText = computed(() =>
+  checkout.value.help_text === DEFAULT_RECHARGE_HELP_TEXT
+    ? t('payment.rechargeHelp')
+    : checkout.value.help_text,
+)
 
 const tabs = computed(() => {
   const result: { key: 'recharge' | 'subscription'; label: string }[] = []

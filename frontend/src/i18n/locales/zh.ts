@@ -7081,6 +7081,7 @@ export default {
     customAmount: '自定义金额',
     enterAmount: '输入金额',
     paymentMethod: '支付方式',
+    rechargeHelp: '请选择页面显示的支付方式完成充值。支付成功后余额通常会自动到账；如遇支付失败或到账延迟，请保留订单号并联系客服处理。',
     fee: '手续费',
     actualPay: '实付金额',
     createOrder: '确认支付',

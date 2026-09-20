@@ -10,16 +10,24 @@
         type="button"
         :disabled="!method.available"
         :class="[
-          'relative flex h-[60px] flex-col items-center justify-center rounded-lg border px-3 transition-all sm:flex-1',
+          'relative flex h-[60px] flex-col items-center justify-center rounded-lg border transition-all sm:flex-1',
+          method.type === 'sunrate' ? 'overflow-hidden p-0' : 'px-3',
           !method.available
             ? 'cursor-not-allowed border-gray-200 bg-gray-50 opacity-50 dark:border-dark-700 dark:bg-dark-800/50'
             : selected === method.type
               ? methodSelectedClass(method.type)
               : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 dark:border-dark-600 dark:bg-dark-800 dark:text-gray-200 dark:hover:border-dark-500',
         ]"
+        :aria-label="method.label || t(`payment.methods.${method.type}`)"
         @click="method.available && emit('select', method.type)"
       >
-        <span class="flex items-center gap-2">
+        <img
+          v-if="method.type === 'sunrate'"
+          :src="method.icon || methodIcon(method.type)"
+          alt=""
+          class="absolute inset-0 h-full w-full object-cover"
+        />
+        <span v-else class="flex items-center gap-2">
           <img :src="method.icon || methodIcon(method.type)" :alt="method.label || t(`payment.methods.${method.type}`)" class="h-7 w-7 object-contain" />
           <span class="flex flex-col items-start leading-none">
             <span class="text-base font-semibold">{{ method.label || t(`payment.methods.${method.type}`) }}</span>
@@ -44,10 +52,7 @@ import alipayIcon from '@/assets/icons/alipay.svg'
 import wxpayIcon from '@/assets/icons/wxpay.svg'
 import stripeIcon from '@/assets/icons/stripe.svg'
 import airwallexIcon from '@/assets/icons/airwallex.svg'
-import promptpayIcon from '@/assets/icons/promptpay.jpg'
-import kplusIcon from '@/assets/icons/kplus.jpg'
-import truemoneyIcon from '@/assets/icons/truemoney.jpg'
-import linepayIcon from '@/assets/icons/linepay.jpg'
+import sunrateCashierIcon from '@/assets/icons/sunrate-cashier.png'
 
 export interface PaymentMethodOption {
   type: string
@@ -73,14 +78,8 @@ const METHOD_ICONS: Record<string, string> = {
   wxpay: wxpayIcon,
   stripe: stripeIcon,
   airwallex: airwallexIcon,
+  sunrate: sunrateCashierIcon,
 }
-
-const SUNRATE_METHODS = [
-  { type: 'sunrate', label: 'PromptPay', icon: promptpayIcon },
-  { type: 'sunrate', label: 'K PLUS', icon: kplusIcon },
-  { type: 'sunrate', label: 'TrueMoney', icon: truemoneyIcon },
-  { type: 'sunrate', label: 'LINE Pay', icon: linepayIcon },
-]
 
 const sortedMethods = computed(() => {
   const order: readonly string[] = METHOD_ORDER
@@ -91,11 +90,7 @@ const sortedMethods = computed(() => {
   })
 })
 
-const displayMethods = computed(() => sortedMethods.value.flatMap(method =>
-  method.type === 'sunrate'
-    ? SUNRATE_METHODS.map(local => ({ ...method, ...local }))
-    : [method],
-))
+const displayMethods = computed(() => sortedMethods.value)
 
 function methodIcon(type: string): string {
   if (type.includes('alipay')) return METHOD_ICONS.alipay

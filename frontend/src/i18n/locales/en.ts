@@ -6901,6 +6901,7 @@ export default {
     customAmount: 'Custom Amount',
     enterAmount: 'Enter amount',
     paymentMethod: 'Payment Method',
+    rechargeHelp: 'Select a payment method shown on this page to top up. Your balance is usually credited automatically after a successful payment. If payment fails or crediting is delayed, keep the order number and contact support.',
     fee: 'Fee',
     actualPay: 'Actual Payment',
     createOrder: 'Confirm Payment',

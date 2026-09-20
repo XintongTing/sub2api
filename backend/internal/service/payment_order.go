@@ -459,12 +459,17 @@ func (s *PaymentService) invokeProvider(ctx context.Context, order *dbent.Paymen
 	if err != nil {
 		return nil, err
 	}
+	providerNotifyURL, err := buildPaymentWebhookURL(canonicalReturnURL, sel.ProviderKey)
+	if err != nil {
+		return nil, err
+	}
 	providerReq := buildProviderCreatePaymentRequest(CreateOrderRequest{
 		PaymentType: req.PaymentType,
 		OpenID:      req.OpenID,
 		ClientIP:    req.ClientIP,
 		IsMobile:    req.IsMobile,
 		ReturnURL:   providerReturnURL,
+		NotifyURL:   providerNotifyURL,
 	}, sel, outTradeNo, payAmountStr, subject)
 	pr, err := prov.CreatePayment(ctx, providerReq)
 	if err != nil {
@@ -508,6 +513,7 @@ func buildProviderCreatePaymentRequest(req CreateOrderRequest, sel *payment.Inst
 		PaymentType:        req.PaymentType,
 		Subject:            subject,
 		ReturnURL:          req.ReturnURL,
+		NotifyURL:          req.NotifyURL,
 		OpenID:             strings.TrimSpace(req.OpenID),
 		ClientIP:           req.ClientIP,
 		IsMobile:           req.IsMobile,
