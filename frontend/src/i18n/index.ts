@@ -6,7 +6,9 @@ type LocaleMessages = Record<string, any>
 
 const LOCALE_KEY = 'sub2api_locale'
 const DEFAULT_LOCALE: LocaleCode = 'th'
-const FALLBACK_LOCALE: LocaleCode = 'zh-CN'
+// Do not fall back to Chinese for a missing Thai message. Each supported
+// locale owns its message tree, so a missing key remains visible to us.
+const FALLBACK_LOCALE = false
 
 const localeLoaders: Record<LocaleCode, () => Promise<{ default: LocaleMessages }>> = {
   en: () => import('./locales/en'),

@@ -180,7 +180,35 @@ const COPY = {
   },
 }
 
-const copy = computed(() => String(locale.value || '').toLowerCase().startsWith('zh') ? COPY.zh : COPY.en)
+const TH_COPY = {
+  kicker: 'ศูนย์ช่วยเหลือ', title: 'ค้นหาคำตอบก่อน แล้วให้เจ้าหน้าที่ช่วยต่อ',
+  description: 'พิมพ์คำสำคัญเพื่อดูคำแนะนำได้ทันที เรื่องบัญชี การชำระเงิน การคืนเงิน และความเป็นส่วนตัว สามารถส่งให้เจ้าหน้าที่ผ่านอีเมลที่ใช้ลงทะเบียนได้',
+  humanSupport: 'อีเมลฝ่ายสนับสนุน', responseNote: 'กรุณาใช้อีเมลที่ลงทะเบียนไว้ และระบุหมายเลขคำสั่งซื้อหรือเวลาที่พบปัญหาในอีเมล',
+  autoReply: 'ตอบกลับอัตโนมัติด้วยคำสำคัญ', searchTitle: 'เราช่วยอะไรคุณได้บ้าง?', searchDescription: 'ลองค้นหาด้วยคำว่า เติมเงิน ชำระเงินไม่สำเร็จ ยอดไม่เข้า คืนเงิน API key ยอดคงเหลือ ใบแจ้งหนี้ หรือความเป็นส่วนตัว',
+  searchPlaceholder: 'ตัวอย่าง: ชำระเงินแล้วแต่ยอดคงเหลือยังไม่เข้า', keywords: ['เติมเงิน', 'ชำระเงินไม่สำเร็จ', 'ยอดไม่เข้า', 'คืนเงิน', 'API key', 'ยอดคงเหลือ', 'ความเป็นส่วนตัว'],
+  emailKicker: 'เจ้าหน้าที่ช่วยเหลือ', emailTitle: 'ส่งอีเมลตามหัวข้อ', emailDescription: 'เลือกหัวข้อเพื่อกรอกชื่อเรื่องอีเมลให้อัตโนมัติ ช่วยให้เจ้าหน้าที่จัดการได้รวดเร็วขึ้น',
+  emailTopics: [
+    ['การชำระเงินหรือการได้รับยอด', 'ระบุหมายเลขคำสั่งซื้อ เวลา จำนวนเงิน สกุลเงิน และหลักฐานการชำระเงินที่ปกปิดข้อมูลสำคัญแล้ว', 'Payment Support'],
+    ['คำขอคืนเงิน', 'ระบุรายละเอียดคำสั่งซื้อและเหตุผลที่ขอคืนเงิน', 'Refund Request'],
+    ['บัญชีหรือ API key', 'ห้ามส่งรหัสผ่านหรือ API key แบบเต็มในอีเมล', 'Account and API Key Support'],
+    ['คำขอเกี่ยวกับความเป็นส่วนตัว', 'คำขอเข้าถึง แก้ไข ลบ หรือดำเนินการอื่นเกี่ยวกับข้อมูล', 'Privacy Request'],
+  ] as [string, string, string][],
+  securityTitle: 'คำแนะนำด้านความปลอดภัย:', securityNote: 'ฝ่ายสนับสนุนจะไม่ขอรหัสผ่าน หมายเลขบัตรเต็ม รหัสความปลอดภัยของบัตร หรือ API key ลับของคุณ',
+  defaultAnswer: { title: 'พิมพ์คำสำคัญของปัญหา', answer: 'เราจะแสดงขั้นตอนที่เกี่ยวข้อง หากไม่พบคำตอบที่ตรงกัน โปรดใช้อีเมลฝ่ายสนับสนุนด้านขวา' },
+  answers: {
+    payment: { title: 'การเติมเงินและการชำระเงิน', answer: 'ลงชื่อเข้าใช้ เปิดหน้าซื้อ เลือกจำนวนเงินและวิธีชำระเงินที่ใช้ได้ จากนั้นตรวจสอบสกุลเงินและยอดสุดท้ายก่อนยืนยัน ดูสถานะได้จากหน้าผลการชำระเงินหรือประวัติคำสั่งซื้อ', path: '/legal/payment-process', linkLabel: 'ดูขั้นตอนการชำระเงิน' },
+    pending: { title: 'ชำระเงินแล้วแต่ยอดไม่เข้า', answer: 'รีเฟรชหน้าผลการชำระเงินและตรวจสอบประวัติคำสั่งซื้อ หากตัดเงินแล้วแต่ยอดยังไม่เข้า โปรดส่งอีเมลจากที่อยู่ที่ลงทะเบียน พร้อมหมายเลขคำสั่งซื้อ เวลา จำนวนเงิน สกุลเงิน และหลักฐานการชำระเงินที่ปกปิดข้อมูลสำคัญแล้ว', path: '/legal/delivery-policy', linkLabel: 'ดูนโยบายการให้บริการ' },
+    refund: { title: 'คำขอคืนเงิน', answer: 'ส่งอีเมลจากที่อยู่ที่ลงทะเบียน โดยใช้หัวข้อ “Refund Request” พร้อมหมายเลขคำสั่งซื้อ วันที่ จำนวนเงิน สกุลเงิน เหตุผล และหลักฐานที่ปกปิดข้อมูลสำคัญแล้ว โดยปกติยอดบริการดิจิทัลที่ใช้ไปแล้วจะไม่สามารถคืนเงินได้ เว้นแต่กฎหมายกำหนด', path: '/legal/refund-policy', linkLabel: 'ดูนโยบายการคืนเงิน' },
+    api: { title: 'ปัญหา API key และคำขอ', answer: 'สร้างหรือจัดการคีย์ได้จากคอนโซล รหัส 401 มักหมายถึงคีย์ไม่มีหรือไม่ถูกต้อง 402 คือยอดคงเหลือไม่เพียงพอ 404 คือโมเดลไม่พร้อมใช้งาน และ 429 คือมีคำขอมากเกินไป', path: '/docs', linkLabel: 'ดูเอกสารสำหรับนักพัฒนา' },
+    privacy: { title: 'ความเป็นส่วนตัวและคำขอข้อมูล', answer: 'ส่งอีเมลจากที่อยู่ที่ลงทะเบียน โดยใช้หัวข้อ “Privacy Request” และระบุว่าต้องการเข้าถึง แก้ไข ลบ หรือจำกัดการใช้ข้อมูล การยืนยันตัวตนอาจเป็นสิ่งจำเป็น', path: '/legal/privacy', linkLabel: 'ดูนโยบายความเป็นส่วนตัว' },
+  } as Record<string, Answer>,
+}
+
+const copy = computed(() => {
+  const currentLocale = String(locale.value || '').toLowerCase()
+  if (currentLocale.startsWith('th')) return TH_COPY
+  return currentLocale.startsWith('zh') ? COPY.zh : COPY.en
+})
 const normalizedQuery = computed(() => query.value.trim().toLowerCase())
 
 const activeAnswer = computed<Answer>(() => {
@@ -194,7 +222,13 @@ const activeAnswer = computed<Answer>(() => {
   return copy.value.defaultAnswer
 })
 
-const generalMailto = computed(() => `mailto:${supportEmail.value}?subject=${encodeURIComponent('Customer Support / 客户服务')}`)
+const generalMailto = computed(() => {
+  const currentLocale = String(locale.value || '').toLowerCase()
+  const subject = currentLocale.startsWith('th')
+    ? 'ฝ่ายสนับสนุนลูกค้า'
+    : currentLocale.startsWith('zh') ? 'Customer Support / 客户服务' : 'Customer Support'
+  return `mailto:${supportEmail.value}?subject=${encodeURIComponent(subject)}`
+})
 const mailTopics = computed(() => copy.value.emailTopics.map(([label, description, subject]) => ({
   label,
   description,

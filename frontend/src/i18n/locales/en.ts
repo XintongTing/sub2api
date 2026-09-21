@@ -1465,6 +1465,26 @@ export default {
       title: 'Model Pricing Settings',
       description: 'Manage THB prices, marketplace metadata, and API availability for sellable models',
     },
+    modelPricingSettings: {
+      financialManagement: 'Financial Management',
+      title: 'Model Pricing Settings',
+      description: 'Maintain THB prices for sellable models. After saving, the settings are written to channel model_pricing and used by both the model marketplace and new API calls.',
+      refreshing: 'Refreshing...', refresh: 'Refresh', advancedChannelSettings: 'Advanced Channel Settings',
+      sellableModels: 'Sellable Models', enabledChannels: 'Enabled Channels', unsavedChanges: 'Unsaved Changes',
+      priceUnit: 'Price Unit', thb: 'THB / Thai Baht', searchPlaceholder: 'Search model name / provider / channel',
+      allProviders: 'All Providers', allBillingTypes: 'All Billing Types', tokenBilling: 'Token-based',
+      perRequestBilling: 'Per request', imagePerRequestBilling: 'Image / per request', imagePerRequest: 'Image / per request',
+      saving: 'Saving...', saveAll: 'Save All ({count})', tableScrollHint: 'The table can be scrolled horizontally. When the page is enlarged, use the scrollbar at the bottom to view update times and save actions on the right.',
+      model: 'Model', provider: 'Provider', endpoint: 'Endpoint', billingType: 'Billing Type', inputPrice: 'Input Price', outputPrice: 'Output Price',
+      cacheReadPrice: 'Cache Read', cacheWritePrice: 'Cache Write', perRequestPrice: 'Per-request Price', perRequestUnit: 'request', tokens: 'Tokens',
+      marketplaceApi: 'Marketplace / API', updatedAt: 'Updated At', actions: 'Actions', pendingPrimaryChannel: 'Pending primary channel',
+      tagsPlaceholder: 'Tags, comma separated', marketplaceDescriptionPlaceholder: 'Marketplace description',
+      showInMarketplace: 'Show in marketplace', allowApiCalls: 'Allow API calls', save: 'Save', saved: 'Saved',
+      empty: 'No editable models. Please synchronize or add sellable models in Advanced Channel Settings first.', notSet: 'Not set',
+      invalidPrice: 'Price must be a number greater than or equal to 0', loadFailed: 'Failed to load model pricing',
+      perRequestPriceRequired: 'Per-request billed models require a per-request price', noWritableChannel: 'No writable channel. Please create and enable an upstream channel first.',
+      saveFailed: 'Save failed',
+    },
 
     // Dashboard
     dashboard: {

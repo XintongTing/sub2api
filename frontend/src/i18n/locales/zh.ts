@@ -1469,6 +1469,21 @@ export default {
       title: '模型价格设置',
       description: '维护可售模型的泰铢售价、展示信息和调用开关',
     },
+    modelPricingSettings: {
+      financialManagement: '财务管理', title: '模型价格设置',
+      description: '直接维护可售模型的 THB 售价。保存后会写入渠道 model_pricing，前台模型广场和新 API 调用扣费都会读取同一套生效价格。',
+      refreshing: '刷新中...', refresh: '刷新', advancedChannelSettings: '高级渠道配置',
+      sellableModels: '可售模型', enabledChannels: '已启用渠道', unsavedChanges: '未保存修改', priceUnit: '价格单位', thb: 'THB / 泰铢',
+      searchPlaceholder: '搜索模型名称 / 供应商 / 渠道', allProviders: '全部供应商', allBillingTypes: '全部计费类型',
+      tokenBilling: '按量计费', perRequestBilling: '按次计费', imagePerRequestBilling: '图片/按次计费', imagePerRequest: '图片/按次',
+      saving: '保存中...', saveAll: '保存全部 ({count})', tableScrollHint: '表格可横向拖动；页面放大时，请使用表格底部滚动条查看右侧更新时间和保存操作。',
+      model: '模型', provider: '供应商', endpoint: '端点', billingType: '计费类型', inputPrice: '输入价', outputPrice: '补全价',
+      cacheReadPrice: '缓存读取', cacheWritePrice: '缓存创建', perRequestPrice: '按次价', perRequestUnit: '次', tokens: 'Tokens', marketplaceApi: '前台/调用',
+      updatedAt: '更新时间', actions: '操作', pendingPrimaryChannel: '待写入主渠道', tagsPlaceholder: '标签，使用英文逗号分隔',
+      marketplaceDescriptionPlaceholder: '模型广场说明', showInMarketplace: '前台显示', allowApiCalls: '允许调用', save: '保存', saved: '已保存',
+      empty: '暂无可编辑模型。请先在高级渠道配置里同步或添加可售模型。', notSet: '未设置', invalidPrice: '价格必须是大于或等于 0 的数字',
+      loadFailed: '加载模型价格失败', perRequestPriceRequired: '按次计费模型必须填写按次价格', noWritableChannel: '没有可写入的渠道，请先创建并启用上游渠道', saveFailed: '保存失败',
+    },
 
     // Dashboard
     dashboard: {

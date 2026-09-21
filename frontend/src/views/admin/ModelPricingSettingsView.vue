@@ -4,18 +4,18 @@
       <div class="rounded-lg border border-emerald-100 bg-gradient-to-r from-primary-700 via-primary-600 to-cyan-500 p-6 text-white shadow-sm">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p class="text-sm font-semibold text-primary-50">财务管理</p>
-            <h1 class="mt-2 text-2xl font-bold sm:text-3xl">模型价格设置</h1>
+            <p class="text-sm font-semibold text-primary-50">{{ t('admin.modelPricingSettings.financialManagement') }}</p>
+            <h1 class="mt-2 text-2xl font-bold sm:text-3xl">{{ t('admin.modelPricingSettings.title') }}</h1>
             <p class="mt-2 max-w-3xl text-sm leading-6 text-primary-50">
-              直接维护可售模型的 THB 售价。保存后会写入渠道 model_pricing，前台模型广场和新 API 调用扣费都会读取同一套生效价格。
+              {{ t('admin.modelPricingSettings.description') }}
             </p>
           </div>
           <div class="flex flex-wrap gap-3">
             <button class="rounded-md bg-white/15 px-4 py-2 text-sm font-semibold text-white hover:bg-white/25" :disabled="loading" @click="load">
-              {{ loading ? '刷新中...' : '刷新' }}
+              {{ loading ? t('admin.modelPricingSettings.refreshing') : t('admin.modelPricingSettings.refresh') }}
             </button>
             <router-link to="/admin/channels/pricing" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50">
-              高级渠道配置
+              {{ t('admin.modelPricingSettings.advancedChannelSettings') }}
             </router-link>
           </div>
         </div>
@@ -23,20 +23,20 @@
 
       <div class="grid gap-4 md:grid-cols-4">
         <div class="card p-4">
-          <p class="text-sm text-slate-500 dark:text-dark-300">可售模型</p>
+          <p class="text-sm text-slate-500 dark:text-dark-300">{{ t('admin.modelPricingSettings.sellableModels') }}</p>
           <p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">{{ publicModels.length }}</p>
         </div>
         <div class="card p-4">
-          <p class="text-sm text-slate-500 dark:text-dark-300">已启用渠道</p>
+          <p class="text-sm text-slate-500 dark:text-dark-300">{{ t('admin.modelPricingSettings.enabledChannels') }}</p>
           <p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">{{ activeChannels.length }}</p>
         </div>
         <div class="card p-4">
-          <p class="text-sm text-slate-500 dark:text-dark-300">未保存修改</p>
+          <p class="text-sm text-slate-500 dark:text-dark-300">{{ t('admin.modelPricingSettings.unsavedChanges') }}</p>
           <p class="mt-2 text-2xl font-bold text-primary-700 dark:text-primary-300">{{ dirtyRows.length }}</p>
         </div>
         <div class="card p-4">
-          <p class="text-sm text-slate-500 dark:text-dark-300">价格单位</p>
-          <p class="mt-2 text-lg font-bold text-slate-950 dark:text-white">THB / 泰铢</p>
+          <p class="text-sm text-slate-500 dark:text-dark-300">{{ t('admin.modelPricingSettings.priceUnit') }}</p>
+          <p class="mt-2 text-lg font-bold text-slate-950 dark:text-white">{{ t('admin.modelPricingSettings.thb') }}</p>
         </div>
       </div>
 
@@ -49,25 +49,25 @@
           <input
             v-model.trim="search"
             type="search"
-            placeholder="搜索模型名称 / 供应商 / 渠道"
+            :placeholder="t('admin.modelPricingSettings.searchPlaceholder')"
             class="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-900 dark:text-white"
           />
           <select v-model="providerFilter" class="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-dark-700 dark:bg-dark-900 dark:text-white">
-            <option value="">全部供应商</option>
+            <option value="">{{ t('admin.modelPricingSettings.allProviders') }}</option>
             <option v-for="provider in providers" :key="provider" :value="provider">{{ provider }}</option>
           </select>
           <select v-model="billingFilter" class="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-dark-700 dark:bg-dark-900 dark:text-white">
-            <option value="">全部计费类型</option>
-            <option value="token">按量计费</option>
-            <option value="per_request">按次计费</option>
-            <option value="image">图片/按次计费</option>
+            <option value="">{{ t('admin.modelPricingSettings.allBillingTypes') }}</option>
+            <option value="token">{{ t('admin.modelPricingSettings.tokenBilling') }}</option>
+            <option value="per_request">{{ t('admin.modelPricingSettings.perRequestBilling') }}</option>
+            <option value="image">{{ t('admin.modelPricingSettings.imagePerRequestBilling') }}</option>
           </select>
           <button
             class="rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
             :disabled="dirtyRows.length === 0 || bulkSaving"
             @click="saveDirtyRows"
           >
-            {{ bulkSaving ? '保存中...' : `保存全部 (${dirtyRows.length})` }}
+            {{ bulkSaving ? t('admin.modelPricingSettings.saving') : t('admin.modelPricingSettings.saveAll', { count: dirtyRows.length }) }}
           </button>
         </div>
       </div>
@@ -78,31 +78,31 @@
 
       <div v-else class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-dark-800 dark:bg-dark-900">
         <div class="border-b border-slate-100 bg-slate-50/80 px-4 py-2 text-xs text-slate-500 dark:border-dark-800 dark:bg-dark-900 dark:text-dark-300">
-          表格可横向拖动；页面放大时，请使用表格底部滚动条查看右侧更新时间和保存操作。
+          {{ t('admin.modelPricingSettings.tableScrollHint') }}
         </div>
         <div class="max-h-[calc(100vh-300px)] min-h-[360px] overflow-auto overscroll-contain">
           <table class="w-full min-w-[1760px] divide-y divide-slate-200 text-sm dark:divide-dark-700">
             <thead class="sticky top-0 z-10 bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500 dark:bg-dark-800 dark:text-dark-300">
               <tr>
-                <th class="px-4 py-3">模型</th>
-                <th class="px-4 py-3">供应商</th>
-                <th class="px-4 py-3">端点</th>
-                <th class="px-4 py-3">计费类型</th>
-                <th class="px-4 py-3">输入价<br />฿ / 1M Tokens</th>
-                <th class="px-4 py-3">补全价<br />฿ / 1M Tokens</th>
-                <th class="px-4 py-3">缓存读取<br />฿ / 1M Tokens</th>
-                <th class="px-4 py-3">缓存创建<br />฿ / 1M Tokens</th>
-                <th class="px-4 py-3">按次价<br />฿ / 次</th>
-                <th class="px-4 py-3">前台/调用</th>
-                <th class="px-4 py-3">更新时间</th>
-                <th class="px-4 py-3 text-right">操作</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.model') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.provider') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.endpoint') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.billingType') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.inputPrice') }}<br />฿ / 1M {{ t('admin.modelPricingSettings.tokens') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.outputPrice') }}<br />฿ / 1M {{ t('admin.modelPricingSettings.tokens') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.cacheReadPrice') }}<br />฿ / 1M {{ t('admin.modelPricingSettings.tokens') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.cacheWritePrice') }}<br />฿ / 1M {{ t('admin.modelPricingSettings.tokens') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.perRequestPrice') }}<br />฿ / {{ t('admin.modelPricingSettings.perRequestUnit') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.marketplaceApi') }}</th>
+                <th class="px-4 py-3">{{ t('admin.modelPricingSettings.updatedAt') }}</th>
+                <th class="px-4 py-3 text-right">{{ t('admin.modelPricingSettings.actions') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
               <tr v-for="row in filteredRows" :key="row.id" class="hover:bg-primary-50/40 dark:hover:bg-primary-500/5">
                 <td class="px-4 py-3 align-top">
                   <div class="font-mono font-semibold text-slate-950 dark:text-white">{{ row.model }}</div>
-                  <div class="mt-1 text-xs text-slate-500 dark:text-dark-300">{{ row.channelName || '待写入主渠道' }}</div>
+                  <div class="mt-1 text-xs text-slate-500 dark:text-dark-300">{{ row.channelName || t('admin.modelPricingSettings.pendingPrimaryChannel') }}</div>
                 </td>
                 <td class="px-4 py-3 align-top">
                   <div class="space-y-2">
@@ -110,14 +110,14 @@
                       v-model.trim="row.provider"
                       type="text"
                       class="w-40 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-950 dark:text-white"
-                      placeholder="Provider"
+                      :placeholder="t('admin.modelPricingSettings.provider')"
                       @input="markDirty(row)"
                     />
                     <input
                       v-model.trim="row.tagsText"
                       type="text"
                       class="w-40 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-950 dark:text-dark-100"
-                      placeholder="Tags, comma separated"
+                      :placeholder="t('admin.modelPricingSettings.tagsPlaceholder')"
                       @input="markDirty(row)"
                     />
                   </div>
@@ -135,16 +135,16 @@
                       v-model.trim="row.descriptionText"
                       rows="2"
                       class="w-52 resize-y rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-950 dark:text-dark-100"
-                      placeholder="Marketplace description"
+                      :placeholder="t('admin.modelPricingSettings.marketplaceDescriptionPlaceholder')"
                       @input="markDirty(row)"
                     />
                   </div>
                 </td>
                 <td class="px-4 py-3 align-top">
                   <select v-model="row.billingMode" class="w-32 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-dark-700 dark:bg-dark-950 dark:text-white" @change="markDirty(row)">
-                    <option value="token">按量计费</option>
-                    <option value="per_request">按次计费</option>
-                    <option value="image">图片/按次</option>
+                    <option value="token">{{ t('admin.modelPricingSettings.tokenBilling') }}</option>
+                    <option value="per_request">{{ t('admin.modelPricingSettings.perRequestBilling') }}</option>
+                    <option value="image">{{ t('admin.modelPricingSettings.imagePerRequest') }}</option>
                   </select>
                 </td>
                 <td class="px-4 py-3 align-top"><PriceInput v-model="row.inputPriceText" @update:model-value="markDirty(row)" /></td>
@@ -156,11 +156,11 @@
                   <div class="flex flex-col gap-2 text-xs text-slate-600 dark:text-dark-200">
                     <label class="inline-flex items-center gap-2">
                       <input v-model="row.publicVisible" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" @change="markDirty(row)" />
-                      <span>前台显示</span>
+                      <span>{{ t('admin.modelPricingSettings.showInMarketplace') }}</span>
                     </label>
                     <label class="inline-flex items-center gap-2">
                       <input v-model="row.apiEnabled" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" @change="markDirty(row)" />
-                      <span>允许调用</span>
+                      <span>{{ t('admin.modelPricingSettings.allowApiCalls') }}</span>
                     </label>
                   </div>
                 </td>
@@ -172,10 +172,10 @@
                       :disabled="row.saving || !row.dirty"
                       @click="saveRow(row)"
                     >
-                      {{ row.saving ? '保存中...' : '保存' }}
+                      {{ row.saving ? t('admin.modelPricingSettings.saving') : t('admin.modelPricingSettings.save') }}
                     </button>
                     <span v-if="row.error" class="max-w-48 text-xs text-red-600">{{ row.error }}</span>
-                    <span v-else-if="row.saved" class="text-xs text-emerald-600">已保存</span>
+                    <span v-else-if="row.saved" class="text-xs text-emerald-600">{{ t('admin.modelPricingSettings.saved') }}</span>
                   </div>
                 </td>
               </tr>
@@ -183,7 +183,7 @@
           </table>
         </div>
         <div v-if="filteredRows.length === 0" class="p-10 text-center text-sm text-slate-500 dark:text-dark-300">
-          暂无可编辑模型。请先在高级渠道配置里同步或添加可售模型。
+          {{ t('admin.modelPricingSettings.empty') }}
         </div>
       </div>
     </div>
@@ -192,12 +192,15 @@
 
 <script setup lang="ts">
 import { computed, defineComponent, h, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { getLocale } from '@/i18n'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import channelsAPI, { type Channel, type ChannelModelPricing } from '@/api/admin/channels'
 import { CHANNEL_STATUS_ACTIVE, BILLING_MODE_TOKEN, BILLING_MODE_PER_REQUEST, BILLING_MODE_IMAGE, type BillingMode } from '@/constants/channel'
 import { canonicalPublicModelName, dedupePublicModels, isPublicModelExcluded, publicModelNameSet, publicModels, type PublicModelInfo } from '@/constants/publicModels'
 
+const { t } = useI18n()
 const PER_MILLION = 1_000_000
 
 const PriceInput = defineComponent({
@@ -206,10 +209,11 @@ const PriceInput = defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
+    const { t } = useI18n()
     return () => h('input', {
       value: props.modelValue,
       inputmode: 'decimal',
-      placeholder: '未设置',
+      placeholder: t('admin.modelPricingSettings.notSet'),
       class: 'w-28 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-primary-400 dark:border-dark-700 dark:bg-dark-950 dark:text-white',
       onInput: (event: Event) => emit('update:modelValue', (event.target as HTMLInputElement).value),
     })
@@ -306,7 +310,7 @@ function parsePrice(value: string): number | null {
   if (!trimmed) return null
   const parsed = Number(trimmed)
   if (!Number.isFinite(parsed) || parsed < 0) {
-    throw new Error('价格必须是大于或等于 0 的数字')
+    throw new Error(t('admin.modelPricingSettings.invalidPrice'))
   }
   return parsed
 }
@@ -486,7 +490,7 @@ async function load(): Promise<void> {
     channels.value = loaded
     rebuildRows()
   } catch (err: any) {
-    error.value = err?.message || '加载模型价格失败'
+    error.value = err?.message || t('admin.modelPricingSettings.loadFailed')
   } finally {
     loading.value = false
   }
@@ -505,7 +509,7 @@ function validateRow(row: PricingRow): void {
   parseTokenPrice(row.cacheWritePriceText)
   const perRequest = parseDirectPrice(row.perRequestPriceText)
   if ((row.billingMode === BILLING_MODE_PER_REQUEST || row.billingMode === BILLING_MODE_IMAGE) && perRequest == null) {
-    throw new Error('按次计费模型必须填写按次价格')
+    throw new Error(t('admin.modelPricingSettings.perRequestPriceRequired'))
   }
 }
 
@@ -535,7 +539,7 @@ async function saveRow(row: PricingRow): Promise<void> {
   try {
     validateRow(row)
     const channel = row.channelId ? channels.value.find(item => item.id === row.channelId) : primaryChannel.value
-    if (!channel) throw new Error('没有可写入的渠道，请先创建并启用上游渠道')
+    if (!channel) throw new Error(t('admin.modelPricingSettings.noWritableChannel'))
 
     const pricing = (channel.model_pricing || []).map(clonePricing)
     if (row.source === 'channel' && row.entryIndex != null && pricing[row.entryIndex]) {
@@ -569,7 +573,7 @@ async function saveRow(row: PricingRow): Promise<void> {
     row.saved = true
     await load()
   } catch (err: any) {
-    row.error = err?.message || '保存失败'
+    row.error = err?.message || t('admin.modelPricingSettings.saveFailed')
   } finally {
     row.saving = false
   }
@@ -590,7 +594,7 @@ function formatDate(value?: string): string {
   if (!value) return '-'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleString()
+  return date.toLocaleString(getLocale())
 }
 
 onMounted(load)
