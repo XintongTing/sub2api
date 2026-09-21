@@ -372,12 +372,23 @@ const variable = (value: string) => wrapToken('text-sky-200', value)
 const operator = (value: string) => wrapToken('text-slate-400', value)
 const string = (value: string) => wrapToken('text-amber-200', value)
 const comment = (value: string) => wrapToken('text-slate-500', value)
+const PUBLIC_API_BASE_ROOT = 'https://tokenapifuel.com'
+const EXAMPLE_API_KEY = 'sk-your-api-key'
+const LEGACY_IP_ADDRESS = ['43', '160', '227', '72'].join('.')
+
+const normalizeUserFacingBaseUrl = (value: string) => {
+  const trimmed = (value || '').trim()
+  if (!trimmed || trimmed.includes(LEGACY_IP_ADDRESS)) {
+    return PUBLIC_API_BASE_ROOT
+  }
+  return trimmed.replace(/^http:\/\/tokenapifuel\.com/i, 'https://tokenapifuel.com').replace(/\/+$/, '')
+}
 
 // Syntax highlighting helpers
 // Generate file configs based on platform and active tab
 const currentFiles = computed((): FileConfig[] => {
-  const baseUrl = props.baseUrl || window.location.origin
-  const apiKey = props.apiKey
+  const baseUrl = normalizeUserFacingBaseUrl(props.baseUrl || window.location.origin)
+  const apiKey = EXAMPLE_API_KEY
   const baseRoot = baseUrl.replace(/\/v1\/?$/, '').replace(/\/+$/, '')
   const ensureV1 = (value: string) => {
     const trimmed = value.replace(/\/+$/, '')

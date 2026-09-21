@@ -7,7 +7,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-const DefaultPaymentCurrency = "CNY"
+const DefaultPaymentCurrency = "THB"
 
 type paymentCurrencyAmountUnit struct {
 	apiMinorUnit      int

@@ -70,7 +70,7 @@ function orderFactory(overrides: Partial<PaymentOrder> = {}): PaymentOrder {
     user_id: 7,
     amount: 100,
     pay_amount: 103,
-    currency: 'CNY',
+    currency: 'THB',
     fee_rate: 0.03,
     payment_type: 'stripe',
     out_trade_no: 'sub2_stripe_42',

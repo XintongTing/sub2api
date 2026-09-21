@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PAYMENT_CURRENCY_OPTIONS, PROVIDER_CONFIG_FIELDS } from '@/components/payment/providerConfig'
+import { PAYMENT_CURRENCY_OPTIONS, PROVIDER_CALLBACK_PATHS, PROVIDER_CONFIG_FIELDS, PROVIDER_SUPPORTED_TYPES, WEBHOOK_PATHS } from '@/components/payment/providerConfig'
 
 function findField(providerKey: string, key: string) {
   const fields = PROVIDER_CONFIG_FIELDS[providerKey] || []
@@ -20,10 +20,10 @@ describe('PROVIDER_CONFIG_FIELDS.wxpay', () => {
 })
 
 describe('PROVIDER_CONFIG_FIELDS.airwallex', () => {
-  it('adds currency config with CNY as the default', () => {
+  it('adds currency config with THB as the default', () => {
     const currency = findField('airwallex', 'currency')
 
-    expect(currency?.defaultValue).toBe('CNY')
+    expect(currency?.defaultValue).toBe('THB')
     expect(currency?.hintKey).toBe('admin.settings.payment.field_paymentCurrencyHint')
     expect(currency?.options).toBe(PAYMENT_CURRENCY_OPTIONS)
   })
@@ -42,11 +42,39 @@ describe('PROVIDER_CONFIG_FIELDS.airwallex', () => {
 })
 
 describe('PROVIDER_CONFIG_FIELDS.stripe', () => {
-  it('adds currency config with CNY as the default', () => {
+  it('adds currency config with THB as the default', () => {
     const currency = findField('stripe', 'currency')
 
-    expect(currency?.defaultValue).toBe('CNY')
+    expect(currency?.defaultValue).toBe('THB')
     expect(currency?.hintKey).toBe('admin.settings.payment.field_paymentCurrencyHint')
     expect(currency?.options).toBe(PAYMENT_CURRENCY_OPTIONS)
+  })
+})
+
+describe('PROVIDER_CONFIG_FIELDS.paypal', () => {
+  it('defines PayPal Checkout credentials and THB currency defaults', () => {
+    expect(PROVIDER_SUPPORTED_TYPES.paypal).toEqual(['paypal'])
+    expect(WEBHOOK_PATHS.paypal).toBe('/api/v1/payment/webhook/paypal')
+    expect(PROVIDER_CALLBACK_PATHS.paypal?.returnUrl).toBe('/payment/result')
+    expect(findField('paypal', 'clientId')?.sensitive).toBe(false)
+    expect(findField('paypal', 'clientSecret')?.sensitive).toBe(true)
+    expect(findField('paypal', 'webhookId')?.sensitive).toBe(false)
+    expect(findField('paypal', 'environment')?.defaultValue).toBe('sandbox')
+    expect(findField('paypal', 'apiBase')?.defaultValue).toBe('https://api-m.sandbox.paypal.com')
+    expect(findField('paypal', 'currency')?.defaultValue).toBe('THB')
+  })
+})
+
+describe('PROVIDER_CONFIG_FIELDS.payoneer', () => {
+  it('defines Payoneer Checkout credentials and THB currency defaults', () => {
+    expect(PROVIDER_SUPPORTED_TYPES.payoneer).toEqual(['payoneer'])
+    expect(WEBHOOK_PATHS.payoneer).toBe('/api/v1/payment/webhook/payoneer')
+    expect(PROVIDER_CALLBACK_PATHS.payoneer?.returnUrl).toBe('/payment/result')
+    expect(findField('payoneer', 'clientId')?.sensitive).toBe(false)
+    expect(findField('payoneer', 'clientSecret')?.sensitive).toBe(true)
+    expect(findField('payoneer', 'webhookSecret')?.sensitive).toBe(true)
+    expect(findField('payoneer', 'environment')?.defaultValue).toBe('sandbox')
+    expect(findField('payoneer', 'apiBase')?.defaultValue).toBe('https://api.sandbox.payoneer.com')
+    expect(findField('payoneer', 'currency')?.defaultValue).toBe('THB')
   })
 })

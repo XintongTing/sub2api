@@ -304,6 +304,21 @@ func buildPaymentReturnURL(base string, orderID int64, outTradeNo string, resume
 	return parsed.String(), nil
 }
 
+func buildPaymentWebhookURL(base string, providerKey string) (string, error) {
+	providerKey = strings.TrimSpace(providerKey)
+	if base == "" || providerKey == "" {
+		return "", nil
+	}
+	parsed, err := url.Parse(base)
+	if err != nil || !parsed.IsAbs() || parsed.Host == "" {
+		return "", infraerrors.BadRequest("INVALID_RETURN_URL", "return_url must be a valid absolute URL")
+	}
+	parsed.Path = "/api/v1/payment/webhook/" + providerKey
+	parsed.RawQuery = ""
+	parsed.Fragment = ""
+	return parsed.String(), nil
+}
+
 func sameOriginHost(returnURLHost string, requestHost string) bool {
 	returnHost := strings.TrimSpace(returnURLHost)
 	reqHost := strings.TrimSpace(requestHost)

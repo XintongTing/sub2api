@@ -36,13 +36,16 @@ export const PROVIDER_SUPPORTED_TYPES: Record<string, string[]> = {
   wxpay: ['wxpay'],
   stripe: ['card', 'alipay', 'wxpay', 'link'],
   airwallex: ['airwallex'],
+  payoneer: ['payoneer'],
+  paypal: ['paypal'],
+  sunrate: ['sunrate'],
 }
 
 /** Available payment modes for EasyPay providers. */
 export const EASYPAY_PAYMENT_MODES = ['qrcode', 'popup'] as const
 
 /** Fixed display order for user-facing payment methods */
-export const METHOD_ORDER = ['alipay', 'alipay_direct', 'wxpay', 'wxpay_direct', 'stripe', 'airwallex'] as const
+export const METHOD_ORDER = ['sunrate', 'paypal', 'payoneer', 'alipay', 'alipay_direct', 'wxpay', 'wxpay_direct', 'stripe', 'airwallex'] as const
 
 /** Payment mode constants */
 export const PAYMENT_MODE_QRCODE = 'qrcode'
@@ -54,17 +57,7 @@ export const PAYMENT_MODE_POPUP = 'popup'
 export const PAYMENT_MODE_REDIRECT = 'redirect'
 
 export const PAYMENT_CURRENCY_OPTIONS: TypeOption[] = [
-  { value: 'CNY', label: 'CNY' },
-  { value: 'HKD', label: 'HKD' },
-  { value: 'USD', label: 'USD' },
-  { value: 'EUR', label: 'EUR' },
-  { value: 'GBP', label: 'GBP' },
-  { value: 'AUD', label: 'AUD' },
-  { value: 'CAD', label: 'CAD' },
-  { value: 'SGD', label: 'SGD' },
-  { value: 'JPY', label: 'JPY' },
-  { value: 'KRW', label: 'KRW' },
-  { value: 'NZD', label: 'NZD' },
+  { value: 'THB', label: 'THB' },
 ]
 
 // 与后端当前集成的 stripe-go v85.0.0 的 stripe.APIVersion 保持一致。
@@ -96,6 +89,9 @@ export const WEBHOOK_PATHS: Record<string, string> = {
   wxpay: '/api/v1/payment/webhook/wxpay',
   stripe: '/api/v1/payment/webhook/stripe',
   airwallex: '/api/v1/payment/webhook/airwallex',
+  payoneer: '/api/v1/payment/webhook/payoneer',
+  paypal: '/api/v1/payment/webhook/paypal',
+  sunrate: '/api/v1/payment/webhook/sunrate',
 }
 
 export const RETURN_PATH = '/payment/result'
@@ -105,6 +101,9 @@ export const PROVIDER_CALLBACK_PATHS: Record<string, CallbackPaths> = {
   easypay: { notifyUrl: WEBHOOK_PATHS.easypay, returnUrl: RETURN_PATH },
   alipay: { notifyUrl: WEBHOOK_PATHS.alipay, returnUrl: RETURN_PATH },
   wxpay: { notifyUrl: WEBHOOK_PATHS.wxpay },
+  payoneer: { notifyUrl: WEBHOOK_PATHS.payoneer, returnUrl: RETURN_PATH },
+  paypal: { notifyUrl: WEBHOOK_PATHS.paypal, returnUrl: RETURN_PATH },
+  sunrate: { notifyUrl: WEBHOOK_PATHS.sunrate, returnUrl: RETURN_PATH },
   // stripe: 不需要回调 URL 配置，Webhook 单独配置。
   // airwallex: 不需要回调 URL 配置，Webhook 在空中云汇后台配置。
 }
@@ -136,7 +135,7 @@ export const PROVIDER_CONFIG_FIELDS: Record<string, ConfigFieldDef[]> = {
     { key: 'secretKey', label: '', sensitive: true },
     { key: 'publishableKey', label: '', sensitive: false },
     { key: 'webhookSecret', label: '', sensitive: true },
-    { key: 'currency', label: '', sensitive: false, defaultValue: 'CNY', hintKey: 'admin.settings.payment.field_paymentCurrencyHint', options: PAYMENT_CURRENCY_OPTIONS },
+    { key: 'currency', label: '', sensitive: false, defaultValue: 'THB', hintKey: 'admin.settings.payment.field_paymentCurrencyHint', options: PAYMENT_CURRENCY_OPTIONS },
   ],
   airwallex: [
     { key: 'clientId', label: '', sensitive: false },
@@ -144,8 +143,43 @@ export const PROVIDER_CONFIG_FIELDS: Record<string, ConfigFieldDef[]> = {
     { key: 'webhookSecret', label: '', sensitive: true },
     { key: 'apiBase', label: '', sensitive: false, defaultValue: 'https://api.airwallex.com/api/v1', hintKey: 'admin.settings.payment.field_airwallexApiBaseHint' },
     { key: 'countryCode', label: '', sensitive: false, defaultValue: 'CN' },
-    { key: 'currency', label: '', sensitive: false, defaultValue: 'CNY', hintKey: 'admin.settings.payment.field_paymentCurrencyHint', options: PAYMENT_CURRENCY_OPTIONS },
+    { key: 'currency', label: '', sensitive: false, defaultValue: 'THB', hintKey: 'admin.settings.payment.field_paymentCurrencyHint', options: PAYMENT_CURRENCY_OPTIONS },
     { key: 'accountId', label: '', sensitive: false, optional: true, clearable: true, hintKey: 'admin.settings.payment.field_accountIdHint' },
+  ],
+  payoneer: [
+    { key: 'clientId', label: '', sensitive: false },
+    { key: 'clientSecret', label: '', sensitive: true },
+    { key: 'webhookSecret', label: '', sensitive: true },
+    { key: 'environment', label: '', sensitive: false, defaultValue: 'sandbox', options: [
+      { value: 'sandbox', label: 'Sandbox' },
+      { value: 'live', label: 'Live' },
+    ] },
+    { key: 'apiBase', label: '', sensitive: false, defaultValue: 'https://api.sandbox.payoneer.com' },
+    { key: 'currency', label: '', sensitive: false, defaultValue: 'THB', hintKey: 'admin.settings.payment.field_paymentCurrencyHint', options: PAYMENT_CURRENCY_OPTIONS },
+    { key: 'createPath', label: '', sensitive: false, defaultValue: '/checkout/payment', optional: true },
+    { key: 'queryPath', label: '', sensitive: false, defaultValue: '/checkout/payment/{trade_no}', optional: true },
+  ],
+  paypal: [
+    { key: 'clientId', label: '', sensitive: false },
+    { key: 'clientSecret', label: '', sensitive: true },
+    { key: 'webhookId', label: '', sensitive: false },
+    { key: 'environment', label: '', sensitive: false, defaultValue: 'sandbox', options: [
+      { value: 'sandbox', label: 'Sandbox' },
+      { value: 'live', label: 'Live' },
+    ] },
+    { key: 'apiBase', label: '', sensitive: false, defaultValue: 'https://api-m.sandbox.paypal.com', hintKey: 'admin.settings.payment.field_paypalApiBaseHint' },
+    { key: 'currency', label: '', sensitive: false, defaultValue: 'THB', hintKey: 'admin.settings.payment.field_paymentCurrencyHint', options: PAYMENT_CURRENCY_OPTIONS },
+  ],
+  sunrate: [
+    { key: 'merchantId', label: '', sensitive: false },
+    { key: 'signatureKey', label: '', sensitive: true },
+    { key: 'environment', label: '', sensitive: false, defaultValue: 'sandbox', options: [
+      { value: 'sandbox', label: 'Sandbox' },
+      { value: 'live', label: 'Live' },
+    ] },
+    { key: 'apiBase', label: '', sensitive: false, defaultValue: 'https://test-api.xunhuiacq.com' },
+    { key: 'currency', label: '', sensitive: false, defaultValue: 'THB', options: PAYMENT_CURRENCY_OPTIONS },
+    { key: 'filters', label: '', sensitive: false, optional: true, defaultValue: 'truemoney,rabbit_line_pay,kplus,promptpay' },
   ],
 }
 

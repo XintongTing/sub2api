@@ -29,6 +29,7 @@ RUN pnpm install --frozen-lockfile
 
 # Copy frontend source and build
 COPY frontend/ ./
+COPY docs/ /app/docs/
 RUN pnpm run build
 
 # -----------------------------------------------------------------------------
@@ -57,6 +58,9 @@ RUN go mod download
 
 # Copy backend source first
 COPY backend/ ./
+
+# Remove any stale checked-in frontend assets before copying the fresh build output.
+RUN rm -rf ./internal/web/dist
 
 # Copy frontend dist from previous stage (must be after backend copy to avoid being overwritten)
 COPY --from=frontend-builder /app/backend/internal/web/dist ./internal/web/dist

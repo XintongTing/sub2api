@@ -56,7 +56,7 @@
 
       <!-- Copyright -->
       <div class="mt-8 text-center text-xs text-gray-400 dark:text-dark-500">
-        &copy; {{ currentYear }} {{ siteName }}. All rights reserved.
+        &copy; {{ currentYear }} {{ siteName }}. {{ t('home.footer.allRightsReserved') }}
       </div>
     </div>
   </div>
@@ -64,14 +64,31 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores'
 import { sanitizeUrl } from '@/utils/url'
 
 const appStore = useAppStore()
+const { t, locale } = useI18n()
 
-const siteName = computed(() => appStore.siteName || 'Sub2API')
+const siteName = computed(() => appStore.siteName || 'OneAPI')
 const siteLogo = computed(() => sanitizeUrl(appStore.siteLogo || '', { allowRelative: true, allowDataUrl: true }))
-const siteSubtitle = computed(() => appStore.cachedPublicSettings?.site_subtitle || 'Subscription to API Conversion Platform')
+const defaultSiteSubtitles = new Set([
+  '',
+  'Subscription to API Conversion Platform',
+  '订阅转 API 转换平台',
+  'AI API Gateway Platform',
+  'AI model API gateway',
+  'AI 模型 API 聚合网关',
+])
+const siteSubtitle = computed(() => {
+  const configured = appStore.cachedPublicSettings?.site_subtitle || ''
+  if (defaultSiteSubtitles.has(configured.trim())) {
+    locale.value
+    return t('home.defaultSiteSubtitle')
+  }
+  return configured
+})
 const settingsLoaded = computed(() => appStore.publicSettingsLoaded)
 
 const currentYear = computed(() => new Date().getFullYear())

@@ -295,6 +295,13 @@ func (s *UsageService) GetUserDashboardStats(ctx context.Context, userID int64) 
 	if err != nil {
 		return nil, fmt.Errorf("get user dashboard stats: %w", err)
 	}
+	if s.userRepo != nil {
+		user, err := s.userRepo.GetByID(ctx, userID)
+		if err != nil {
+			return nil, fmt.Errorf("get dashboard user balance: %w", err)
+		}
+		stats.Balance = user.Balance
+	}
 	return stats, nil
 }
 

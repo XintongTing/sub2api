@@ -102,7 +102,7 @@ export const FeatureFlags = {
   availableChannels: defineFlag({
     key: 'available_channels_enabled',
     mode: 'opt-in',
-    label: 'Available Channels',
+    label: 'Available Models',
   }),
   payment: defineFlag({
     key: 'payment_enabled',
