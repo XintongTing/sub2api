@@ -7038,7 +7038,7 @@ const form = reactive<SettingsForm>({
   site_logo: "",
   site_subtitle: "Subscription to API Conversion Platform",
   api_base_url: "https://tokenapifuel.com",
-  contact_info: "service@tokenapifuel.com",
+  contact_info: "customerservice_tokenapifuel@outlook.com",
   doc_url: "",
   home_content: "",
   backend_mode_enabled: false,

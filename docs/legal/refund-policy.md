@@ -33,7 +33,7 @@ Except where required by law, refunds are normally unavailable for:
 
 ## 3. How to request a refund / 退款申请方式
 
-Send an email from the account's registered address to [service@tokenapifuel.com](mailto:service@tokenapifuel.com) with the subject "Refund Request / 退款申请". Include:
+Send an email from the account's registered address to [customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com) with the subject "Refund Request / 退款申请". Include:
 
 1. registered account email;
 2. order number and payment date;
@@ -41,7 +41,7 @@ Send an email from the account's registered address to [service@tokenapifuel.com
 4. reason for the request; and
 5. supporting evidence, with sensitive payment data redacted.
 
-请使用账户注册邮箱发送邮件至 [service@tokenapifuel.com](mailto:service@tokenapifuel.com)，主题注明“Refund Request / 退款申请”，并提供：注册邮箱、订单号及支付日期、金额及币种、申请原因，以及已遮盖支付敏感信息的证明材料。
+请使用账户注册邮箱发送邮件至 [customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com)，主题注明“Refund Request / 退款申请”，并提供：注册邮箱、订单号及支付日期、金额及币种、申请原因，以及已遮盖支付敏感信息的证明材料。
 
 Do not send passwords, full payment-card numbers, card security codes, or API keys.
 

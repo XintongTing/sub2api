@@ -83,4 +83,4 @@ These terms are governed by the laws of the Hong Kong Special Administrative Reg
 **Ekkamai Technology (Hong Kong) Company Limited**  
 Room 701, Unit 127, 7/F, Tower B, New Mandarin Plaza, 14 Science Museum Road, Tsim Sha Tsui, Kowloon  
 Phone: 66841850843  
-Email: [service@tokenapifuel.com](mailto:service@tokenapifuel.com)
+Email: [customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com)

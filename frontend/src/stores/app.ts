@@ -15,7 +15,7 @@ import {
 import { getPublicSettings as fetchPublicSettingsAPI } from '@/api/auth'
 
 const DEFAULT_SITE_NAME = 'OneAPI'
-const DEFAULT_CONTACT_EMAIL = 'service@tokenapifuel.com'
+const DEFAULT_CONTACT_EMAIL = 'customerservice_tokenapifuel@outlook.com'
 
 function normalizePublicSiteName(value?: string | null): string {
   const trimmed = String(value || '').trim()

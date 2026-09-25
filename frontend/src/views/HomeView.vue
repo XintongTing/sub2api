@@ -209,7 +209,7 @@ import {
 } from '@/constants/publicModels'
 import { listPublicModels } from '@/api/publicModels'
 
-const CONTACT_EMAIL = 'service@tokenapifuel.com'
+const CONTACT_EMAIL = 'customerservice_tokenapifuel@outlook.com'
 
 const { locale } = useI18n()
 const appStore = useAppStore()

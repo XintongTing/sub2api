@@ -11,7 +11,7 @@ This Privacy Policy explains how **Ekkamai Technology (Hong Kong) Company Limite
 **Ekkamai Technology (Hong Kong) Company Limited**  
 Room 701, Unit 127, 7/F, Tower B, New Mandarin Plaza, 14 Science Museum Road, Tsim Sha Tsui, Kowloon  
 Phone: 66841850843  
-Privacy enquiries: [service@tokenapifuel.com](mailto:service@tokenapifuel.com)
+Privacy enquiries: [customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com)
 
 ## 2. Information we collect / 我们收集的信息
 
@@ -73,9 +73,9 @@ Subject to applicable law, you may request access, correction, deletion, restric
 
 在适用法律规定范围内，您可就个人资料申请访问、更正、删除、限制处理、反对处理、数据可携或撤回同意，也可向有权的隐私监管机构投诉。处理请求前，我们可能需要核实您的身份。
 
-Send privacy requests from your registered email address to [service@tokenapifuel.com](mailto:service@tokenapifuel.com) with the subject "Privacy Request / 隐私请求".
+Send privacy requests from your registered email address to [customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com) with the subject "Privacy Request / 隐私请求".
 
-请使用注册邮箱发送邮件至 [service@tokenapifuel.com](mailto:service@tokenapifuel.com)，主题注明“Privacy Request / 隐私请求”。
+请使用注册邮箱发送邮件至 [customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com)，主题注明“Privacy Request / 隐私请求”。
 
 ## 9. Children / 未成年人
 

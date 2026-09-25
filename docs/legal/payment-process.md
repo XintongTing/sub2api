@@ -42,7 +42,7 @@
   **处理中：**等待支付服务商确认后，刷新支付结果页或订单记录。
 - **Failed or cancelled:** no balance should be delivered; start a new order only after confirming the earlier order was not charged.  
   **失败或取消：**通常不会交付余额；确认原订单未扣款后再发起新订单。
-- **Charged but not credited:** contact [service@tokenapifuel.com](mailto:service@tokenapifuel.com) from the registered email and provide the order number, time, amount, currency, and redacted receipt.  
+- **Charged but not credited:** contact [customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com) from the registered email and provide the order number, time, amount, currency, and redacted receipt.
   **已扣款但未入账：**使用注册邮箱联系客服并提供订单号、时间、金额、币种及已遮盖敏感信息的凭证。
 - **Refund:** follow the [Refund Policy](/legal/refund-policy).  
   **退款：**请按[退换货及退款政策](/legal/refund-policy)提交申请。

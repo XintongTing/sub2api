@@ -24,7 +24,7 @@ The company does not sell or ship physical goods through this website. The avail
 
 ## Customer service / 客户服务
 
-- Email / 客服邮箱：[service@tokenapifuel.com](mailto:service@tokenapifuel.com)
+- Email / 客服邮箱：[customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com)
 - Online help / 在线帮助：[Customer Support / 客服中心](/support)
 
 For account or payment enquiries, please contact us from the email address registered to your account and include the relevant order number. Do not send passwords, full card numbers, API keys, or other authentication credentials by email.

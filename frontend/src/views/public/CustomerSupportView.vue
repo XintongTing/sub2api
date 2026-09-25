@@ -121,7 +121,7 @@ import { useAppStore } from '@/stores'
 
 type Answer = { title: string; answer: string; path?: string; linkLabel?: string }
 
-const DEFAULT_SUPPORT_EMAIL = 'service@tokenapifuel.com'
+const DEFAULT_SUPPORT_EMAIL = 'customerservice_tokenapifuel@outlook.com'
 const { locale } = useI18n()
 const appStore = useAppStore()
 const query = ref('')

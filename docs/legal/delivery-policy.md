@@ -22,9 +22,9 @@ Digital delivery is normally completed shortly after payment confirmation. Bank,
 
 ## 4. Failed or delayed delivery / 交付失败或延迟
 
-If payment has been deducted but the balance is not credited, first refresh the order or payment-result page and check the account's order history. If the issue remains, email [service@tokenapifuel.com](mailto:service@tokenapifuel.com) from the registered address and provide the order number, payment time, amount, currency, and a redacted payment receipt. Do not send a full card number, password, or API key.
+If payment has been deducted but the balance is not credited, first refresh the order or payment-result page and check the account's order history. If the issue remains, email [customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com) from the registered address and provide the order number, payment time, amount, currency, and a redacted payment receipt. Do not send a full card number, password, or API key.
 
-如款项已扣除但余额未入账，请先刷新订单或支付结果页面，并查看账户订单记录。如问题仍未解决，请使用注册邮箱联系 [service@tokenapifuel.com](mailto:service@tokenapifuel.com)，提供订单号、支付时间、金额、币种及已遮盖敏感信息的支付凭证。请勿发送完整银行卡号、密码或 API Key。
+如款项已扣除但余额未入账，请先刷新订单或支付结果页面，并查看账户订单记录。如问题仍未解决，请使用注册邮箱联系 [customerservice_tokenapifuel@outlook.com](mailto:customerservice_tokenapifuel@outlook.com)，提供订单号、支付时间、金额、币种及已遮盖敏感信息的支付凭证。请勿发送完整银行卡号、密码或 API Key。
 
 ## 5. Incorrect account / 充值账户错误
 

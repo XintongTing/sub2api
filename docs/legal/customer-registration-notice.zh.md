@@ -2,7 +2,7 @@
 
 ## 联络信息
 
-平台唯一官方联络邮箱：service@tokenapifuel.com
+平台唯一官方联络邮箱：customerservice_tokenapifuel@outlook.com
 
 ## 一、服务范围、地域限制与出口管制
 
