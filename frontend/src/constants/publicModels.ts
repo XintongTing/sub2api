@@ -18,6 +18,7 @@ export interface PublicModelInfo {
   description: string
   descriptionI18n?: Partial<Record<PublicModelLocale, string>>
   tags: string[]
+  pricingIntervals?: Array<{ minTokens: number; maxTokens: number | null; tierLabel?: string; inputPrice?: number | null; outputPrice?: number | null; cacheReadPrice?: number | null; cacheWritePrice?: number | null; perRequestPrice?: number | null }>
 }
 
 export type PublicModelLocale = 'zh-CN' | 'zh-TW' | 'en' | 'th'

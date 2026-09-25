@@ -95,6 +95,7 @@ type userSupportedModel struct {
 
 type publicModelPricing struct {
 	Name            string   `json:"name"`
+	DisplayName     string   `json:"display_name"`
 	Provider        string   `json:"provider"`
 	BillingMode     string   `json:"billing_mode"`
 	Currency        string   `json:"currency"`
@@ -107,6 +108,7 @@ type publicModelPricing struct {
 	EndpointTypes   []string `json:"endpoint_types"`
 	Tags            []string `json:"tags"`
 	Description     string   `json:"description"`
+	Intervals       []userPricingIntervalDTO `json:"intervals"`
 }
 
 // userChannelPlatformSection 单渠道内某个平台的子视图：用户可见的分组 + 该平台
@@ -213,6 +215,7 @@ func (h *AvailableChannelHandler) ListPublicModels(c *gin.Context) {
 		if !exists {
 			item = publicModelPricing{
 				Name:          name,
+				DisplayName:   publicModelDisplayName(name),
 				Provider:      publicModelProvider(name, platform, channelName),
 				BillingMode:   string(service.BillingModeToken),
 				Currency:      "THB",
@@ -393,6 +396,17 @@ func mergePublicPricing(dst *publicModelPricing, p *service.ChannelModelPricing)
 	if strings.TrimSpace(p.Provider) != "" {
 		dst.Provider = strings.TrimSpace(p.Provider)
 	}
+	if len(p.Intervals) > 0 {
+		dst.Intervals = make([]userPricingIntervalDTO, 0, len(p.Intervals))
+		for _, iv := range p.Intervals {
+			dst.Intervals = append(dst.Intervals, userPricingIntervalDTO{
+				MinTokens: iv.MinTokens, MaxTokens: iv.MaxTokens, TierLabel: iv.TierLabel,
+				InputPrice: iv.InputPrice, OutputPrice: iv.OutputPrice,
+				CacheWritePrice: iv.CacheWritePrice, CacheReadPrice: iv.CacheReadPrice,
+				PerRequestPrice: iv.PerRequestPrice,
+			})
+		}
+	}
 	if endpointTypes := normalizePublicStringList(p.EndpointTypes); len(endpointTypes) > 0 {
 		dst.EndpointTypes = endpointTypes
 	}
@@ -497,6 +511,25 @@ func publicModelProvider(modelName, platform, channelName string) string {
 		return channelName
 	}
 	return "Other"
+}
+
+func publicModelDisplayName(modelName string) string {
+	switch strings.ToLower(strings.TrimSpace(modelName)) {
+	case "deepseek-v4-flash":
+		return "deepseek-v4-flash-0731"
+	case "deepseek-v4-pro":
+		return "deepseek-v4-pro-0813"
+	case "qwen3.8-max":
+		return "Qwen3.8 max"
+	case "kling-3.0":
+		return "kling3.0"
+	case "doubao-seedream-5-0-260128", "doubao-seedream-5-0-pro-260628":
+		return "seedream5.0"
+	case "doubao-seed-2-1-pro-260628":
+		return "seedance2.0"
+	default:
+		return modelName
+	}
 }
 
 func publicModelTags(modelName string) []string {

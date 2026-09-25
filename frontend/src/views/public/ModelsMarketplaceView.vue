@@ -162,6 +162,13 @@
                 <PriceLine v-if="model.cacheWritePrice" :label="text.cacheWritePrice" :value="formatTokenPrice(model.cacheWritePrice)" :visible="showPrices" :hidden-label="text.hidden" />
                 <PriceLine v-if="model.perRequestPrice" :label="text.perRequestPrice" :value="formatRequestPrice(model.perRequestPrice)" :visible="showPrices" :hidden-label="text.hidden" />
               </div>
+              <div v-if="model.pricingIntervals?.length" class="mt-3 rounded-md bg-slate-50 p-3 text-xs dark:bg-dark-950">
+                <div class="mb-2 font-semibold">{{ text.priceSummary }}</div>
+                <div v-for="tier in model.pricingIntervals" :key="`${tier.tierLabel}-${tier.minTokens}`" class="flex justify-between gap-3 py-1">
+                  <span>{{ tier.tierLabel || contextTierLabel(tier) }}</span>
+                  <span>{{ tier.perRequestPrice != null ? formatRequestPrice(tier.perRequestPrice) : `${formatTokenPrice(tier.inputPrice)} / ${formatTokenPrice(tier.outputPrice)}` }}</span>
+                </div>
+              </div>
 
               <p class="mt-4 line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-slate-600 dark:text-dark-300">
                 {{ modelDescription(model) }}
@@ -265,7 +272,6 @@ import {
   localizePublicModelTag,
   localizePublicModelTags,
   normalizePublicModelLocale,
-  publicModels,
   type PublicModelInfo,
 } from '@/constants/publicModels'
 import { useAppStore } from '@/stores'
@@ -342,7 +348,7 @@ const COPY: Record<CopyKey, {
     each: '次',
     emptyTitle: '没有找到匹配模型',
     emptyDescription: '换一个关键词或重置筛选条件。',
-    fallbackNotice: '，当前展示静态兜底模型。',
+    fallbackNotice: '，模型目录暂不可用。',
     basicInfo: '基本信息',
     apiEndpoint: 'API 端点',
     priceSummary: '价格摘要',
@@ -381,7 +387,7 @@ const COPY: Record<CopyKey, {
     each: '次',
     emptyTitle: '沒有找到匹配模型',
     emptyDescription: '換一個關鍵字或重置篩選條件。',
-    fallbackNotice: '，目前展示靜態備用模型。',
+    fallbackNotice: '，模型目錄暫時不可用。',
     basicInfo: '基本資訊',
     apiEndpoint: 'API 端點',
     priceSummary: '價格摘要',
@@ -420,7 +426,7 @@ const COPY: Record<CopyKey, {
     each: 'request',
     emptyTitle: 'No models found',
     emptyDescription: 'Try another keyword or reset the filters.',
-    fallbackNotice: '; showing static fallback models.',
+    fallbackNotice: '; the model catalog is temporarily unavailable.',
     basicInfo: 'Basic Info',
     apiEndpoint: 'API Endpoint',
     priceSummary: 'Price Summary',
@@ -459,7 +465,7 @@ const COPY: Record<CopyKey, {
     each: 'ครั้ง',
     emptyTitle: 'ไม่พบโมเดลที่ตรงกัน',
     emptyDescription: 'ลองเปลี่ยนคำค้นหาหรือรีเซ็ตตัวกรอง',
-    fallbackNotice: ' ขณะนี้แสดงรายการสำรองแบบคงที่',
+    fallbackNotice: ' แค็ตตาล็อกโมเดลใช้งานไม่ได้ชั่วคราว',
     basicInfo: 'ข้อมูลพื้นฐาน',
     apiEndpoint: 'ปลายทาง API',
     priceSummary: 'สรุปราคา',
@@ -498,7 +504,7 @@ const route = useRoute()
 const { locale } = useI18n()
 const appStore = useAppStore()
 
-const models = ref<PublicModelInfo[]>(dedupePublicModels(publicModels))
+const models = ref<PublicModelInfo[]>([])
 const isLoading = ref(false)
 const loadError = ref('')
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
@@ -571,18 +577,12 @@ onMounted(async () => {
   loadError.value = ''
   try {
     const remote = await listPublicModels()
-    if (remote.length > 0) {
-      const remoteModels = remote.map(mapRemoteModel)
-      const remoteByName = new Map(remoteModels.map(model => [model.name.toLowerCase(), model]))
-      // Keep every model in the published catalog; remote data only enriches it.
-      models.value = dedupePublicModels(publicModels.map(model => {
-        const remoteModel = remoteByName.get(model.name.toLowerCase())
-        return remoteModel ? { ...model, ...remoteModel, id: model.name, name: model.name, displayName: model.name, upstreamModel: model.name } : model
-      }))
-    }
+    models.value = dedupePublicModels(remote.map(mapRemoteModel))
   } catch (error) {
     loadError.value = error instanceof Error ? error.message : text.value.publicModelApiUnavailable
-    models.value = dedupePublicModels(publicModels)
+    // Do not show the bundled catalog when the server catalog is unavailable:
+    // it may contain models that have been unpublished or removed from the contract.
+    models.value = []
   } finally {
     isLoading.value = false
   }
@@ -595,7 +595,7 @@ function mapRemoteModel(model: PublicModelDTO): PublicModelInfo {
   return {
     id: canonicalName,
     name: canonicalName,
-    displayName: canonicalName,
+    displayName: model.display_name || canonicalName,
     provider: model.provider || known?.provider || 'OneAPI',
     upstreamModel: canonicalName,
     type: known?.type || (billingMode === 'request' ? 'Task' : 'Chat'),
@@ -612,6 +612,16 @@ function mapRemoteModel(model: PublicModelDTO): PublicModelInfo {
     descriptionI18n: known?.descriptionI18n,
     description: model.description || known?.description || '',
     tags: model.tags?.length ? model.tags : (known?.tags || []),
+    pricingIntervals: model.intervals?.map(interval => ({
+      minTokens: interval.min_tokens,
+      maxTokens: interval.max_tokens,
+      tierLabel: interval.tier_label,
+      inputPrice: interval.input_price,
+      outputPrice: interval.output_price,
+      cacheReadPrice: interval.cache_read_price,
+      cacheWritePrice: interval.cache_write_price,
+      perRequestPrice: interval.per_request_price,
+    })),
   }
 }
 
@@ -669,6 +679,12 @@ function formatTokenPrice(value?: number | null): string {
 function formatRequestPrice(value?: number | null): string {
   if (typeof value !== 'number' || !Number.isFinite(value)) return text.value.unset
   return `฿${value.toFixed(4)} / ${text.value.each}`
+}
+
+function contextTierLabel(tier: { minTokens: number; maxTokens: number | null }): string {
+  const min = tier.minTokens > 0 ? `${Math.round(tier.minTokens / 1000)}K+` : ''
+  const max = tier.maxTokens != null ? `${Math.round(tier.maxTokens / 1000)}K` : ''
+  return min && max ? `${min}-${max}` : min || max || 'Default'
 }
 
 function tableInputPrice(model: PublicModelInfo): string {

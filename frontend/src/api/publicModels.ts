@@ -2,6 +2,7 @@ import { apiClient } from './client'
 
 export interface PublicModelDTO {
   name: string
+  display_name?: string
   provider: string
   billing_mode: string
   currency?: string
@@ -14,6 +15,7 @@ export interface PublicModelDTO {
   endpoint_types: string[]
   tags: string[]
   description: string
+  intervals?: Array<{ min_tokens: number; max_tokens: number | null; tier_label?: string; input_price?: number | null; output_price?: number | null; cache_read_price?: number | null; cache_write_price?: number | null; per_request_price?: number | null }>
 }
 
 export async function listPublicModels(): Promise<PublicModelDTO[]> {
