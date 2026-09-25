@@ -148,7 +148,7 @@
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <h3 class="truncate text-xl font-bold text-slate-950 dark:text-white">{{ model.displayName }}</h3>
-                  <p class="mt-1 text-sm text-slate-500 dark:text-dark-400">{{ model.provider }}</p>
+                  <p class="mt-1 text-sm text-slate-500 dark:text-dark-400">{{ providerLabel(model.provider) }}</p>
                 </div>
                 <button type="button" class="rounded-md p-1.5 text-slate-400 hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-primary-500/10" @click.stop="copyModelName(model.name)">
                   <Icon name="copy" size="sm" />
@@ -195,7 +195,7 @@
               <tbody class="divide-y divide-slate-100 text-sm dark:divide-dark-800">
                 <tr v-for="model in filteredModels" :key="model.name" class="cursor-pointer hover:bg-primary-50/60 dark:hover:bg-primary-500/10" @click="selectedModel = model">
                   <td class="px-4 py-3 font-semibold">{{ model.displayName }}</td>
-                  <td class="px-4 py-3">{{ model.provider }}</td>
+                  <td class="px-4 py-3">{{ providerLabel(model.provider) }}</td>
                   <td class="px-4 py-3">{{ billingLabel(model.billingMode) }}</td>
                   <td class="px-4 py-3">{{ showPrices ? tableInputPrice(model) : text.hidden }}</td>
                   <td class="px-4 py-3">{{ showPrices ? tableOutputPrice(model) : text.hidden }}</td>
@@ -223,7 +223,7 @@
         <div class="flex items-start justify-between gap-4 border-b border-slate-200 p-5 dark:border-dark-800">
           <div>
             <h2 class="text-2xl font-bold">{{ selectedModel.displayName }}</h2>
-            <p class="mt-1 text-sm text-slate-500 dark:text-dark-300">{{ selectedModel.provider }} / {{ billingLabel(selectedModel.billingMode) }}</p>
+            <p class="mt-1 text-sm text-slate-500 dark:text-dark-300">{{ providerLabel(selectedModel.provider) }} / {{ billingLabel(selectedModel.billingMode) }}</p>
           </div>
           <button type="button" class="rounded-md p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-dark-800" @click="selectedModel = null">
             <Icon name="x" size="md" />
@@ -530,7 +530,7 @@ const providerOptions = computed(() => [
   { label: text.value.allProviders, value: 'all' },
   ...Array.from(new Set(models.value.map(model => model.provider).filter(Boolean)))
     .sort((a, b) => a.localeCompare(b))
-    .map(provider => ({ label: provider, value: provider })),
+    .map(provider => ({ label: providerLabel(provider), value: provider })),
 ])
 
 const tagOptions = computed(() => [
@@ -557,7 +557,7 @@ const filteredModels = computed(() => {
   return models.value.filter((model) => {
     const localizedDescription = modelDescription(model)
     const localizedTags = modelTags(model)
-    const matchesSearch = !keyword || [model.name, model.displayName, model.provider, model.description, localizedDescription, ...model.tags, ...localizedTags, ...model.endpointTypes]
+    const matchesSearch = !keyword || [model.name, model.displayName, model.provider, providerLabel(model.provider), model.description, localizedDescription, ...model.tags, ...localizedTags, ...model.endpointTypes]
       .filter(Boolean)
       .some(value => value.toLowerCase().includes(keyword))
     const matchesProvider = selectedProvider.value === 'all' || model.provider === selectedProvider.value
@@ -685,6 +685,16 @@ function contextTierLabel(tier: { minTokens: number; maxTokens: number | null })
   const min = tier.minTokens > 0 ? `${Math.round(tier.minTokens / 1000)}K+` : ''
   const max = tier.maxTokens != null ? `${Math.round(tier.maxTokens / 1000)}K` : ''
   return min && max ? `${min}-${max}` : min || max || 'Default'
+}
+
+function providerLabel(provider: string): string {
+  const labels: Record<string, Record<CopyKey, string>> = {
+    '阿里Qwen': { 'zh-CN': '阿里Qwen', 'zh-TW': '阿里 Qwen', en: 'Alibaba Qwen', th: 'อาลีบาบา Qwen' },
+    '智谱 GLM': { 'zh-CN': '智谱 GLM', 'zh-TW': '智譜 GLM', en: 'Zhipu GLM', th: 'จื้อผู่ GLM' },
+    '豆包': { 'zh-CN': '豆包', 'zh-TW': '豆包', en: 'Doubao', th: 'โต้วเปา' },
+    Other: { 'zh-CN': '其他', 'zh-TW': '其他', en: 'Other', th: 'อื่นๆ' },
+  }
+  return labels[provider]?.[copyKey.value] || provider
 }
 
 function tableInputPrice(model: PublicModelInfo): string {
