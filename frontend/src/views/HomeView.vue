@@ -130,7 +130,7 @@
             <div class="flex items-center justify-between gap-3">
               <h3 class="truncate text-lg font-bold text-slate-950 dark:text-white">{{ model.displayName }}</h3>
               <span class="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-semibold text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
-                {{ model.provider }}
+                {{ providerLabel(model.provider) }}
               </span>
             </div>
             <p class="mt-3 line-clamp-3 text-sm leading-6 text-slate-600 dark:text-dark-300">
@@ -203,11 +203,13 @@ import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import Icon from '@/components/icons/Icon.vue'
 import {
   dedupePublicModels,
+  findPublicModelByName,
   localizePublicModelDescription,
   publicModels,
   type PublicModelInfo,
 } from '@/constants/publicModels'
 import { listPublicModels } from '@/api/publicModels'
+import { mapMessageStrings, toTraditionalText } from '@/i18n/locales/localeHelpers'
 
 const CONTACT_EMAIL = 'customerservice_tokenapifuel@outlook.com'
 
@@ -220,8 +222,8 @@ const homeContent = computed(() => appStore.cachedPublicSettings?.home_content |
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const userIdentity = computed(() => authStore.user?.email || authStore.user?.username || 'OneAPI User')
 const availableModels = dedupePublicModels(publicModels)
-const models = availableModels.filter(model => model.endpointTypes.includes('openai:/v1/chat/completions'))
-const modelCount = ref(availableModels.length)
+const models = ref<PublicModelInfo[]>([])
+const modelCount = ref(0)
 const currentLocale = computed(() => String(locale.value || 'zh-CN'))
 
 const apiBaseUrl = computed(() => {
@@ -364,6 +366,7 @@ const copy = computed(() => {
   const current = String(locale.value || '').toLowerCase()
   if (current.startsWith('th')) return localized.th
   if (current.startsWith('en')) return localized.en
+  if (current.startsWith('zh-tw')) return mapMessageStrings(localized.zh, toTraditionalText)
   return localized.zh
 })
 
@@ -374,7 +377,24 @@ const featureCards = computed(() =>
 )
 
 function modelDescription(model: PublicModelInfo): string {
-  return localizePublicModelDescription(model, currentLocale.value)
+  const description = localizePublicModelDescription(model, currentLocale.value)
+  if (description && !description.includes('Qwen model for daily chat')) return description
+  const lower = model.name.toLowerCase()
+  if (lower.includes('glm')) return currentLocale.value.startsWith('th') ? 'โมเดล GLM สำหรับการสร้างข้อความ การใช้เครื่องมือ งานสำนักงาน และงานแบบมีโครงสร้าง' : currentLocale.value.startsWith('en') ? 'GLM model for text generation, tool use, office automation, and structured tasks.' : 'GLM 模型，适合文本生成、工具调用、办公自动化和结构化任务。'
+  if (lower.includes('doubao') || lower.includes('seedance') || lower.includes('seedream')) return currentLocale.value.startsWith('th') ? 'โมเดล Doubao สำหรับการสร้างเนื้อหาและงานมัลติโมดัล' : currentLocale.value.startsWith('en') ? 'Doubao model for content generation and multimodal tasks.' : '豆包模型，适合内容生成和多模态任务。'
+  return description || findPublicModelByName(model.name)?.description || ''
+}
+
+function providerLabel(provider: string): string {
+  const current = currentLocale.value.toLowerCase()
+  const labels: Record<string, string> = current.startsWith('th')
+    ? { '智谱 GLM': 'จื้อผู่ GLM', '豆包': 'โต้วเปา', '阿里Qwen': 'อาลีบาบา Qwen' }
+    : current.startsWith('en')
+      ? { '智谱 GLM': 'Zhipu GLM', '豆包': 'Doubao', '阿里Qwen': 'Alibaba Qwen' }
+      : current.startsWith('zh-tw')
+        ? { '智谱 GLM': '智譜 GLM', '豆包': '豆包', '阿里Qwen': '阿里 Qwen' }
+        : { '智谱 GLM': '智谱 GLM', '豆包': '豆包', '阿里Qwen': '阿里Qwen' }
+  return labels[provider] || provider
 }
 
 function modelBillingLabel(model: PublicModelInfo): string {
@@ -386,11 +406,16 @@ const contactHref = computed(() => `mailto:${CONTACT_EMAIL}`)
 
 onMounted(async () => {
   try {
-    await listPublicModels()
-    // The published catalog is the single source of truth for this number.
-    modelCount.value = availableModels.length
+    const remote = await listPublicModels()
+    modelCount.value = remote.length
+    const knownByName = new Map(availableModels.map(model => [model.name.toLowerCase(), model]))
+    models.value = remote.map(item => {
+      const known = knownByName.get(item.name.toLowerCase())
+      return known ? { ...known, displayName: item.display_name || known.displayName, provider: item.provider || known.provider, description: item.description || known.description } : null
+    }).filter((model): model is PublicModelInfo => Boolean(model)).filter(model => model.endpointTypes.includes('openai:/v1/chat/completions'))
   } catch {
-    // Keep the bundled catalog count when the public model API is unavailable.
+    modelCount.value = 0
+    models.value = []
   }
 })
 </script>

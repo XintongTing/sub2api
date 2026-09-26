@@ -118,6 +118,7 @@ import { useI18n } from 'vue-i18n'
 import PublicTopNav from '@/components/public/PublicTopNav.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { useAppStore } from '@/stores'
+import { mapMessageStrings, toTraditionalText } from '@/i18n/locales/localeHelpers'
 
 type Answer = { title: string; answer: string; path?: string; linkLabel?: string }
 
@@ -207,6 +208,7 @@ const TH_COPY = {
 const copy = computed(() => {
   const currentLocale = String(locale.value || '').toLowerCase()
   if (currentLocale.startsWith('th')) return TH_COPY
+  if (currentLocale.startsWith('zh-tw')) return mapMessageStrings(COPY.zh, toTraditionalText)
   return currentLocale.startsWith('zh') ? COPY.zh : COPY.en
 })
 const normalizedQuery = computed(() => query.value.trim().toLowerCase())
