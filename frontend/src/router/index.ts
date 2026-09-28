@@ -216,6 +216,7 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiresAdmin: false,
       title: '数据看板',
+      titleKey: 'dashboard.title',
       descriptionKey: 'dashboard.welcomeMessage'
     }
   },

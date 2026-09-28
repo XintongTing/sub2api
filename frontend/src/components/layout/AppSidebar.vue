@@ -737,64 +737,64 @@ const customMenuItemsForAdmin = computed(() => {
 
 const adminNavItems = computed((): NavItem[] => {
   const baseItems: NavItem[] = [
-    { path: '/admin/dashboard', label: '数据总览', icon: DashboardIcon },
-    { path: '/admin/users', label: '用户管理', icon: UsersIcon, hideInSimpleMode: true },
-    { path: '/admin/users?focus=balance', label: '余额/积分管理', icon: CreditCardIcon, hideInSimpleMode: true },
+    { path: '/admin/dashboard', label: t('nav.dataBoard'), icon: DashboardIcon },
+    { path: '/admin/users', label: t('nav.users'), icon: UsersIcon, hideInSimpleMode: true },
+    { path: '/admin/users?focus=balance', label: t('nav.walletManagement'), icon: CreditCardIcon, hideInSimpleMode: true },
     {
       path: '/admin/channels',
-      label: '模型与价格',
+      label: t('nav.channels'),
       icon: ChannelIcon,
       hideInSimpleMode: true,
       expandOnly: true,
       children: [
-        { path: '/admin/model-pricing', label: '模型价格设置', icon: PriceTagIcon },
-        { path: '/admin/channels/pricing', label: '高级渠道配置', icon: ChannelIcon },
-        { path: '/admin/channels/monitor', label: '渠道监控', icon: SignalIcon, featureFlag: flagChannelMonitor },
+        { path: '/admin/model-pricing', label: t('admin.modelPricing.title'), icon: PriceTagIcon },
+        { path: '/admin/channels/pricing', label: t('nav.channelPricing'), icon: ChannelIcon },
+        { path: '/admin/channels/monitor', label: t('nav.channelMonitor'), icon: SignalIcon, featureFlag: flagChannelMonitor },
       ],
     },
     {
       path: '/admin/orders',
-      label: '订单与充值',
+      label: t('nav.orderManagement'),
       icon: OrderIcon,
       hideInSimpleMode: true,
       expandOnly: true,
       featureFlag: flagAdminPayment,
       children: [
-        { path: '/admin/orders/plans', label: '充值金额设置', icon: CreditCardIcon },
-        { path: '/admin/orders', label: '订单管理', icon: OrderIcon },
-        { path: '/admin/orders/dashboard', label: '支付数据', icon: ChartIcon },
+        { path: '/admin/orders/plans', label: t('nav.paymentPlans'), icon: CreditCardIcon },
+        { path: '/admin/orders', label: t('nav.orderManagement'), icon: OrderIcon },
+        { path: '/admin/orders/dashboard', label: t('nav.paymentDashboard'), icon: ChartIcon },
       ],
     },
-    { path: '/admin/subscriptions', label: '订阅管理', icon: CreditCardIcon, hideInSimpleMode: true },
-    { path: '/admin/redeem', label: '兑换码', icon: TicketIcon, hideInSimpleMode: true },
-    { path: '/admin/usage', label: '用量记录', icon: ChartIcon },
-    { path: '/admin/announcements', label: '公告', icon: BellIcon },
+    { path: '/admin/subscriptions', label: t('nav.subscriptions'), icon: CreditCardIcon, hideInSimpleMode: true },
+    { path: '/admin/redeem', label: t('nav.redeemCodes'), icon: TicketIcon, hideInSimpleMode: true },
+    { path: '/admin/usage', label: t('nav.usage'), icon: ChartIcon },
+    { path: '/admin/announcements', label: t('nav.announcements'), icon: BellIcon },
     {
       path: '/admin/more',
-      label: '更多管理',
+      label: t('common.more'),
       icon: CogIcon,
       hideInSimpleMode: true,
       expandOnly: true,
       children: [
-        { path: '/admin/groups', label: '分组管理', icon: FolderIcon },
-        { path: '/admin/accounts', label: '上游账号', icon: GlobeIcon },
-        { path: '/admin/proxies', label: '代理管理', icon: ServerIcon },
-        { path: '/admin/risk-control', label: '风控中心', icon: ShieldIcon, featureFlag: flagRiskControl },
-        { path: '/admin/promo-codes', label: '优惠码', icon: GiftIcon },
-        { path: '/admin/ops', label: '运维监控', icon: ChartIcon, featureFlag: flagOpsMonitoring },
+        { path: '/admin/groups', label: t('nav.groups'), icon: FolderIcon },
+        { path: '/admin/accounts', label: t('nav.accounts'), icon: GlobeIcon },
+        { path: '/admin/proxies', label: t('nav.proxies'), icon: ServerIcon },
+        { path: '/admin/risk-control', label: t('nav.riskControl'), icon: ShieldIcon, featureFlag: flagRiskControl },
+        { path: '/admin/promo-codes', label: t('nav.promoCodes'), icon: GiftIcon },
+        { path: '/admin/ops', label: t('nav.ops'), icon: ChartIcon, featureFlag: flagOpsMonitoring },
       ],
     },
     {
       path: '/admin/affiliates',
-      label: '邀请返利',
+      label: t('nav.affiliateManagement'),
       icon: UsersIcon,
       hideInSimpleMode: true,
       expandOnly: true,
       featureFlag: flagAffiliate,
       children: [
-        { path: '/admin/affiliates/invites', label: '邀请记录', icon: UsersIcon },
-        { path: '/admin/affiliates/rebates', label: '返利记录', icon: OrderIcon },
-        { path: '/admin/affiliates/transfers', label: '划转记录', icon: CreditCardIcon },
+        { path: '/admin/affiliates/invites', label: t('nav.affiliateInviteRecords'), icon: UsersIcon },
+        { path: '/admin/affiliates/rebates', label: t('nav.affiliateRebateRecords'), icon: OrderIcon },
+        { path: '/admin/affiliates/transfers', label: t('nav.affiliateTransferRecords'), icon: CreditCardIcon },
       ],
     }
   ]
@@ -804,14 +804,14 @@ const adminNavItems = computed((): NavItem[] => {
   if (authStore.isSimpleMode) {
     const filtered = visible.filter(item => !item.hideInSimpleMode)
     filtered.push({ path: '/keys', label: t('nav.apiKeys'), icon: KeyIcon })
-    filtered.push({ path: '/admin/settings', label: '系统设置', icon: CogIcon })
+    filtered.push({ path: '/admin/settings', label: t('nav.settings'), icon: CogIcon })
     for (const cm of customMenuItemsForAdmin.value) {
       filtered.push({ path: `/custom/${cm.id}`, label: cm.label, icon: null, iconSvg: cm.icon_svg })
     }
     return filtered
   }
 
-  visible.push({ path: '/admin/settings', label: '系统设置', icon: CogIcon })
+  visible.push({ path: '/admin/settings', label: t('nav.settings'), icon: CogIcon })
   for (const cm of customMenuItemsForAdmin.value) {
     visible.push({ path: `/custom/${cm.id}`, label: cm.label, icon: null, iconSvg: cm.icon_svg })
   }
