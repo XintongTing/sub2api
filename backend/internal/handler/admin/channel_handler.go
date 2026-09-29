@@ -56,6 +56,11 @@ type updateChannelRequest struct {
 	AccountStatsPricingRules   *[]accountStatsPricingRuleRequest `json:"account_stats_pricing_rules"`
 }
 
+type syncHuosanyunCatalogRequest struct {
+	Overwrite      bool  `json:"overwrite"`
+	RestrictModels *bool `json:"restrict_models"`
+}
+
 type channelModelPricingRequest struct {
 	Platform         string                   `json:"platform" binding:"omitempty,max=50"`
 	Models           []string                 `json:"models" binding:"required,min=1,max=100"`
@@ -66,6 +71,12 @@ type channelModelPricingRequest struct {
 	CacheReadPrice   *float64                 `json:"cache_read_price" binding:"omitempty,min=0"`
 	ImageOutputPrice *float64                 `json:"image_output_price" binding:"omitempty,min=0"`
 	PerRequestPrice  *float64                 `json:"per_request_price" binding:"omitempty,min=0"`
+	PublicVisible    *bool                    `json:"public_visible"`
+	APIEnabled       *bool                    `json:"api_enabled"`
+	Provider         string                   `json:"provider" binding:"omitempty,max=100"`
+	EndpointTypes    []string                 `json:"endpoint_types" binding:"omitempty,max=20"`
+	Description      string                   `json:"description" binding:"omitempty,max=1000"`
+	Tags             []string                 `json:"tags" binding:"omitempty,max=50"`
 	Intervals        []pricingIntervalRequest `json:"intervals"`
 }
 
@@ -117,7 +128,15 @@ type channelModelPricingResponse struct {
 	CacheReadPrice   *float64                  `json:"cache_read_price"`
 	ImageOutputPrice *float64                  `json:"image_output_price"`
 	PerRequestPrice  *float64                  `json:"per_request_price"`
+	PublicVisible    bool                      `json:"public_visible"`
+	APIEnabled       bool                      `json:"api_enabled"`
+	Provider         string                    `json:"provider"`
+	EndpointTypes    []string                  `json:"endpoint_types"`
+	Description      string                    `json:"description"`
+	Tags             []string                  `json:"tags"`
 	Intervals        []pricingIntervalResponse `json:"intervals"`
+	CreatedAt        string                    `json:"created_at"`
+	UpdatedAt        string                    `json:"updated_at"`
 }
 
 type pricingIntervalResponse struct {
@@ -224,8 +243,38 @@ func pricingToResponse(p *service.ChannelModelPricing) channelModelPricingRespon
 		CacheReadPrice:   p.CacheReadPrice,
 		ImageOutputPrice: p.ImageOutputPrice,
 		PerRequestPrice:  p.PerRequestPrice,
+		PublicVisible:    p.IsPublicVisible(),
+		APIEnabled:       p.IsAPIEnabled(),
+		Provider:         p.Provider,
+		EndpointTypes:    p.EndpointTypes,
+		Description:      p.Description,
+		Tags:             p.Tags,
 		Intervals:        intervals,
+		CreatedAt:        p.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:        p.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+}
+
+
+func cleanStringList(values []string) []string {
+	if len(values) == 0 {
+		return []string{}
+	}
+	seen := make(map[string]struct{}, len(values))
+	out := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		key := strings.ToLower(value)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		out = append(out, value)
+	}
+	return out
 }
 
 func intervalToResponse(iv service.PricingInterval) pricingIntervalResponse {
@@ -275,6 +324,12 @@ func pricingRequestToService(reqs []channelModelPricingRequest) []service.Channe
 			CacheReadPrice:   r.CacheReadPrice,
 			ImageOutputPrice: r.ImageOutputPrice,
 			PerRequestPrice:  r.PerRequestPrice,
+			PublicVisible:    r.PublicVisible,
+			APIEnabled:       r.APIEnabled,
+			Provider:         strings.TrimSpace(r.Provider),
+			EndpointTypes:    cleanStringList(r.EndpointTypes),
+			Description:      strings.TrimSpace(r.Description),
+			Tags:             cleanStringList(r.Tags),
 			Intervals:        intervals,
 		})
 	}
@@ -456,6 +511,56 @@ func (h *ChannelHandler) Update(c *gin.Context) {
 	}
 
 	response.Success(c, channelToResponse(channel))
+}
+
+// SyncHuosanyunCatalog imports TokenAPIFuel's verified Huosanyun sellable model
+// catalog into a channel. It stores real upstream model IDs, legacy aliases, and
+// THB sell prices in model_pricing/model_mapping without exposing upstream keys.
+// POST /api/v1/admin/channels/:id/sync-huosanyun
+func (h *ChannelHandler) SyncHuosanyunCatalog(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.ErrorFrom(c, infraerrors.BadRequest("INVALID_CHANNEL_ID", "Invalid channel ID"))
+		return
+	}
+
+	req := syncHuosanyunCatalogRequest{}
+	if c.Request.ContentLength > 0 {
+		if err := c.ShouldBindJSON(&req); err != nil {
+			response.ErrorFrom(c, infraerrors.BadRequest("VALIDATION_ERROR", err.Error()))
+			return
+		}
+	}
+
+	channel, err := h.channelService.GetByID(c.Request.Context(), id)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	pricing := service.MergeHuosanyunCatalog(channel.ModelPricing, req.Overwrite)
+	mapping := service.MergeHuosanyunAliases(channel.ModelMapping, req.Overwrite)
+	restrictModels := true
+	if req.RestrictModels != nil {
+		restrictModels = *req.RestrictModels
+	}
+
+	updated, err := h.channelService.Update(c.Request.Context(), id, &service.UpdateChannelInput{
+		ModelPricing:       &pricing,
+		ModelMapping:       mapping,
+		BillingModelSource: service.BillingModelSourceChannelMapped,
+		RestrictModels:     &restrictModels,
+	})
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	response.Success(c, gin.H{
+		"channel":     channelToResponse(updated),
+		"model_count": len(service.DefaultHuosanyunCatalog()),
+		"overwrite":   req.Overwrite,
+	})
 }
 
 // Delete handles deleting a channel

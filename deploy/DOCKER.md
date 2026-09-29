@@ -1,6 +1,6 @@
-# Sub2API Docker Image
+# OneAPI Docker Image
 
-Sub2API is an AI API Gateway Platform for distributing and managing AI product subscription API quotas.
+OneAPI is an AI API Gateway Platform for distributing and managing AI product subscription API quotas.
 
 ## Quick Start
 

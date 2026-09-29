@@ -20,6 +20,15 @@ import (
 
 // --- Order Creation ---
 
+var allowedBalanceRechargeAmountCents = map[int64]struct{}{
+	10000:  {},
+	20000:  {},
+	50000:  {},
+	100000: {},
+	200000: {},
+	500000: {},
+}
+
 func (s *PaymentService) CreateOrder(ctx context.Context, req CreateOrderRequest) (*CreateOrderResponse, error) {
 	if req.OrderType == "" {
 		req.OrderType = payment.OrderTypeBalance
@@ -126,7 +135,20 @@ func (s *PaymentService) validateOrderInput(ctx context.Context, req CreateOrder
 		return nil, infraerrors.BadRequest("INVALID_AMOUNT", "amount out of range").
 			WithMetadata(map[string]string{"min": fmt.Sprintf("%.2f", cfg.MinAmount), "max": fmt.Sprintf("%.2f", cfg.MaxAmount)})
 	}
+	if req.OrderType == payment.OrderTypeBalance && !isAllowedBalanceRechargeAmount(req.Amount) {
+		return nil, infraerrors.BadRequest("INVALID_AMOUNT", "amount must be one of the fixed THB top-up amounts").
+			WithMetadata(map[string]string{"allowed": "100,200,500,1000,2000,5000"})
+	}
 	return nil, nil
+}
+
+func isAllowedBalanceRechargeAmount(amount float64) bool {
+	cents := int64(math.Round(amount * 100))
+	if math.Abs(amount*100-float64(cents)) > 1e-6 {
+		return false
+	}
+	_, ok := allowedBalanceRechargeAmountCents[cents]
+	return ok
 }
 
 func (s *PaymentService) validateSubOrder(ctx context.Context, req CreateOrderRequest) (*dbent.SubscriptionPlan, error) {
@@ -437,12 +459,17 @@ func (s *PaymentService) invokeProvider(ctx context.Context, order *dbent.Paymen
 	if err != nil {
 		return nil, err
 	}
+	providerNotifyURL, err := buildPaymentWebhookURL(canonicalReturnURL, sel.ProviderKey)
+	if err != nil {
+		return nil, err
+	}
 	providerReq := buildProviderCreatePaymentRequest(CreateOrderRequest{
 		PaymentType: req.PaymentType,
 		OpenID:      req.OpenID,
 		ClientIP:    req.ClientIP,
 		IsMobile:    req.IsMobile,
 		ReturnURL:   providerReturnURL,
+		NotifyURL:   providerNotifyURL,
 	}, sel, outTradeNo, payAmountStr, subject)
 	pr, err := prov.CreatePayment(ctx, providerReq)
 	if err != nil {
@@ -486,6 +513,7 @@ func buildProviderCreatePaymentRequest(req CreateOrderRequest, sel *payment.Inst
 		PaymentType:        req.PaymentType,
 		Subject:            subject,
 		ReturnURL:          req.ReturnURL,
+		NotifyURL:          req.NotifyURL,
 		OpenID:             strings.TrimSpace(req.OpenID),
 		ClientIP:           req.ClientIP,
 		IsMobile:           req.IsMobile,
@@ -504,7 +532,7 @@ func (s *PaymentService) buildPaymentSubject(plan *dbent.SubscriptionPlan, limit
 	if plan != nil {
 		productName := plan.ProductName
 		if productName == "" {
-			productName = "Sub2API Subscription " + plan.Name
+			productName = "OneAPI Subscription " + plan.Name
 		}
 		return applyPaymentProductNameAffix(productName, cfg)
 	}
@@ -516,7 +544,7 @@ func (s *PaymentService) buildPaymentSubject(plan *dbent.SubscriptionPlan, limit
 	if hasPaymentProductNameAffix(cfg) {
 		return applyPaymentProductNameAffix(amountStr, cfg)
 	}
-	return "Sub2API " + amountStr + " " + currency
+	return "OneAPI " + amountStr + " " + currency
 }
 
 func hasPaymentProductNameAffix(cfg *PaymentConfig) bool {

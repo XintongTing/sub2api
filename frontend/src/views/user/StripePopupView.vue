@@ -3,15 +3,13 @@
     <div
       class="w-full max-w-md space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg dark:border-slate-700 dark:bg-slate-900"
     >
-      <!-- Amount + Order ID -->
       <div v-if="amount" class="text-center">
-        <p class="text-3xl font-bold" :style="{ color: methodColor }">¥{{ amount }}</p>
+        <p class="text-3xl font-bold" :style="{ color: methodColor }">฿{{ amount }}</p>
         <p v-if="orderId" class="mt-1 text-sm text-gray-500 dark:text-slate-400">
           {{ t('payment.orders.orderId') }}: {{ orderId }}
         </p>
       </div>
 
-      <!-- Error -->
       <div v-if="error" class="space-y-3">
         <div
           class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-700 dark:bg-red-900/30 dark:text-red-400"
@@ -27,9 +25,8 @@
         </button>
       </div>
 
-      <!-- Success -->
       <div v-else-if="success" class="space-y-3 py-4 text-center">
-        <div class="text-5xl text-green-600 dark:text-green-400">✓</div>
+        <div class="text-4xl font-bold text-green-600 dark:text-green-400">OK</div>
         <p class="text-sm text-gray-500 dark:text-slate-400">{{ t('payment.result.success') }}</p>
         <button
           class="text-sm underline dark:text-blue-400 dark:hover:text-blue-300"
@@ -40,7 +37,6 @@
         </button>
       </div>
 
-      <!-- Loading / Redirecting -->
       <div v-else class="flex items-center justify-center py-8">
         <div
           class="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
@@ -123,11 +119,9 @@ async function initStripe(clientSecret: string, publishableKey: string) {
     const returnUrl = window.location.origin + '/payment/result?order_id=' + orderId + '&status=success'
 
     if (method === 'alipay') {
-      // Alipay: redirect this popup to Alipay payment page
       const { error: err } = await stripe.confirmAlipayPayment(clientSecret, { return_url: returnUrl })
       if (err) error.value = err.message || t('payment.result.failed')
     } else if (method === 'wechat_pay') {
-      // WeChat: Stripe shows its built-in QR dialog, user scans, promise resolves
       hint.value = t('payment.stripePopup.loadingQr')
       const result = await (stripe as unknown as StripeWithWechatPay).confirmWechatPayPayment(clientSecret, {
         payment_method_options: { wechat_pay: { client: isMobileDevice() ? 'mobile_web' : 'web' } },
@@ -138,7 +132,6 @@ async function initStripe(clientSecret: string, publishableKey: string) {
         success.value = true
         setTimeout(closeWindow, 2000)
       } else {
-        // Payment not completed (user closed QR dialog)
         startPolling()
       }
     }
@@ -164,7 +157,9 @@ function startPolling() {
         success.value = true
         setTimeout(closeWindow, 2000)
       }
-    } catch { /* ignore */ }
+    } catch {
+      // Ignore polling errors; checkout result page will show the final order status.
+    }
   }, 3000)
 }
 </script>

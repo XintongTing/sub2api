@@ -32,7 +32,7 @@ const (
 	AffiliateRebateFreezeHoursMax       = 720   // 最大 30 天
 	AffiliateRebateDurationDaysDefault  = 0     // 0 = 永久有效
 	AffiliateRebateDurationDaysMax      = 3650  // ~10 年
-	AffiliateRebatePerInviteeCapDefault = 0.0   // 0 = 无上限
+	AffiliateRebatePerInviteeCapDefault = 20.0  // 默认单个被邀请用户最多奖励 20 THB
 )
 
 // Platform constants

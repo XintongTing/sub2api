@@ -183,6 +183,18 @@ func TestBuildPaymentReturnURLEmptyBase(t *testing.T) {
 	}
 }
 
+func TestBuildPaymentWebhookURL(t *testing.T) {
+	t.Parallel()
+
+	got, err := buildPaymentWebhookURL("https://example.com/payment/result?from=checkout#fragment", payment.TypeSunrate)
+	if err != nil {
+		t.Fatalf("buildPaymentWebhookURL returned error: %v", err)
+	}
+	if got != "https://example.com/api/v1/payment/webhook/sunrate" {
+		t.Fatalf("buildPaymentWebhookURL = %q", got)
+	}
+}
+
 func TestPaymentResumeTokenRoundTrip(t *testing.T) {
 	t.Parallel()
 

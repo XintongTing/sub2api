@@ -80,6 +80,7 @@ type CreateOrderRequest struct {
 	SrcHost         string
 	SrcURL          string
 	ReturnURL       string
+	NotifyURL       string
 	PaymentSource   string
 	OrderType       string
 	PlanID          int64

@@ -130,7 +130,11 @@ export function useRoutePrefetch(router?: Router) {
   const triggerPrefetch = (route: RouteLocationNormalized): void => {
     cancelPendingPrefetch()
 
-    const prefetchPaths = getPrefetchPaths(route)
+    // Do not compete with the page's critical requests on constrained networks.
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection
+    if (connection?.saveData || ['slow-2g', '2g', '3g'].includes(connection?.effectiveType || '')) return
+
+    const prefetchPaths = getPrefetchPaths(route).slice(0, 1)
     if (prefetchPaths.length === 0) return
 
     pendingPrefetchHandle.value = scheduleIdleCallback(

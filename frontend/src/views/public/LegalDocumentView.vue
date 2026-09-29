@@ -96,6 +96,12 @@ import { sanitizeUrl } from '@/utils/url'
 import type { LoginAgreementDocument, PublicSettings } from '@/types'
 import zhAdminCompliance from '../../../../docs/legal/admin-compliance.zh.md?raw'
 import enAdminCompliance from '../../../../docs/legal/admin-compliance.en.md?raw'
+import companyInformation from '../../../../docs/legal/company-information.md?raw'
+import deliveryPolicy from '../../../../docs/legal/delivery-policy.md?raw'
+import paymentProcess from '../../../../docs/legal/payment-process.md?raw'
+import privacyPolicy from '../../../../docs/legal/privacy-policy.md?raw'
+import refundPolicy from '../../../../docs/legal/refund-policy.md?raw'
+import termsOfService from '../../../../docs/legal/terms-of-service.md?raw'
 
 type LegalDocumentIcon = 'document' | 'shield' | 'globe' | 'cog'
 
@@ -112,14 +118,29 @@ marked.setOptions({
 
 const documentId = computed(() => String(route.params.documentId || ''))
 const isAdminComplianceDocument = computed(() => documentId.value === 'admin-compliance')
+const bundledDocuments: Record<string, LoginAgreementDocument> = {
+  terms: { id: 'terms', title: 'Terms of Service / 用户服务协议', content_md: termsOfService },
+  'customer-registration-notice': { id: 'terms', title: 'Terms of Service / 用户服务协议', content_md: termsOfService },
+  'service-agreement': { id: 'terms', title: 'Terms of Service / 用户服务协议', content_md: termsOfService },
+  privacy: { id: 'privacy', title: 'Privacy Policy / 隐私政策', content_md: privacyPolicy },
+  'delivery-policy': { id: 'delivery-policy', title: 'Digital Delivery and Logistics Policy / 数字交付与物流政策', content_md: deliveryPolicy },
+  'refund-policy': { id: 'refund-policy', title: 'Refund Policy / 退换货及退款政策', content_md: refundPolicy },
+  'payment-process': { id: 'payment-process', title: 'Payment Process / 支付流程', content_md: paymentProcess },
+  company: { id: 'company', title: 'Company Information / 公司信息', content_md: companyInformation },
+}
+const isBundledDocument = computed(() => Boolean(bundledDocuments[documentId.value]))
 const documents = computed(() => settings.value?.login_agreement_documents ?? [])
-const siteName = computed(() => settings.value?.site_name || 'Sub2API')
+const siteName = computed(() => settings.value?.site_name || 'OneAPI')
 const siteLogo = computed(() => sanitizeUrl(settings.value?.site_logo || '', {
   allowRelative: true,
   allowDataUrl: true,
 }))
 const updatedAt = computed(() =>
-  isAdminComplianceDocument.value ? '' : settings.value?.login_agreement_updated_at || ''
+  isAdminComplianceDocument.value
+    ? ''
+    : isBundledDocument.value
+      ? '2026-08-14'
+      : settings.value?.login_agreement_updated_at || ''
 )
 const documentTypeLabel = computed(() =>
   isAdminComplianceDocument.value ? t('legal.adminCompliance') : t('legal.loginAgreement')
@@ -130,8 +151,11 @@ const currentDocument = computed<LoginAgreementDocument | null>(() => {
     return {
       id: 'admin-compliance',
       title: t('adminCompliance.title'),
-      content_md: getLocale() === 'zh' ? zhAdminCompliance : enAdminCompliance
+      content_md: getLocale().startsWith('zh') ? zhAdminCompliance : enAdminCompliance
     }
+  }
+  if (bundledDocuments[documentId.value]) {
+    return bundledDocuments[documentId.value]
   }
   const id = documentId.value
   if (!id) {
@@ -153,7 +177,7 @@ const renderedHtml = computed(() => {
 
 const documentIcon = computed<LegalDocumentIcon>(() => {
   const title = currentDocument.value?.title || ''
-  if (title.includes('政策') || title.includes('隐私')) {
+  if (title.includes('政策') || title.includes('隐私') || title.includes('合规')) {
     return 'shield'
   }
   if (title.includes('国家') || title.includes('地区')) {

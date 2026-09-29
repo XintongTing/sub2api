@@ -392,6 +392,59 @@ func TestGatewayModels_OpenAICustomModelsListKeepsOpenAIResponseShapeForDefaultF
 	require.Empty(t, got.Data[0].CreatedAt)
 }
 
+func TestGatewayModels_OpenAIHuosanyunAliasesAreCanonicalizedAndExcluded(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	groupID := int64(28)
+	h := newGatewayModelsHandlerForTest(
+		&gatewayModelsAccountRepoStub{
+			byGroup: map[int64][]service.Account{
+				groupID: {
+					{
+						ID:       1,
+						Platform: service.PlatformOpenAI,
+						Credentials: map[string]any{
+							"model_mapping": map[string]any{
+								"DeepSeek-Pro":   "deepseek-v4-pro",
+								"GLM4-Air":       "glm-4.7",
+								"Qwen3-Turbo":    "qwen-plus",
+								"deepseek-v3.2":  "deepseek-v3.2",
+								"kling-v2-1":     "kling-v2-1",
+								"DeepSeek-V3":    "deepseek-v3",
+								"deepseek-v4-pro": "deepseek-v4-pro",
+							},
+						},
+					},
+				},
+			},
+		},
+	)
+
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodGet, "/v1/models", nil)
+	c.Set(string(middleware2.ContextKeyAPIKey), &service.APIKey{
+		Group: &service.Group{ID: groupID, Platform: service.PlatformOpenAI},
+	})
+
+	h.Models(c)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+
+	var got gatewayModelsResponseForTest
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &got))
+	ids := modelIDsForTest(got.Data)
+	require.Contains(t, ids, "deepseek-v4-pro")
+	require.Contains(t, ids, "glm-4.7")
+	require.Contains(t, ids, "qwen-plus")
+	require.NotContains(t, ids, "DeepSeek-Pro")
+	require.NotContains(t, ids, "GLM4-Air")
+	require.NotContains(t, ids, "Qwen3-Turbo")
+	require.NotContains(t, ids, "DeepSeek-V3")
+	require.NotContains(t, ids, "deepseek-v3.2")
+	require.NotContains(t, ids, "deepseek-v3")
+	require.NotContains(t, ids, "kling-v2-1")
+}
 func modelIDsForTest(models []gatewayModelItemForTest) []string {
 	ids := make([]string, 0, len(models))
 	for _, model := range models {

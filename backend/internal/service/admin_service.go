@@ -999,6 +999,8 @@ func (s *adminServiceImpl) UpdateUserBalance(ctx context.Context, userID int64, 
 		user.Balance += balance
 	case "subtract":
 		user.Balance -= balance
+	default:
+		return nil, fmt.Errorf("invalid balance operation: must be 'set', 'add', or 'subtract'")
 	}
 
 	if user.Balance < 0 {

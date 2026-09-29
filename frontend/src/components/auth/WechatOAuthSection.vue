@@ -48,7 +48,8 @@ const route = useRoute()
 const { t, locale } = useI18n()
 const providerName = computed(() => t('auth.wechatProviderName'))
 
-function localizeWeChatHint(zh: string, en: string): string {
+function localizeWeChatHint(zh: string, en: string, th: string): string {
+  if (locale.value.startsWith('th')) return th
   return locale.value.startsWith('zh') ? zh : en
 }
 
@@ -67,6 +68,7 @@ const disabledHint = computed(() => {
       return localizeWeChatHint(
         '当前仅配置微信移动应用登录，需要在原生 App 中通过微信 SDK 发起授权。',
         'This site only has WeChat mobile app login configured. Continue from the native app through the WeChat SDK.',
+        'เว็บไซต์นี้ตั้งค่าเฉพาะการเข้าสู่ระบบผ่านแอป WeChat บนมือถือ โปรดดำเนินการต่อจากแอปแบบเนทีฟผ่าน WeChat SDK',
       )
     case 'not_configured':
       return t('auth.oauthFlow.wechatNotConfigured')

@@ -39,6 +39,7 @@ describe('getVisibleMethods', () => {
       wxpay: methodLimit({ single_max: 100 }),
       stripe: methodLimit({ fee_rate: 3 }),
       airwallex: methodLimit({ single_min: 10 }),
+      paypal: methodLimit({ single_min: 20 }),
     })
 
     expect(visible).toEqual({
@@ -46,6 +47,7 @@ describe('getVisibleMethods', () => {
       wxpay: methodLimit({ single_max: 100 }),
       stripe: methodLimit({ fee_rate: 3 }),
       airwallex: methodLimit({ single_min: 10 }),
+      paypal: methodLimit({ single_min: 20 }),
     })
   })
 
@@ -110,8 +112,8 @@ describe('decidePaymentLaunch', () => {
     const decision = decidePaymentLaunch(createOrderResult({
       client_secret: 'awx_cs',
       intent_id: 'int_awx',
-      currency: 'CNY',
-      country_code: 'CN',
+      currency: 'THB',
+      country_code: 'TH',
       payment_env: 'demo',
       out_trade_no: 'sub2_awx',
     }), {
@@ -124,8 +126,8 @@ describe('decidePaymentLaunch', () => {
     expect(decision.kind).toBe('airwallex_route')
     expect(decision.paymentState.payUrl).toBe('/payment/airwallex?order_id=101')
     expect(decision.paymentState.intentId).toBe('int_awx')
-    expect(decision.paymentState.currency).toBe('CNY')
-    expect(decision.paymentState.countryCode).toBe('CN')
+    expect(decision.paymentState.currency).toBe('THB')
+    expect(decision.paymentState.countryCode).toBe('TH')
     expect(decision.paymentState.paymentEnv).toBe('demo')
   })
 
@@ -146,6 +148,42 @@ describe('decidePaymentLaunch', () => {
     expect(decision.recovery.paymentMode).toBe('popup')
     expect(decision.recovery.outTradeNo).toBe('sub2_abc')
     expect(decision.recovery.resumeToken).toBe('resume-2')
+  })
+
+  it('uses hosted redirect flow for Payoneer checkout URLs', () => {
+    const decision = decidePaymentLaunch(createOrderResult({
+      pay_url: 'https://checkout.payoneer.example/session/abc',
+      payment_mode: 'redirect',
+      currency: 'THB',
+      resume_token: 'resume-payoneer',
+    }), {
+      visibleMethod: 'payoneer',
+      orderType: 'balance',
+      isMobile: false,
+    })
+
+    expect(decision.kind).toBe('redirect_waiting')
+    expect(decision.paymentState.paymentType).toBe('payoneer')
+    expect(decision.paymentState.currency).toBe('THB')
+    expect(decision.recovery.resumeToken).toBe('resume-payoneer')
+  })
+
+  it('uses hosted redirect flow for PayPal checkout URLs', () => {
+    const decision = decidePaymentLaunch(createOrderResult({
+      pay_url: 'https://checkout.paypal.example/session/abc',
+      payment_mode: 'redirect',
+      currency: 'THB',
+      resume_token: 'resume-paypal',
+    }), {
+      visibleMethod: 'paypal',
+      orderType: 'balance',
+      isMobile: false,
+    })
+
+    expect(decision.kind).toBe('redirect_waiting')
+    expect(decision.paymentState.paymentType).toBe('paypal')
+    expect(decision.paymentState.currency).toBe('THB')
+    expect(decision.recovery.resumeToken).toBe('resume-paypal')
   })
 
   it('prefers redirect on mobile when both pay_url and qr_code are present', () => {

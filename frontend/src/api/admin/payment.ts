@@ -130,19 +130,19 @@ export const adminPaymentAPI = {
     return apiClient.delete(`/admin/payment/channels/${id}`)
   },
 
-  // ==================== Subscription Plans ====================
+  // ==================== Recharge Amounts ====================
 
-  /** Get all subscription plans */
+  /** Get all recharge amounts */
   getPlans() {
     return apiClient.get<SubscriptionPlan[]>('/admin/payment/plans')
   },
 
-  /** Create a subscription plan */
+  /** Create a recharge amount */
   createPlan(data: Record<string, unknown>) {
     return apiClient.post<SubscriptionPlan>('/admin/payment/plans', data)
   },
 
-  /** Update a subscription plan */
+  /** Update a recharge amount */
   updatePlan(id: number, data: Record<string, unknown>) {
     return apiClient.put<SubscriptionPlan>(`/admin/payment/plans/${id}`, data)
   },

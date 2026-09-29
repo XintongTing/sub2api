@@ -247,6 +247,9 @@ func (h *PaymentHandler) CreateOrder(c *gin.Context) {
 			return
 		}
 	}
+	if strings.TrimSpace(req.ReturnURL) == "" {
+		req.ReturnURL = defaultPaymentReturnURL(c)
+	}
 
 	mobile := isMobile(c)
 	if req.IsMobile != nil {
@@ -273,6 +276,20 @@ func (h *PaymentHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 	response.Success(c, result)
+}
+
+func defaultPaymentReturnURL(c *gin.Context) string {
+	if c == nil || c.Request == nil || strings.TrimSpace(c.Request.Host) == "" {
+		return ""
+	}
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+	if forwardedProto := strings.TrimSpace(strings.Split(c.GetHeader("X-Forwarded-Proto"), ",")[0]); forwardedProto == "https" || forwardedProto == "http" {
+		scheme = forwardedProto
+	}
+	return scheme + "://" + c.Request.Host + "/payment/result"
 }
 
 func applyWeChatPaymentResumeClaims(req *CreateOrderRequest, claims *service.WeChatPaymentResumeClaims) error {

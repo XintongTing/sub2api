@@ -95,3 +95,22 @@ func TestAdminService_UpdateUserBalance_NoChangeNoInvalidate(t *testing.T) {
 	require.Empty(t, invalidator.userIDs)
 	require.Empty(t, redeemRepo.created)
 }
+
+func TestAdminService_UpdateUserBalance_InvalidOperation(t *testing.T) {
+	baseRepo := &userRepoStub{user: &User{ID: 7, Balance: 10}}
+	repo := &balanceUserRepoStub{userRepoStub: baseRepo}
+	redeemRepo := &balanceRedeemRepoStub{redeemRepoStub: &redeemRepoStub{}}
+	invalidator := &authCacheInvalidatorStub{}
+	svc := &adminServiceImpl{
+		userRepo:             repo,
+		redeemCodeRepo:       redeemRepo,
+		authCacheInvalidator: invalidator,
+	}
+
+	_, err := svc.UpdateUserBalance(context.Background(), 7, 5, "", "")
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "invalid balance operation")
+	require.Empty(t, repo.updated)
+	require.Empty(t, invalidator.userIDs)
+	require.Empty(t, redeemRepo.created)
+}
